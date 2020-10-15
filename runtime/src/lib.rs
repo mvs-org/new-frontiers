@@ -284,6 +284,12 @@ impl pallet_evm::Trait for Runtime {
 	type ChainId = LeetChainId;
 }
 
+impl pallet_ethereum::Trait for Runtime {
+	type Event = Event;
+	// This means we will never record a block author in the Ethereum-formatted blocks
+	type FindAuthor = ();
+}
+
 // Create the runtime by composing the FRAME pallets that were previously configured.
 construct_runtime!(
 	pub enum Runtime where
@@ -301,7 +307,8 @@ construct_runtime!(
 		Sudo: pallet_sudo::{Module, Call, Config<T>, Storage, Event<T>},
 		// Include the custom logic from the template pallet in the runtime.
 		TemplateModule: pallet_template::{Module, Call, Storage, Event<T>},
-		EVM: pallet_evm::{Module, Call, Storage, Config, Event<T>}
+		EVM: pallet_evm::{Module, Call, Storage, Config, Event<T>},
+		Ethereum: pallet_ethereum::{Module, Call, Storage, Event, Config, ValidateUnsigned},
 	}
 );
 

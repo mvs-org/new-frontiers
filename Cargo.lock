@@ -1119,8 +1119,22 @@ checksum = "71a6567e6fd35589fea0c63b94b4cf2e55573e413901bdbe60ab15cf0e25e5df"
 dependencies = [
  "crunchy",
  "fixed-hash",
+ "impl-codec",
  "impl-rlp",
  "tiny-keccak",
+]
+
+[[package]]
+name = "ethereum"
+version = "0.3.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "da7fef4d2da1de3a4f4f85408379644276db9b46c4af7b0fe38a3debec5cb7cd"
+dependencies = [
+ "ethereum-types",
+ "parity-scale-codec",
+ "rlp",
+ "rlp-derive",
+ "sha3 0.8.2",
 ]
 
 [[package]]
@@ -1145,6 +1159,7 @@ checksum = "473aecff686bd8e7b9db0165cbbb53562376b39bf35b427f0c60446a9e1634b0"
 dependencies = [
  "ethbloom",
  "fixed-hash",
+ "impl-codec",
  "impl-rlp",
  "primitive-types",
  "uint",
@@ -1162,7 +1177,7 @@ version = "0.17.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "16c8deca0ec3efa361b03d9cae6fe94321a1d2d0a523437edd720b3d140e3c08"
 dependencies = [
- "ethereum",
+ "ethereum 0.4.1",
  "evm-core",
  "evm-gasometer",
  "evm-runtime",
@@ -1504,6 +1519,32 @@ checksum = "9b128f689fd9d497c3a7e881be524a8a1e2d80e2661754add6e36c9dfdcbe373"
 dependencies = [
  "parity-scale-codec",
  "sp-api",
+]
+
+[[package]]
+name = "frontier-consensus-primitives"
+version = "0.1.0"
+source = "git+https://github.com/PureStake/frontier.git?branch=substrate-v2#c5fe2a61f2aecd6cba62e7163b44af5a38bac6ad"
+dependencies = [
+ "parity-scale-codec",
+ "sp-core",
+ "sp-runtime",
+ "sp-std",
+]
+
+[[package]]
+name = "frontier-rpc-primitives"
+version = "0.1.0"
+source = "git+https://github.com/PureStake/frontier.git?branch=substrate-v2#c5fe2a61f2aecd6cba62e7163b44af5a38bac6ad"
+dependencies = [
+ "ethereum 0.3.3",
+ "ethereum-types",
+ "pallet-evm",
+ "parity-scale-codec",
+ "sp-api",
+ "sp-core",
+ "sp-runtime",
+ "sp-std",
 ]
 
 [[package]]
@@ -3382,6 +3423,7 @@ dependencies = [
  "hex-literal",
  "pallet-aura",
  "pallet-balances",
+ "pallet-ethereum",
  "pallet-evm",
  "pallet-grandpa",
  "pallet-randomness-collective-flip",
@@ -3600,6 +3642,32 @@ dependencies = [
  "frame-system",
  "parity-scale-codec",
  "serde",
+ "sp-runtime",
+ "sp-std",
+]
+
+[[package]]
+name = "pallet-ethereum"
+version = "0.1.0"
+source = "git+https://github.com/PureStake/frontier.git?branch=substrate-v2#c5fe2a61f2aecd6cba62e7163b44af5a38bac6ad"
+dependencies = [
+ "ethereum 0.3.3",
+ "ethereum-types",
+ "evm",
+ "frame-support",
+ "frame-system",
+ "frontier-consensus-primitives",
+ "frontier-rpc-primitives",
+ "libsecp256k1",
+ "pallet-balances",
+ "pallet-evm",
+ "pallet-timestamp",
+ "parity-scale-codec",
+ "rlp",
+ "rustc-hex",
+ "serde",
+ "sha3 0.8.2",
+ "sp-io",
  "sp-runtime",
  "sp-std",
 ]
