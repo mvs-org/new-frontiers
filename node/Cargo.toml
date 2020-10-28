@@ -54,6 +54,8 @@ substrate-frame-rpc-system = '2.0.0'
 
 # Frontier Dependencies
 frontier-consensus = { git = 'https://github.com/PureStake/frontier.git', branch = 'substrate-v2' }
+frontier-rpc = { git = 'https://github.com/PureStake/frontier.git', branch = 'substrate-v2' }
+frontier-rpc-primitives = { git = 'https://github.com/PureStake/frontier.git', branch = 'substrate-v2' }
 
 [features]
 default = []
