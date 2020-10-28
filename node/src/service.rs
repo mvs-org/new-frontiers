@@ -70,6 +70,7 @@ pub fn new_partial(config: &Configuration) -> Result<sc_service::PartialComponen
 		true
 	);
 
+	// Be sure to update the existing aura block import to use the new piece.
 	let aura_block_import = sc_consensus_aura::AuraBlockImport::<_, _, _, AuraPair>::new(
 		frontier_block_import.clone(), client.clone(),
 	);
