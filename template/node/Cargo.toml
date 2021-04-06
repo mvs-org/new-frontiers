@@ -1,5 +1,5 @@
 [package]
-name = "frontier-template-node"
+name = "new-hope"
 version = "3.0.0-dev"
 authors = ["Parity Technologies <admin@parity.io>"]
 description = "Substrate Node template"
