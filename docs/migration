@@ -1,0 +1,33 @@
+Preparation
+    - Migration PR
+        - Select migrations
+Writing/testing
+
+Create runtime upgrade
+Test
+Execute
+
+Remove runtime upgrade
+Database migration
+Documented
+Discoverable
+Reusable
+Check version
+Store version
+Compare version
+On_reuntime_upgrade->migrate_enum_set
+One migration within one function
+Logging
+Log errors
+
+Migration ordering 
+
+pub type Execultive
+AllModules
+Reverse order of declaration
+/home/paf/metaverse/new-hope/substrate/frame/executive/src/lib.rs
+ 
+
+
+
+

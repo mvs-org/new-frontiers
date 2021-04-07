@@ -90,7 +90,8 @@ pub trait FeeCalculator {
 }
 
 impl FeeCalculator for () {
-	fn min_gas_price() -> U256 { U256::zero() }
+	fn min_gas_price() -> U256 { // Gas price is always one token per gas.
+		1.into() }
 }
 
 pub trait EnsureAddressOrigin<OuterOrigin> {
