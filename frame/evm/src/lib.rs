@@ -83,6 +83,8 @@ pub type BalanceOf<T> = <<T as Config>::Currency as Currency<<T as frame_system:
 /// Type alias for negative imbalance during fees
 type NegativeImbalanceOf<C, T> = <C as Currency<<T as frame_system::Config>::AccountId>>::NegativeImbalance;
 
+const SAT: u64 = 10000000000;
+
 /// Trait that outputs the current transaction gas price.
 pub trait FeeCalculator {
 	/// Return the minimal required gas price.
@@ -91,7 +93,7 @@ pub trait FeeCalculator {
 
 impl FeeCalculator for () {
 	fn min_gas_price() -> U256 { // Gas price is always one token per gas.
-		1.into() }
+		SAT.into() }
 }
 
 pub trait EnsureAddressOrigin<OuterOrigin> {

@@ -270,10 +270,12 @@ impl pallet_sudo::Config for Runtime {
 /// Fixed gas price of `1`.
 pub struct FixedGasPrice;
 
+const SAT:u64 = 10000000000;
+
 impl FeeCalculator for FixedGasPrice {
 	fn min_gas_price() -> U256 {
-		// Gas price is always one token per gas.
-		1.into()
+		// Gas price is always one sat per gas.
+		SAT.into()
 	}
 }
 
