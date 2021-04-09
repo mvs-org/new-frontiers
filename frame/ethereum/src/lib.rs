@@ -152,13 +152,13 @@ decl_module! {
 			Self::do_transact(transaction)
 		}
 
-		fn on_finalize(n: T::BlockNumber) {
+		fn on_finalize(_n: T::BlockNumber) {
 			<Module<T>>::store_block(
 				fp_consensus::find_pre_log(&frame_system::Module::<T>::digest()).is_err(),
 			);
 		}
 
-		fn on_initialize(n: T::BlockNumber) -> Weight {
+		fn on_initialize(_n: T::BlockNumber) -> Weight {
 			Pending::kill();
 
 			if let Ok(log) = fp_consensus::find_pre_log(&frame_system::Module::<T>::digest()) {
