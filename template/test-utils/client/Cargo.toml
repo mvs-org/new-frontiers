@@ -8,11 +8,11 @@ license = "GPL-3.0"
 
 [dependencies]
 codec = { package = "parity-scale-codec", version = "2.0.0" }
-sp-runtime = { git = "https://github.com/paritytech/substrate.git", branch = "frontier" }
-sp-api = { git = "https://github.com/paritytech/substrate.git", branch = "frontier" }
-sc-executor = { git = "https://github.com/paritytech/substrate.git", branch = "frontier" }
-sc-light = { git = "https://github.com/paritytech/substrate.git", branch = "frontier" }
-sc-consensus = { git = "https://github.com/paritytech/substrate.git", branch = "frontier" }
-sc-client-api = { git = "https://github.com/paritytech/substrate.git", branch = "frontier" }
-substrate-test-client = { git = "https://github.com/paritytech/substrate.git", branch = "frontier" }
+sp-runtime = { git = "https://github.com/mvs-org/substrate.git", branch = "new-frontiers" }
+sp-api = { git = "https://github.com/mvs-org/substrate.git", branch = "new-frontiers" }
+sc-executor = { git = "https://github.com/mvs-org/substrate.git", branch = "new-frontiers" }
+sc-light = { git = "https://github.com/mvs-org/substrate.git", branch = "new-frontiers" }
+sc-consensus = { git = "https://github.com/mvs-org/substrate.git", branch = "new-frontiers" }
+sc-client-api = { git = "https://github.com/mvs-org/substrate.git", branch = "new-frontiers" }
+substrate-test-client = { git = "https://github.com/mvs-org/substrate.git", branch = "new-frontiers" }
 frontier-template-runtime = { path = "../../runtime" }

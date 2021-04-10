@@ -303,7 +303,7 @@ impl<B, C, P, CT, BE, H: ExHashT> EthApiT for EthApi<B, C, P, CT, BE, H> where
 				current_block: block_number,
 				// TODO `highest_block` is not correct, should load `best_seen_block` from NetworkWorker,
 				// but afaik that is not currently possible in Substrate:
-				// https://github.com/paritytech/substrate/issues/7311
+				// https://github.com/mvs-org/substrate/issues/7311
 				highest_block: block_number,
 				warp_chunks_amount: None,
 				warp_chunks_processed: None,

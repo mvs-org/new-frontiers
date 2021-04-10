@@ -5,7 +5,7 @@ license = "Apache-2.0"
 authors = ["Parity Technologies <admin@parity.io>"]
 edition = "2018"
 homepage = "https://substrate.dev"
-repository = "https://github.com/paritytech/substrate/"
+repository = "https://github.com/mvs-org/substrate/"
 description = "Primitive EVM abstractions for Substrate."
 documentation = "https://docs.rs/sp-evm"
 readme = "README.md"
@@ -14,8 +14,8 @@ readme = "README.md"
 targets = ["x86_64-unknown-linux-gnu"]
 
 [dependencies]
-sp-core = { version = "3.0.0", git = "https://github.com/paritytech/substrate.git", branch = "frontier", default-features = false }
-sp-std = { version = "3.0.0", git = "https://github.com/paritytech/substrate.git", branch = "frontier", default-features = false }
+sp-core = { version = "3.0.0", git = "https://github.com/mvs-org/substrate.git", branch = "new-frontiers", default-features = false }
+sp-std = { version = "3.0.0", git = "https://github.com/mvs-org/substrate.git", branch = "new-frontiers", default-features = false }
 serde = { version = "1.0.101", optional = true, features = ["derive"] }
 codec = { package = "parity-scale-codec", version = "2.0.0", default-features = false }
 evm = { version = "0.25.0", default-features = false, features = ["with-codec"] }
