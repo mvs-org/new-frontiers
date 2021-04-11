@@ -32,6 +32,8 @@ pallet-sudo = { version = "3.0.0-dev", default-features = false, git = "https://
 pallet-timestamp = { version = "3.0.0-dev", default-features = false, git = "https://github.com/mvs-org/substrate.git", branch = "new-frontiers" }
 pallet-transaction-payment = { version = "3.0.0-dev", default-features = false, git = "https://github.com/mvs-org/substrate.git", branch = "new-frontiers" }
 pallet-transaction-payment-rpc-runtime-api = { version = "3.0.0-dev", default-features = false, git = "https://github.com/mvs-org/substrate.git", branch = "new-frontiers" }
+pallet-scheduler = { default-features = false, version = '3.0.0' }
+
 
 sp-api = { version = "3.0.0-dev", default-features = false, git = "https://github.com/mvs-org/substrate.git", branch = "new-frontiers" }
 sp-block-builder = { default-features = false, git = "https://github.com/mvs-org/substrate.git", branch = "new-frontiers"}
@@ -80,7 +82,7 @@ std = [
 	"pallet-timestamp/std",
 	"pallet-transaction-payment-rpc-runtime-api/std",
 	"pallet-transaction-payment/std",
-
+	"pallet-scheduler/std",
 	"sp-api/std",
 	"sp-block-builder/std",
 	"sp-consensus-aura/std",

@@ -1,8 +1,8 @@
 [package]
-name = "new-hope"
+name = "metaverse-vanilla"
 version = "3.0.0-dev"
 authors = ["Parity Technologies <admin@parity.io>"]
-description = "Substrate Node template"
+description = "Metaverse Vanilla"
 edition = "2018"
 license = "Unlicense"
 build = "build.rs"

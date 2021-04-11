@@ -21,6 +21,7 @@ use sp_runtime::traits::{
 use sp_api::impl_runtime_apis;
 use sp_consensus_aura::sr25519::AuthorityId as AuraId;
 use pallet_grandpa::{AuthorityId as GrandpaId, AuthorityList as GrandpaAuthorityList};
+
 use pallet_grandpa::fg_primitives;
 use sp_version::RuntimeVersion;
 #[cfg(feature = "std")]
@@ -100,10 +101,10 @@ pub mod opaque {
 }
 
 pub const VERSION: RuntimeVersion = RuntimeVersion {
-	spec_name: create_runtime_str!("metaverse-vanilla"),
-	impl_name: create_runtime_str!("metaverse-vanilla"),
+	spec_name: create_runtime_str!("frontier-template-runtime"),
+	impl_name: create_runtime_str!("frontier-template-runtime"),
 	authoring_version: 1,
-	spec_version: 1,
+	spec_version: 301,
 	impl_version: 1,
 	apis: RUNTIME_API_VERSIONS,
 	transaction_version: 1,
@@ -307,6 +308,8 @@ impl pallet_evm::Config for Runtime {
 	type OnChargeTransaction = ();
 }
 
+
+
 pub struct EthereumFindAuthor<F>(PhantomData<F>);
 impl<F: FindAuthor<u32>> FindAuthor<H160> for EthereumFindAuthor<F>
 {
@@ -327,6 +330,26 @@ impl pallet_ethereum::Config for Runtime {
 	type StateRoot = pallet_ethereum::IntermediateStateRoot;
 }
 
+// /// Define the types required by the Scheduler pallet.
+// parameter_types! {
+//     pub MaximumSchedulerWeight: Weight = 10_000_000;
+//     pub const MaxScheduledPerBlock: u32 = 50;
+// }
+
+/// Configure the runtime's implementation of the Scheduler pallet.
+// impl pallet_scheduler::Config for Runtime {
+    // type Event = Event;
+    // type Origin = Origin;
+    // type PalletsOrigin = OriginCaller;
+    // type Call = Call;
+    // type MaximumWeight = MaximumSchedulerWeight;
+    // type ScheduleOrigin = frame_system::EnsureRoot<AccountId>;
+    // type MaxScheduledPerBlock = MaxScheduledPerBlock;
+    // type WeightInfo = ();
+// }
+
+
+
 // Create the runtime by composing the FRAME pallets that were previously configured.
 construct_runtime!(
 	pub enum Runtime where
@@ -344,6 +367,7 @@ construct_runtime!(
 		Sudo: pallet_sudo::{Module, Call, Config<T>, Storage, Event<T>},
 		Ethereum: pallet_ethereum::{Module, Call, Storage, Event, Config, ValidateUnsigned},
 		EVM: pallet_evm::{Module, Config, Call, Storage, Event<T>},
+		// Scheduler: pallet_scheduler::{Module, Call, Storage, Event<T>},
 	}
 );
 

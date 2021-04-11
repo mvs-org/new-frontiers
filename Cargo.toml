@@ -18,8 +18,8 @@ members = [
 	"primitives/consensus",
 	"primitives/evm",
 	"primitives/rpc",
-	"template/node",
-	"template/runtime",
-	"template/test-utils/client",
+	"metaverse-vanilla/node",
+	"metaverse-vanilla/runtime",
+	"metaverse-vanilla/test-utils/client",
 	"primitives/array-bytes"
 ]

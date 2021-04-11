@@ -1,1 +1,1 @@
-./target/release/new-hope purge-chain --dev
+./target/release/metaverse-vanilla purge-chain --dev

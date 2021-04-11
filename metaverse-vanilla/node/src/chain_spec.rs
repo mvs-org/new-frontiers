@@ -45,7 +45,7 @@ pub fn development_config() -> Result<ChainSpec, String> {
 
 	Ok(ChainSpec::from_genesis(
 		// Name
-		"Development",
+		"Metaverse Vanilla",
 		// ID
 		"dev",
 		ChainType::Development,
@@ -203,5 +203,6 @@ fn testnet_genesis(
 			
 		},
 		pallet_ethereum: EthereumConfig {},
+		
 	}
 }
