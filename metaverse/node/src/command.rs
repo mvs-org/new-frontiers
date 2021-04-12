@@ -7,7 +7,7 @@ use crate::service::new_partial;
 
 impl SubstrateCli for Cli {
 	fn impl_name() -> String {
-		"Metaverse Vanilla Node".into()
+		"Metaverse Node".into()
 	}
 
 	fn impl_version() -> String {

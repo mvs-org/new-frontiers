@@ -17,14 +17,14 @@ $ cargo build --release
 To execute the chain, run:
 
 ```
-$ ./target/debug/metaverse-vanilla --dev
+$ ./target/debug/metaverse --dev
 ```
 
 The node also supports to use manual seal (to produce block manually through RPc).  
 This is also used by the ts-tests:
 
 ```
-$ ./target/debug/metaverse-vanilla --dev --manual-seal
+$ ./target/debug/metaverse --dev --manual-seal
 ```
 
 ### Docker image

@@ -25,7 +25,7 @@ Migration ordering
 pub type Execultive
 AllModules
 Reverse order of declaration
-/home/paf/metaverse/metaverse-vanilla/substrate/frame/executive/src/lib.rs
+/home/paf/metaverse/metaverse/substrate/frame/executive/src/lib.rs
  
 
 

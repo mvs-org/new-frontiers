@@ -1,1 +1,1 @@
-./target/release/metaverse-vanilla purge-chain --dev
+./target/release/metaverse purge-chain --dev

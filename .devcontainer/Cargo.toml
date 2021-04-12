@@ -1,8 +1,8 @@
 [package]
-name = "metaverse-vanilla"
+name = "metaverse"
 version = "3.0.0-dev"
 authors = ["Parity Technologies <admin@parity.io>"]
-description = "Metaverse Vanilla"
+description = "Metaverse"
 edition = "2018"
 license = "Unlicense"
 build = "build.rs"
