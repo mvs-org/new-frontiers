@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-or-later WITH Classpath-exception-2.0
-// This file is part of Frontier.
+// This file is part of metaverse.
 //
 // Copyright (c) 2015-2020 Parity Technologies (UK) Ltd.
 //

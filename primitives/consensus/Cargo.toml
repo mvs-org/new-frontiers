@@ -2,7 +2,7 @@
 name = "fp-consensus"
 version = "0.1.0"
 authors = ["Parity Technologies <admin@parity.io>"]
-description = "Primitives for Frontier consensus"
+description = "Primitives for metaverse consensus"
 edition = "2018"
 license = "Apache-2.0"
 homepage = "https://substrate.dev"

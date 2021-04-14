@@ -1,7 +1,7 @@
 # ERC20 contract creation
 
 This directory contains typescript script describing the different
-topics presented by the frontier node template.
+topics presented by the metaverse node template.
 
 ## Basic
 
@@ -63,7 +63,7 @@ Bob Contract account storage: 0x000000000000000000000000000000000000000000000000
 ## RPC
 
 This section describes how to use the web3.js SDK to interact with
-Frontier.
+metaverse.
 
 ## Installation and Usage
 

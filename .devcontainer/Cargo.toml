@@ -51,7 +51,7 @@ sc-telemetry = { git = "https://github.com/mvs-org/substrate.git", branch = "new
 
 fc-consensus = { path = "../../client/consensus" }
 fp-consensus = { path = "../../primitives/consensus" }
-frontier-template-runtime = { path = "../runtime", default-features = false, features = ["std"] }
+metaverse-template-runtime = { path = "../runtime", default-features = false, features = ["std"] }
 fc-rpc = { path = "../../client/rpc" }
 fp-rpc = { path = "../../primitives/rpc" }
 array-bytes = { path = "../../primitives/array-bytes" }
@@ -64,6 +64,6 @@ substrate-build-script-utils = { git = "https://github.com/mvs-org/substrate.git
 
 [features]
 default = ["aura"]
-aura = ["frontier-template-runtime/aura"]
-manual-seal = ["frontier-template-runtime/manual-seal"]
+aura = ["metaverse-template-runtime/aura"]
+manual-seal = ["metaverse-template-runtime/manual-seal"]
 

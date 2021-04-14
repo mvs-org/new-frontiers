@@ -1,9 +1,9 @@
 import { expect } from "chai";
 import { step } from "mocha-steps";
 
-import { createAndFinalizeBlock, describeWithFrontier } from "./util";
+import { createAndFinalizeBlock, describeWithMetaverse } from "./util";
 
-describeWithFrontier("Frontier RPC (State root hash)", `simple-specs.json`, (context) => {
+describeWithMetaverse("metaverse RPC (State root hash)", `simple-specs.json`, (context) => {
 
 	let block;
 	step("should calculate a valid intermediate state root hash", async function () {

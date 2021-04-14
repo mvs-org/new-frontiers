@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-or-later WITH Classpath-exception-2.0
-// This file is part of Frontier.
+// This file is part of metaverse.
 //
 // Copyright (c) 2020 Parity Technologies (UK) Ltd.
 //
@@ -38,7 +38,7 @@ pub struct MappingSyncWorker<Block: BlockT, C, B> {
 
 	client: Arc<C>,
 	substrate_backend: Arc<B>,
-	frontier_backend: Arc<fc_db::Backend<Block>>,
+	metaverse_backend: Arc<fc_db::Backend<Block>>,
 
 	have_next: bool,
 }
@@ -49,7 +49,7 @@ impl<Block: BlockT, C, B> MappingSyncWorker<Block, C, B> {
 		timeout: Duration,
 		client: Arc<C>,
 		substrate_backend: Arc<B>,
-		frontier_backend: Arc<fc_db::Backend<Block>>,
+		metaverse_backend: Arc<fc_db::Backend<Block>>,
 	) -> Self {
 		Self {
 			import_notifications,
@@ -58,7 +58,7 @@ impl<Block: BlockT, C, B> MappingSyncWorker<Block, C, B> {
 
 			client,
 			substrate_backend,
-			frontier_backend,
+			metaverse_backend,
 
 			have_next: true,
 		}
@@ -105,7 +105,7 @@ impl<Block: BlockT, C, B> Stream for MappingSyncWorker<Block, C, B> where
 			match crate::sync_blocks(
 				self.client.as_ref(),
 				self.substrate_backend.blockchain(),
-				self.frontier_backend.as_ref(),
+				self.metaverse_backend.as_ref(),
 				LIMIT,
 			) {
 				Ok(have_next) => {

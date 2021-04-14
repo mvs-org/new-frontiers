@@ -5,7 +5,7 @@ FROM rustlang/rust:nightly
 
 
 ARG PROFILE=release
-WORKDIR /frontier
+WORKDIR /metaverse
 
 # Upcd dates core parts
 RUN apt-get update -y && \
@@ -14,9 +14,9 @@ RUN apt-get update -y && \
 # Install rust wasm. Needed for substrate wasm engine
 RUN rustup target add wasm32-unknown-unknown
 
-# Download Frontier repo
-RUN git clone https://github.com/paritytech/frontier /frontier
-RUN cd /frontier && git submodule init && git submodule update
+# Download metaverse repo
+RUN git clone https://github.com/paritytech/metaverse /metaverse
+RUN cd /metaverse && git submodule init && git submodule update
 
 # Download rust dependencies and build the rust binary
 RUN cargo build "--$PROFILE"

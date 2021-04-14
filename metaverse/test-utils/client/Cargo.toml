@@ -1,5 +1,5 @@
 [package]
-name = "frontier-template-test-client"
+name = "metaverse-template-test-client"
 version = "0.1.0"
 authors = ["Parity Technologies <admin@parity.io>"]
 edition = "2018"
@@ -15,4 +15,4 @@ sc-light = { git = "https://github.com/mvs-org/substrate.git", branch = "new-fro
 sc-consensus = { git = "https://github.com/mvs-org/substrate.git", branch = "new-frontiers" }
 sc-client-api = { git = "https://github.com/mvs-org/substrate.git", branch = "new-frontiers" }
 substrate-test-client = { git = "https://github.com/mvs-org/substrate.git", branch = "new-frontiers" }
-frontier-template-runtime = { path = "../../runtime" }
+metaverse-template-runtime = { path = "../../runtime" }

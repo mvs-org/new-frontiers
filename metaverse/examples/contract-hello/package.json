@@ -1,11 +1,11 @@
 {
-  "name": "frontier-example-contract-hello",
+  "name": "metaverse-example-contract-hello",
   "version": "0.1.0",
-  "description": "Hello contract example for Frontier project",
+  "description": "Hello contract example for metaverse project",
   "main": "index.js",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/paritytech/frontier.git"
+    "url": "git+https://github.com/paritytech/metaverse.git"
   },
   "keywords": [
     "ethereum",
@@ -14,9 +14,9 @@
   "author": "Parity Technologies <admin@parity.io>",
   "license": "GPL-3.0",
   "bugs": {
-    "url": "https://github.com/paritytech/frontier/issues"
+    "url": "https://github.com/paritytech/metaverse/issues"
   },
-  "homepage": "https://github.com/paritytech/frontier",
+  "homepage": "https://github.com/paritytech/metaverse",
   "dependencies": {
     "web3": "^1.2.8"
   }

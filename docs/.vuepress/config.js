@@ -1,7 +1,7 @@
 module.exports = {
-  title: 'Frontier',
+  title: 'metaverse',
   description: 'Ethereum compatibility layer for Substrate',
-  base: '/frontier/',
+  base: '/metaverse/',
 
   head: [
     ['meta', { name: 'theme-color', content: '#3eaf7c' }],
@@ -10,13 +10,13 @@ module.exports = {
   ],
 
   themeConfig: {
-    repo: 'https://github.com/paritytech/frontier',
+    repo: 'https://github.com/paritytech/metaverse',
     editLinks: false,
     docsDir: 'docs',
     editLinkText: '',
     lastUpdated: false,
     nav: [
-      { text: 'API reference', link: 'https://paritytech.github.io/frontier/rustdocs/pallet_evm' }
+      { text: 'API reference', link: 'https://paritytech.github.io/metaverse/rustdocs/pallet_evm' }
     ],
     sidebar: [
       'overview',

@@ -1,9 +1,9 @@
 import { expect } from "chai";
 import { step } from "mocha-steps";
 
-import { createAndFinalizeBlock, describeWithFrontier } from "./util";
+import { createAndFinalizeBlock, describeWithMetaverse } from "./util";
 
-describeWithFrontier("Frontier RPC (Block)", `simple-specs.json`, (context) => {
+describeWithMetaverse("metaverse RPC (Block)", `simple-specs.json`, (context) => {
 	let previousBlock;
 	// Those tests are dependant of each other in the given order.
 	// The reason is to avoid having to restart the node each time

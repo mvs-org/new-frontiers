@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-or-later WITH Classpath-exception-2.0
-// This file is part of Frontier.
+// This file is part of metaverse.
 //
 // Copyright (c) 2020 Parity Technologies (UK) Ltd.
 //
@@ -37,7 +37,7 @@ use pallet_evm::ExitReason;
 use sha3::{Digest, Keccak256};
 use evm::ExitError;
 
-pub mod frontier_backend_client {
+pub mod metaverse_backend_client {
 
 	use super::internal_err;
 

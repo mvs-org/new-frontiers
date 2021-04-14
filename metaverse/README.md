@@ -1,4 +1,4 @@
-# Substrate Frontier Node Temlate
+# Substrate metaverse Node Temlate
 
 A [FRAME](https://substrate.dev/docs/en/next/conceptual/runtime/frame)-based [Substrate](https://substrate.dev/en/) node with the Ethereum RPC support, ready for hacking :rocket:
 
@@ -29,18 +29,18 @@ $ ./target/debug/metaverse --dev --manual-seal
 
 ### Docker image
 
-You can run the frontier node (for development) within Docker directly.  
+You can run the metaverse node (for development) within Docker directly.  
 The Dockerfile is optimized for development speed.  
 (Running the `docker run...` command will recompile the binaries but not the dependencies)
 
 Building (takes 5-10 min):
 ```bash
-docker build -t frontier-node-dev .
+docker build -t metaverse-node-dev .
 ```
 
 Running (takes 1 min to rebuild binaries):
 ```bash
-docker run -t frontier-node-dev
+docker run -t metaverse-node-dev
 ```
 
 ## Genesis Configuration
