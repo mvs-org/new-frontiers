@@ -54,12 +54,13 @@ pub fn development_config() -> Result<ChainSpec, String> {
 			// Initial PoA authorities
 			vec![
 				authority_keys_from_seed("5DtFw8yZ776C3BKrEWypLaGycL5QkQMHnHpeVEEkC6btFRCW"),
+				authority_keys_from_seed("5Cp1xHtUkLSNn3EUPcVUgT7ffhbmwr78UjzK6BN5dmBEBtPT"),
 			],
 			// Sudo account
-			get_account_id_from_seed::<sr25519::Public>("5DtFw8yZ776C3BKrEWypLaGycL5QkQMHnHpeVEEkC6btFRCW"),
+			get_account_id_from_seed::<sr25519::Public>("5EfTxKXzGSzX4QRXAL5yJz8qtSQ3iZJjykC2et8BBF1R11fd"),
 			// Pre-funded accounts
 			vec![
-				get_account_id_from_seed::<sr25519::Public>("5DtFw8yZ776C3BKrEWypLaGycL5QkQMHnHpeVEEkC6btFRCW"),
+				get_account_id_from_seed::<sr25519::Public>("5Fq4FmzHHfTEPozeNoE9nQxvUHN9kEehKp5sCc4QAz3F1f1c"),
 				
 			],
 			true,
