@@ -2,10 +2,10 @@
 name = "fc-consensus"
 version = "0.1.0"
 authors = ["Parity Technologies <admin@parity.io>"]
-description = "metaverse consensus for substrate"
+description = "Frontier consensus for substrate"
 edition = "2018"
 license = "GPL-3.0-or-later WITH Classpath-exception-2.0"
-repository = "https://github.com/mvs-org/mvs-new-hope/"
+repository = "https://github.com/paritytech/frontier/"
 
 [dependencies]
 codec = { package = "parity-scale-codec", version = "2.0.0", features = ["derive"] }

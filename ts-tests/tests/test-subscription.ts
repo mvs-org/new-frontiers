@@ -1,9 +1,9 @@
 import { expect } from "chai";
 import { step } from "mocha-steps";
 
-import { createAndFinalizeBlock, customRequest, describeWithMetaverse } from "./util";
+import { createAndFinalizeBlock, customRequest, describeWithFrontier } from "./util";
 
-describeWithMetaverse("metaverse RPC (Subscription)", `simple-specs.json`, (context) => {
+describeWithFrontier("Frontier RPC (Subscription)", `simple-specs.json`, (context) => {
 
 	let subscription;
 	let logs_generated = 0;

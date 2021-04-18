@@ -1,6 +1,6 @@
 # Overview
 
-The metaverse suite contains several crates that can be used
+The Frontier suite contains several crates that can be used
 independently.
 
 ## EVM execution only
@@ -43,10 +43,10 @@ A blockchain can first use pre-block feeding with empty extrinsic
 requirement. In this way, because no other external information is
 feeded, combined with a suitable consensus engine, one Ethereum block
 will have an exact corresponding Substrate block. This is called the
-**wrapper block** strategy, and it allows metaverse to function as a
+**wrapper block** strategy, and it allows Frontier to function as a
 normal Ethereum client.
 
-With a sufficient number of the network running a metaverse node, the
+With a sufficient number of the network running a Frontier node, the
 blockchain can then initiate a hard fork, allowing extrinsic to be
 added in. From there on, the blockchain is migrated to Substrate and
 can enjoy Substrate-specific features like on-chain governance and

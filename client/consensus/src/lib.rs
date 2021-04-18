@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-or-later WITH Classpath-exception-2.0
-// This file is part of metaverse.
+// This file is part of Frontier.
 //
 // Copyright (c) 2020 Parity Technologies (UK) Ltd.
 //
@@ -63,16 +63,16 @@ impl From<Error> for ConsensusError {
 	}
 }
 
-pub struct MetaverseBlockImport<B: BlockT, I, C> {
+pub struct FrontierBlockImport<B: BlockT, I, C> {
 	inner: I,
 	client: Arc<C>,
 	backend: Arc<fc_db::Backend<B>>,
 	_marker: PhantomData<B>,
 }
 
-impl<Block: BlockT, I: Clone + BlockImport<Block>, C> Clone for MetaverseBlockImport<Block, I, C> {
+impl<Block: BlockT, I: Clone + BlockImport<Block>, C> Clone for FrontierBlockImport<Block, I, C> {
 	fn clone(&self) -> Self {
-		MetaverseBlockImport {
+		FrontierBlockImport {
 			inner: self.inner.clone(),
 			client: self.client.clone(),
 			backend: self.backend.clone(),
@@ -81,7 +81,7 @@ impl<Block: BlockT, I: Clone + BlockImport<Block>, C> Clone for MetaverseBlockIm
 	}
 }
 
-impl<B, I, C> MetaverseBlockImport<B, I, C> where
+impl<B, I, C> FrontierBlockImport<B, I, C> where
 	B: BlockT,
 	I: BlockImport<B, Transaction = sp_api::TransactionFor<C, B>> + Send + Sync,
 	I::Error: Into<ConsensusError>,
@@ -103,7 +103,7 @@ impl<B, I, C> MetaverseBlockImport<B, I, C> where
 	}
 }
 
-impl<B, I, C> BlockImport<B> for MetaverseBlockImport<B, I, C> where
+impl<B, I, C> BlockImport<B> for FrontierBlockImport<B, I, C> where
 	B: BlockT,
 	I: BlockImport<B, Transaction = sp_api::TransactionFor<C, B>> + Send + Sync,
 	I::Error: Into<ConsensusError>,
@@ -126,7 +126,7 @@ impl<B, I, C> BlockImport<B> for MetaverseBlockImport<B, I, C> where
 		block: BlockImportParams<B, Self::Transaction>,
 		new_cache: HashMap<CacheKeyId, Vec<u8>>,
 	) -> Result<ImportResult, Self::Error> {
-		// We validate that there are only one metaverse log. No other
+		// We validate that there are only one frontier log. No other
 		// actions are needed and mapping syncing is delegated to a separate
 		// worker.
 		ensure_log(&block.header.digest()).map_err(|e| Error::from(e))?;

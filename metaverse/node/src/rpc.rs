@@ -5,7 +5,7 @@ use std::sync::Arc;
 use std::collections::BTreeMap;
 use fc_rpc_core::types::{PendingTransactions, FilterPool};
 use sc_consensus_manual_seal::rpc::{ManualSeal, ManualSealApi};
-use metaverse_template_runtime::{Hash, AccountId, Index, opaque::Block, Balance};
+use frontier_template_runtime::{Hash, AccountId, Index, opaque::Block, Balance};
 use sp_api::ProvideRuntimeApi;
 use sp_transaction_pool::TransactionPool;
 use sp_blockchain::{Error as BlockChainError, HeaderMetadata, HeaderBackend};
@@ -117,7 +117,7 @@ pub fn create_full<C, P, BE>(
 		EthApiServer::to_delegate(EthApi::new(
 			client.clone(),
 			pool.clone(),
-			metaverse_template_runtime::TransactionConverter,
+			frontier_template_runtime::TransactionConverter,
 			network.clone(),
 			pending_transactions.clone(),
 			signers,

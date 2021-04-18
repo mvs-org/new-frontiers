@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// This file is part of metaverse.
+// This file is part of Frontier.
 //
 // Copyright (c) 2020 Parity Technologies (UK) Ltd.
 //
@@ -43,7 +43,7 @@ use fp_evm::CallOrCreateInfo;
 use pallet_evm::{Runner, GasWeightMapping, FeeCalculator};
 use sha3::{Digest, Keccak256};
 use codec::{Encode, Decode};
-use fp_consensus::{METAVERSE_ENGINE_ID, PostLog, PreLog};
+use fp_consensus::{FRONTIER_ENGINE_ID, PostLog, PreLog};
 use fp_storage::PALLET_ETHEREUM_SCHEMA;
 
 pub use fp_rpc::TransactionStatus;
@@ -291,7 +291,7 @@ impl<T: Config> Module<T> {
 
 		if post_log {
 			let digest = DigestItem::<T::Hash>::Consensus(
-				METAVERSE_ENGINE_ID,
+				FRONTIER_ENGINE_ID,
 				PostLog::Hashes(fp_consensus::Hashes::from_block(block)).encode(),
 			);
 			frame_system::Module::<T>::deposit_log(digest.into());

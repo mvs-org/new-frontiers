@@ -6,15 +6,15 @@ actionText: Overview →
 actionLink: overview.md
 features:
 - title: EVM Contract
-  details: metaverse allows you to run EVM contracts natively in Substrate, tightly integrated with the rest of the Substrate ecosystem.
+  details: Frontier allows you to run EVM contracts natively in Substrate, tightly integrated with the rest of the Substrate ecosystem.
 - title: RPC Compatibility
   details: All existing Ethereum RPC methods work, so none of your dapps will break.
 - title: Substrate Module
-  details: metaverse can be easily integrated in your existing Substrate application as a runtime module.
+  details: Frontier can be easily integrated in your existing Substrate application as a runtime module.
 footer: Made by Parity & Wei & PureStake with ❤️
 ---
 
-metaverse is the suite that provides an Ethereum compatibility layer
+Frontier is the suite that provides an Ethereum compatibility layer
 for Substrate. It has two components that can be activated separately:
 
 * **Pallet EVM**: This is the pallet that enables functionality of
@@ -26,19 +26,19 @@ for Substrate. It has two components that can be activated separately:
   existing dapps to be deployed on a Substrate blockchain with minimal
   modifications.
   
-metaverse is not a bridge. metaverse enables you to run Ethereum dapps
+Frontier is not a bridge. Frontier enables you to run Ethereum dapps
 natively on Substrate, but does not deal with the issues of
 communicating with other Ethereum-based networks. If you want a
-standalone blockchain, you are looking for metaverse. If you want to
+standalone blockchain, you are looking for Frontier. If you want to
 create a parachain that has Ethereum functionality, you need to
-combine metaverse with Cumulus. If you do not want EVM functionality
+combine Frontier with Cumulus. If you do not want EVM functionality
 natively but want to communicate with other networks, you need the
 Parity Bridge project.
 
-metaverse is still under heavy development. We consider Pallet EVM to
+Frontier is still under heavy development. We consider Pallet EVM to
 be relatively stable, while some parts of Pallet Ethereum's design
 might still be changed. In the future, using the [wrapper
-block](https://corepaper.org/substrate/wrapper/) strategy, metaverse
+block](https://corepaper.org/substrate/wrapper/) strategy, Frontier
 can also eventually function as an Ethereum client, allowing you to
 migrate any eth1.x-based blockchains seamlessly over to Substrate,
 allowing you to add Substrate-specific features like on-chain

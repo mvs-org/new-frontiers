@@ -1,9 +1,9 @@
-# metaverse
+# Frontier
 
-![GitHub Workflow Status](https://img.shields.io/github/workflow/status/paritytech/metaverse/Rust)
-![Matrix](https://img.shields.io/matrix/metaverse:matrix.org)
+![GitHub Workflow Status](https://img.shields.io/github/workflow/status/paritytech/frontier/Rust)
+![Matrix](https://img.shields.io/matrix/frontier:matrix.org)
 
-metaverse is Substrate's Ethereum compatibility layer. It allows you to run
+Frontier is Substrate's Ethereum compatibility layer. It allows you to run
 unmodified Ethereum dapps.
 
 The goal of Ethereum compatibility layer is to be able to:
@@ -14,14 +14,14 @@ The goal of Ethereum compatibility layer is to be able to:
 
 It consists of the following components:
 
-* **[pallet-evm](https://github.com/paritytech/metaverse/tree/master/frame/evm)**:
+* **[pallet-evm](https://github.com/paritytech/frontier/tree/master/frame/evm)**:
   EVM execution engine for Substrate.
-* **[pallet-ethereum](https://github.com/paritytech/metaverse/tree/master/frame/ethereum)**: Emulation of full Ethereum block processing.
+* **[pallet-ethereum](https://github.com/paritytech/frontier/tree/master/frame/ethereum)**: Emulation of full Ethereum block processing.
 * **rpc-ethereum**: Compatibility layer for web3 RPC methods.
 
 ## Development notes
 
-metaverse is still work-in-progress. Below are some notes about the development.
+Frontier is still work-in-progress. Below are some notes about the development.
 
 ### Runtime
 

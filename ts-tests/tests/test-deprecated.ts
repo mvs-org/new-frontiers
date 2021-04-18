@@ -1,8 +1,8 @@
 import { expect } from "chai";
 
-import { customRequest, describeWithMetaverse } from "./util";
+import { customRequest, describeWithFrontier } from "./util";
 
-describeWithMetaverse("metaverse RPC (Deprecated)", `simple-specs.json`, (context) => {
+describeWithFrontier("Frontier RPC (Deprecated)", `simple-specs.json`, (context) => {
 	// List of deprecated methods
 	[
 		{ method: "eth_getCompilers", params: [] },

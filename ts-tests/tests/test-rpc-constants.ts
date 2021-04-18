@@ -1,10 +1,10 @@
 import { expect } from "chai";
 
-import { describeWithMetaverse } from "./util";
+import { describeWithFrontier } from "./util";
 
 // All test for the RPC
 
-describeWithMetaverse("metaverse RPC (Constant)", `simple-specs.json`, (context) => {
+describeWithFrontier("Frontier RPC (Constant)", `simple-specs.json`, (context) => {
 	it("should have 0 hashrate", async function () {
 		expect(await context.web3.eth.getHashrate()).to.equal(0);
 	});

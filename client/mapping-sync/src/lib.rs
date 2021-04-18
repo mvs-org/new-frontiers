@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-or-later WITH Classpath-exception-2.0
-// This file is part of metaverse.
+// This file is part of Frontier.
 //
 // Copyright (c) 2020 Parity Technologies (UK) Ltd.
 //
@@ -69,13 +69,13 @@ pub fn sync_genesis_block<Block: BlockT, C>(
 pub fn sync_one_block<Block: BlockT, C, B>(
 	client: &C,
 	substrate_backend: &B,
-	metaverse_backend: &fc_db::Backend<Block>,
+	frontier_backend: &fc_db::Backend<Block>,
 ) -> Result<bool, String> where
 	C: ProvideRuntimeApi<Block> + Send + Sync + HeaderBackend<Block> + BlockOf,
 	C::Api: EthereumRuntimeRPCApi<Block>,
 	B: sp_blockchain::HeaderBackend<Block> + sp_blockchain::Backend<Block>,
 {
-	let mut current_syncing_tips = metaverse_backend.meta().current_syncing_tips()?;
+	let mut current_syncing_tips = frontier_backend.meta().current_syncing_tips()?;
 
 	if current_syncing_tips.is_empty() {
 		let mut leaves = substrate_backend.leaves().map_err(|e| format!("{:?}", e))?;
@@ -89,7 +89,7 @@ pub fn sync_one_block<Block: BlockT, C, B>(
 	let mut operating_tip = None;
 
 	while let Some(checking_tip) = current_syncing_tips.pop() {
-		if !metaverse_backend.mapping().is_synced(&checking_tip).map_err(|e| format!("{:?}", e))? {
+		if !frontier_backend.mapping().is_synced(&checking_tip).map_err(|e| format!("{:?}", e))? {
 			operating_tip = Some(checking_tip);
 			break
 		}
@@ -98,7 +98,7 @@ pub fn sync_one_block<Block: BlockT, C, B>(
 	let operating_tip = match operating_tip {
 		Some(operating_tip) => operating_tip,
 		None => {
-			metaverse_backend.meta().write_current_syncing_tips(current_syncing_tips)?;
+			frontier_backend.meta().write_current_syncing_tips(current_syncing_tips)?;
 			return Ok(false)
 		}
 	};
@@ -108,15 +108,15 @@ pub fn sync_one_block<Block: BlockT, C, B>(
 		.ok_or("Header not found".to_string())?;
 
 	if operating_header.number() == &Zero::zero() {
-		sync_genesis_block(client, metaverse_backend, &operating_header)?;
+		sync_genesis_block(client, frontier_backend, &operating_header)?;
 
-		metaverse_backend.meta().write_current_syncing_tips(current_syncing_tips)?;
+		frontier_backend.meta().write_current_syncing_tips(current_syncing_tips)?;
 		Ok(true)
 	} else {
-		sync_block(metaverse_backend, &operating_header)?;
+		sync_block(frontier_backend, &operating_header)?;
 
 		current_syncing_tips.push(*operating_header.parent_hash());
-		metaverse_backend.meta().write_current_syncing_tips(current_syncing_tips)?;
+		frontier_backend.meta().write_current_syncing_tips(current_syncing_tips)?;
 		Ok(true)
 	}
 }
@@ -124,7 +124,7 @@ pub fn sync_one_block<Block: BlockT, C, B>(
 pub fn sync_blocks<Block: BlockT, C, B>(
 	client: &C,
 	substrate_backend: &B,
-	metaverse_backend: &fc_db::Backend<Block>,
+	frontier_backend: &fc_db::Backend<Block>,
 	limit: usize,
 ) -> Result<bool, String> where
 	C: ProvideRuntimeApi<Block> + Send + Sync + HeaderBackend<Block> + BlockOf,
@@ -134,7 +134,7 @@ pub fn sync_blocks<Block: BlockT, C, B>(
 	let mut synced_any = false;
 
 	for _ in 0..limit {
-		synced_any = synced_any || sync_one_block(client, substrate_backend, metaverse_backend)?;
+		synced_any = synced_any || sync_one_block(client, substrate_backend, frontier_backend)?;
 	}
 
 	Ok(synced_any)

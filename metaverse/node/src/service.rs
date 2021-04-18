@@ -6,9 +6,9 @@ use fc_rpc_core::types::{FilterPool, PendingTransactions};
 use sc_client_api::{ExecutorProvider, RemoteBackend, BlockchainEvents};
 #[cfg(feature = "manual-seal")]
 use sc_consensus_manual_seal::{self as manual_seal};
-use fc_consensus::MetaverseBlockImport;
+use fc_consensus::FrontierBlockImport;
 use fc_mapping_sync::MappingSyncWorker;
-use metaverse_template_runtime::{self, opaque::Block, RuntimeApi, SLOT_DURATION};
+use frontier_template_runtime::{self, opaque::Block, RuntimeApi, SLOT_DURATION};
 use sc_service::{error::Error as ServiceError, Configuration, TaskManager, BasePath};
 use sp_inherents::{InherentDataProviders, ProvideInherentData, InherentIdentifier, InherentData};
 use sc_executor::native_executor_instance;
@@ -28,8 +28,8 @@ use crate::cli::Sealing;
 // Our native executor instance.
 native_executor_instance!(
 	pub Executor,
-	metaverse_template_runtime::api::dispatch,
-	metaverse_template_runtime::native_version,
+	frontier_template_runtime::api::dispatch,
+	frontier_template_runtime::native_version,
 );
 
 type FullClient = sc_service::TFullClient<Block, RuntimeApi, Executor>;
@@ -41,7 +41,7 @@ pub type ConsensusResult = (
 	sc_consensus_aura::AuraBlockImport<
 		Block,
 		FullClient,
-		MetaverseBlockImport<
+		FrontierBlockImport<
 			Block,
 			sc_finality_grandpa::GrandpaBlockImport<FullBackend, Block, FullClient, FullSelectChain>,
 			FullClient
@@ -52,7 +52,7 @@ pub type ConsensusResult = (
 );
 
 #[cfg(feature = "manual-seal")]
-pub type ConsensusResult = (MetaverseBlockImport<Block, Arc<FullClient>, FullClient>, Sealing);
+pub type ConsensusResult = (FrontierBlockImport<Block, Arc<FullClient>, FullClient>, Sealing);
 
 /// Provide a mock duration starting at 0 in millisecond for timestamp inherent.
 /// Each call will increment timestamp by slot_duration making Aura think time has passed.
@@ -82,14 +82,14 @@ impl ProvideInherentData for MockTimestampInherentDataProvider {
 	}
 }
 
-pub fn open_metaverse_backend(config: &Configuration) -> Result<Arc<fc_db::Backend<Block>>, String> {
+pub fn open_frontier_backend(config: &Configuration) -> Result<Arc<fc_db::Backend<Block>>, String> {
 	let config_dir = config.base_path.as_ref()
 		.map(|base_path| base_path.config_dir(config.chain_spec.id()))
 		.unwrap_or_else(|| {
 			BasePath::from_project("", "", &crate::cli::Cli::executable_name())
 				.config_dir(config.chain_spec.id())
 		});
-	let database_dir = config_dir.join("metaverse").join("db");
+	let database_dir = config_dir.join("frontier").join("db");
 
 	Ok(Arc::new(fc_db::Backend::<Block>::new(&fc_db::DatabaseSettings {
 		source: fc_db::DatabaseSettingsSrc::RocksDb {
@@ -146,7 +146,7 @@ pub fn new_partial(config: &Configuration, #[allow(unused_variables)] cli: &Cli)
 	let filter_pool: Option<FilterPool>
 		= Some(Arc::new(Mutex::new(BTreeMap::new())));
 
-	let metaverse_backend = open_metaverse_backend(config)?;
+	let frontier_backend = open_frontier_backend(config)?;
 
 	#[cfg(feature = "manual-seal")] {
 		let sealing = cli.run.sealing;
@@ -156,14 +156,14 @@ pub fn new_partial(config: &Configuration, #[allow(unused_variables)] cli: &Cli)
 			.map_err(Into::into)
 			.map_err(sp_consensus::error::Error::InherentData)?;
 
-		let metaverse_block_import = MetaverseBlockImport::new(
+		let frontier_block_import = FrontierBlockImport::new(
 			client.clone(),
 			client.clone(),
-			metaverse_backend.clone(),
+			frontier_backend.clone(),
 		);
 
 		let import_queue = sc_consensus_manual_seal::import_queue(
-			Box::new(metaverse_block_import.clone()),
+			Box::new(frontier_block_import.clone()),
 			&task_manager.spawn_essential_handle(),
 			config.prometheus_registry(),
 		);
@@ -172,10 +172,10 @@ pub fn new_partial(config: &Configuration, #[allow(unused_variables)] cli: &Cli)
 			client, backend, task_manager, import_queue, keystore_container,
 			select_chain, transaction_pool, inherent_data_providers,
 			other: (
-				(metaverse_block_import, sealing),
+				(frontier_block_import, sealing),
 				pending_transactions,
 				filter_pool,
-				metaverse_backend,
+				frontier_backend,
 				telemetry,
 			)
 		})
@@ -189,14 +189,14 @@ pub fn new_partial(config: &Configuration, #[allow(unused_variables)] cli: &Cli)
 			telemetry.as_ref().map(|x| x.handle()),
 		)?;
 
-		let metaverse_block_import = MetaverseBlockImport::new(
+		let frontier_block_import = FrontierBlockImport::new(
 			grandpa_block_import.clone(),
 			client.clone(),
-			metaverse_backend.clone(),
+			frontier_backend.clone(),
 		);
 
 		let aura_block_import = sc_consensus_aura::AuraBlockImport::<_, _, _, AuraPair>::new(
-			metaverse_block_import, client.clone(),
+			frontier_block_import, client.clone(),
 		);
 
 		let import_queue = sc_consensus_aura::import_queue::<AuraPair, _, _, _, _, _>(
@@ -221,7 +221,7 @@ pub fn new_partial(config: &Configuration, #[allow(unused_variables)] cli: &Cli)
 				(aura_block_import, grandpa_link),
 				pending_transactions,
 				filter_pool,
-				metaverse_backend,
+				frontier_backend,
 				telemetry,
 			)
 		})
@@ -238,7 +238,7 @@ pub fn new_full(
 	let sc_service::PartialComponents {
 		client, backend, mut task_manager, import_queue, keystore_container,
 		select_chain, transaction_pool, inherent_data_providers,
-		other: (consensus_result, pending_transactions, filter_pool, metaverse_backend, mut telemetry),
+		other: (consensus_result, pending_transactions, filter_pool, frontier_backend, mut telemetry),
 	} = new_partial(&config, cli)?;
 
 	let (network, network_status_sinks, system_rpc_tx, network_starter) =
@@ -276,7 +276,7 @@ pub fn new_full(
 		let network = network.clone();
 		let pending = pending_transactions.clone();
 		let filter_pool = filter_pool.clone();
-		let metaverse_backend = metaverse_backend.clone();
+		let frontier_backend = frontier_backend.clone();
 
 		Box::new(move |deny_unsafe, _| {
 			let deps = crate::rpc::FullDeps {
@@ -288,7 +288,7 @@ pub fn new_full(
 				network: network.clone(),
 				pending_transactions: pending.clone(),
 				filter_pool: filter_pool.clone(),
-				backend: metaverse_backend.clone(),
+				backend: frontier_backend.clone(),
 				command_sink: Some(command_sink.clone())
 			};
 			crate::rpc::create_full(
@@ -299,13 +299,13 @@ pub fn new_full(
 	};
 
 	task_manager.spawn_essential_handle().spawn(
-		"metaverse-mapping-sync-worker",
+		"frontier-mapping-sync-worker",
 		MappingSyncWorker::new(
 			client.import_notification_stream(),
 			Duration::new(6, 0),
 			client.clone(),
 			backend.clone(),
-			metaverse_backend.clone(),
+			frontier_backend.clone(),
 		).for_each(|()| futures::future::ready(()))
 	);
 
@@ -321,12 +321,12 @@ pub fn new_full(
 		backend, network_status_sinks, system_rpc_tx, config, telemetry: telemetry.as_mut(),
 	})?;
 
-	// Spawn metaverse EthFilterApi maintenance task.
+	// Spawn Frontier EthFilterApi maintenance task.
 	if let Some(filter_pool) = filter_pool {
 		// Each filter is allowed to stay in the pool for 100 blocks.
 		const FILTER_RETAIN_THRESHOLD: u64 = 100;
 		task_manager.spawn_essential_handle().spawn(
-			"metaverse-filter-pool",
+			"frontier-filter-pool",
 			EthTask::filter_pool_task(
 					Arc::clone(&client),
 					filter_pool,
@@ -335,11 +335,11 @@ pub fn new_full(
 		);
 	}
 
-	// Spawn metaverse pending transactions maintenance task (as essential, otherwise we leak).
+	// Spawn Frontier pending transactions maintenance task (as essential, otherwise we leak).
 	if let Some(pending_transactions) = pending_transactions {
 		const TRANSACTION_RETAIN_THRESHOLD: u64 = 5;
 		task_manager.spawn_essential_handle().spawn(
-			"metaverse-pending-transactions",
+			"frontier-pending-transactions",
 			EthTask::pending_transaction_task(
 				Arc::clone(&client),
 					pending_transactions,

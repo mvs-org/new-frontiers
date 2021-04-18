@@ -1,10 +1,10 @@
 import { expect } from "chai";
 
 import ExplicitRevertReason from "../build/contracts/ExplicitRevertReason.json"
-import { createAndFinalizeBlock, customRequest, describeWithMetaverse } from "./util";
+import { createAndFinalizeBlock, customRequest, describeWithFrontier } from "./util";
 import { AbiItem } from "web3-utils";
 
-describeWithMetaverse("metaverse RPC (Revert Reason)", `simple-specs.json`, (context) => {
+describeWithFrontier("Frontier RPC (Revert Reason)", `simple-specs.json`, (context) => {
 
 	let contractAddress;
 

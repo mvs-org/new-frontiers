@@ -101,10 +101,10 @@ pub mod opaque {
 }
 
 pub const VERSION: RuntimeVersion = RuntimeVersion {
-	spec_name: create_runtime_str!("metaverse-template-runtime"),
-	impl_name: create_runtime_str!("metaverse-template-runtime"),
+	spec_name: create_runtime_str!("frontier-template-runtime"),
+	impl_name: create_runtime_str!("frontier-template-runtime"),
 	authoring_version: 1,
-	spec_version: 601,
+	spec_version: 501,
 	impl_version: 1,
 	apis: RUNTIME_API_VERSIONS,
 	transaction_version: 1,

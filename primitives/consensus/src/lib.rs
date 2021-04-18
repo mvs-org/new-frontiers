@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// This file is part of metaverse.
+// This file is part of Frontier.
 //
 // Copyright (c) 2020 Parity Technologies (UK) Ltd.
 //
@@ -25,7 +25,7 @@ use sp_runtime::{
 };
 use sha3::{Digest as Sha3Digest, Keccak256};
 
-pub const METAVERSE_ENGINE_ID: ConsensusEngineId = [b'f', b'r', b'o', b'n'];
+pub const FRONTIER_ENGINE_ID: ConsensusEngineId = [b'f', b'r', b'o', b'n'];
 
 #[derive(Clone, PartialEq, Eq)]
 pub enum Log {
@@ -94,7 +94,7 @@ pub fn find_pre_log<Hash>(
 	let mut found = None;
 
 	for log in digest.logs() {
-		let log = log.try_to::<PreLog>(OpaqueDigestItemId::PreRuntime(&METAVERSE_ENGINE_ID));
+		let log = log.try_to::<PreLog>(OpaqueDigestItemId::PreRuntime(&FRONTIER_ENGINE_ID));
 		match (log, found.is_some()) {
 			(Some(_), true) => return Err(FindLogError::MultipleLogs),
 			(Some(log), false) => found = Some(log),
@@ -111,7 +111,7 @@ pub fn find_post_log<Hash>(
 	let mut found = None;
 
 	for log in digest.logs() {
-		let log = log.try_to::<PostLog>(OpaqueDigestItemId::Consensus(&METAVERSE_ENGINE_ID));
+		let log = log.try_to::<PostLog>(OpaqueDigestItemId::Consensus(&FRONTIER_ENGINE_ID));
 		match (log, found.is_some()) {
 			(Some(_), true) => return Err(FindLogError::MultipleLogs),
 			(Some(log), false) => found = Some(log),
@@ -128,14 +128,14 @@ pub fn find_log<Hash>(
 	let mut found = None;
 
 	for log in digest.logs() {
-		let pre_log = log.try_to::<PreLog>(OpaqueDigestItemId::PreRuntime(&METAVERSE_ENGINE_ID));
+		let pre_log = log.try_to::<PreLog>(OpaqueDigestItemId::PreRuntime(&FRONTIER_ENGINE_ID));
 		match (pre_log, found.is_some()) {
 			(Some(_), true) => return Err(FindLogError::MultipleLogs),
 			(Some(pre_log), false) => found = Some(Log::Pre(pre_log)),
 			(None, _) => (),
 		}
 
-		let post_log = log.try_to::<PostLog>(OpaqueDigestItemId::Consensus(&METAVERSE_ENGINE_ID));
+		let post_log = log.try_to::<PostLog>(OpaqueDigestItemId::Consensus(&FRONTIER_ENGINE_ID));
 		match (post_log, found.is_some()) {
 			(Some(_), true) => return Err(FindLogError::MultipleLogs),
 			(Some(post_log), false) => found = Some(Log::Post(post_log)),
@@ -152,14 +152,14 @@ pub fn ensure_log<Hash>(
 	let mut found = false;
 
 	for log in digest.logs() {
-		let pre_log = log.try_to::<PreLog>(OpaqueDigestItemId::PreRuntime(&METAVERSE_ENGINE_ID));
+		let pre_log = log.try_to::<PreLog>(OpaqueDigestItemId::PreRuntime(&FRONTIER_ENGINE_ID));
 		match (pre_log, found) {
 			(Some(_), true) => return Err(FindLogError::MultipleLogs),
 			(Some(_), false) => found = true,
 			(None, _) => (),
 		}
 
-		let post_log = log.try_to::<PostLog>(OpaqueDigestItemId::Consensus(&METAVERSE_ENGINE_ID));
+		let post_log = log.try_to::<PostLog>(OpaqueDigestItemId::Consensus(&FRONTIER_ENGINE_ID));
 		match (post_log, found) {
 			(Some(_), true) => return Err(FindLogError::MultipleLogs),
 			(Some(_), false) => found = true,

@@ -41,7 +41,7 @@ impl SubstrateCli for Cli {
 	}
 
 	fn native_runtime_version(_: &Box<dyn ChainSpec>) -> &'static RuntimeVersion {
-		&metaverse_template_runtime::VERSION
+		&frontier_template_runtime::VERSION
 	}
 }
 
