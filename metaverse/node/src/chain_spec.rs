@@ -1,4 +1,4 @@
-use sp_core::{Pair, Public, sr25519};
+use sp_core::{Pair, Public, sr25519, ed25519};
 use frontier_template_runtime::{
 	AccountId, AuraConfig, BalancesConfig, EVMConfig, EthereumConfig, GenesisConfig, GrandpaConfig,
 	SudoConfig, SystemConfig, WASM_BINARY, Signature
@@ -8,8 +8,10 @@ use sp_finality_grandpa::AuthorityId as GrandpaId;
 use sp_runtime::traits::{Verify, IdentifyAccount};
 use sc_service::ChainType;
 use std::collections::BTreeMap;
+use hex_literal::hex;
 use pallet_evm::GenesisAccount;
 use array_bytes::fixed_hex_bytes_unchecked;
+
 // The URL for the telemetry server.
 // const STAGING_TELEMETRY_URL: &str = "wss://telemetry.polkadot.io/submit/";
 

@@ -67,3 +67,4 @@ default = ["aura"]
 aura = ["frontier-template-runtime/aura"]
 manual-seal = ["frontier-template-runtime/manual-seal"]
 
+
