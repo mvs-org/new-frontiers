@@ -1,5 +1,5 @@
 [package]
-name = "frontier-template-runtime"
+name = "metaverse-runtime"
 version = "3.0.0-dev"
 authors = ["Parity Technologies <admin@parity.io>"]
 edition = "2018"

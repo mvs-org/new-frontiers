@@ -1,7 +1,7 @@
 use std::sync::Arc;
 
 pub use substrate_test_client::*;
-pub use frontier_template_runtime as runtime;
+pub use metaverse_runtime as runtime;
 use sp_runtime::traits::HashFor;
 
 sc_executor::native_executor_instance! {

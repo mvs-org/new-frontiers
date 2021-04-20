@@ -1827,60 +1827,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "frontier-template-runtime"
-version = "3.0.0-dev"
-dependencies = [
- "fp-rpc",
- "frame-executive",
- "frame-support 3.0.0 (git+https://github.com/mvs-org/substrate.git?branch=new-frontiers)",
- "frame-system 3.0.0 (git+https://github.com/mvs-org/substrate.git?branch=new-frontiers)",
- "frame-system-rpc-runtime-api",
- "pallet-aura",
- "pallet-balances",
- "pallet-ethereum",
- "pallet-evm",
- "pallet-evm-precompile-sha3fips",
- "pallet-evm-precompile-simple",
- "pallet-grandpa",
- "pallet-randomness-collective-flip",
- "pallet-scheduler",
- "pallet-sudo",
- "pallet-timestamp",
- "pallet-transaction-payment",
- "pallet-transaction-payment-rpc-runtime-api",
- "parity-scale-codec",
- "serde",
- "sp-api 3.0.0 (git+https://github.com/mvs-org/substrate.git?branch=new-frontiers)",
- "sp-block-builder",
- "sp-consensus-aura",
- "sp-core 3.0.0 (git+https://github.com/mvs-org/substrate.git?branch=new-frontiers)",
- "sp-inherents 3.0.0 (git+https://github.com/mvs-org/substrate.git?branch=new-frontiers)",
- "sp-io 3.0.0 (git+https://github.com/mvs-org/substrate.git?branch=new-frontiers)",
- "sp-offchain",
- "sp-runtime 3.0.0 (git+https://github.com/mvs-org/substrate.git?branch=new-frontiers)",
- "sp-session",
- "sp-std 3.0.0 (git+https://github.com/mvs-org/substrate.git?branch=new-frontiers)",
- "sp-transaction-pool",
- "sp-version 3.0.0 (git+https://github.com/mvs-org/substrate.git?branch=new-frontiers)",
- "substrate-wasm-builder",
-]
-
-[[package]]
-name = "frontier-template-test-client"
-version = "0.1.0"
-dependencies = [
- "frontier-template-runtime",
- "parity-scale-codec",
- "sc-client-api",
- "sc-consensus",
- "sc-executor",
- "sc-light",
- "sp-api 3.0.0 (git+https://github.com/mvs-org/substrate.git?branch=new-frontiers)",
- "sp-runtime 3.0.0 (git+https://github.com/mvs-org/substrate.git?branch=new-frontiers)",
- "substrate-test-client",
-]
-
-[[package]]
 name = "fs-swap"
 version = "0.2.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3556,12 +3502,12 @@ dependencies = [
  "fc-rpc-core",
  "fp-consensus",
  "fp-rpc",
- "frontier-template-runtime",
  "futures 0.3.14",
  "hex-literal",
  "jsonrpc-core 15.1.0",
  "jsonrpc-pubsub 15.1.0",
  "log",
+ "metaverse-runtime",
  "pallet-ethereum",
  "pallet-evm",
  "pallet-transaction-payment-rpc",
@@ -3593,6 +3539,60 @@ dependencies = [
  "structopt",
  "substrate-build-script-utils",
  "substrate-frame-rpc-system",
+]
+
+[[package]]
+name = "metaverse-runtime"
+version = "3.0.0-dev"
+dependencies = [
+ "fp-rpc",
+ "frame-executive",
+ "frame-support 3.0.0 (git+https://github.com/mvs-org/substrate.git?branch=new-frontiers)",
+ "frame-system 3.0.0 (git+https://github.com/mvs-org/substrate.git?branch=new-frontiers)",
+ "frame-system-rpc-runtime-api",
+ "pallet-aura",
+ "pallet-balances",
+ "pallet-ethereum",
+ "pallet-evm",
+ "pallet-evm-precompile-sha3fips",
+ "pallet-evm-precompile-simple",
+ "pallet-grandpa",
+ "pallet-randomness-collective-flip",
+ "pallet-scheduler",
+ "pallet-sudo",
+ "pallet-timestamp",
+ "pallet-transaction-payment",
+ "pallet-transaction-payment-rpc-runtime-api",
+ "parity-scale-codec",
+ "serde",
+ "sp-api 3.0.0 (git+https://github.com/mvs-org/substrate.git?branch=new-frontiers)",
+ "sp-block-builder",
+ "sp-consensus-aura",
+ "sp-core 3.0.0 (git+https://github.com/mvs-org/substrate.git?branch=new-frontiers)",
+ "sp-inherents 3.0.0 (git+https://github.com/mvs-org/substrate.git?branch=new-frontiers)",
+ "sp-io 3.0.0 (git+https://github.com/mvs-org/substrate.git?branch=new-frontiers)",
+ "sp-offchain",
+ "sp-runtime 3.0.0 (git+https://github.com/mvs-org/substrate.git?branch=new-frontiers)",
+ "sp-session",
+ "sp-std 3.0.0 (git+https://github.com/mvs-org/substrate.git?branch=new-frontiers)",
+ "sp-transaction-pool",
+ "sp-version 3.0.0 (git+https://github.com/mvs-org/substrate.git?branch=new-frontiers)",
+ "substrate-wasm-builder",
+]
+
+[[package]]
+name = "metaverse-test-client"
+version = "0.1.0"
+dependencies = [
+ "metaverse-runtime",
+ "parity-scale-codec",
+ "sc-client-api",
+ "sc-consensus",
+ "sc-executor",
+ "sc-light",
+ "sp-api 3.0.0 (git+https://github.com/mvs-org/substrate.git?branch=new-frontiers)",
+ "sp-runtime 3.0.0 (git+https://github.com/mvs-org/substrate.git?branch=new-frontiers)",
+ "substrate-test-client",
 ]
 
 [[package]]

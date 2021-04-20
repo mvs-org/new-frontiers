@@ -1,5 +1,5 @@
 use sp_core::{Pair, Public, sr25519};
-use frontier_template_runtime::{
+use metaverse_runtime::{
 	AccountId, AuraConfig, BalancesConfig, EVMConfig, EthereumConfig, GenesisConfig, GrandpaConfig,
 	SudoConfig, SystemConfig, WASM_BINARY, Signature
 };
