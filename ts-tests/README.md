@@ -1,6 +1,6 @@
-# Functional testing for Substrate Frontier Node RPC
+# Functional testing for Substrate Metaverse Node RPC
 
-This folder contains a set of functional tests desgined to perform functional testing on the Frontier Eth RPC.
+This folder contains a set of functional tests desgined to perform functional testing on the Metaverse Eth RPC.
 
 It is written in typescript, using Mocha/Chai as Test framework.
 
@@ -21,7 +21,7 @@ npm install
 npm run test
 ```
 
-You can also add the Frontier Node logs to the output using the `FRONTIER_LOG` env variable. Ex:
+You can also add the Metaverse Node logs to the output using the `FRONTIER_LOG` env variable. Ex:
 
 ```
 FRONTIER_LOG="warn,rpc=trace" npm run test

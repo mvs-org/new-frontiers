@@ -1,5 +1,5 @@
 module.exports = {
-  title: 'Frontier',
+  title: 'Metaverse',
   description: 'Ethereum compatibility layer for Substrate',
   base: '/frontier/',
 

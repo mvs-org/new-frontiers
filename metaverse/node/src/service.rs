@@ -6,7 +6,7 @@ use fc_rpc_core::types::{FilterPool, PendingTransactions};
 use sc_client_api::{ExecutorProvider, RemoteBackend, BlockchainEvents};
 #[cfg(feature = "manual-seal")]
 use sc_consensus_manual_seal::{self as manual_seal};
-use fc_consensus::FrontierBlockImport;
+use fc_consensus::MetaverseBlockImport;
 use fc_mapping_sync::MappingSyncWorker;
 use metaverse_runtime::{self, opaque::Block, RuntimeApi, SLOT_DURATION};
 use sc_service::{error::Error as ServiceError, Configuration, TaskManager, BasePath};
@@ -41,7 +41,7 @@ pub type ConsensusResult = (
 	sc_consensus_aura::AuraBlockImport<
 		Block,
 		FullClient,
-		FrontierBlockImport<
+		MetaverseBlockImport<
 			Block,
 			sc_finality_grandpa::GrandpaBlockImport<FullBackend, Block, FullClient, FullSelectChain>,
 			FullClient
@@ -52,7 +52,7 @@ pub type ConsensusResult = (
 );
 
 #[cfg(feature = "manual-seal")]
-pub type ConsensusResult = (FrontierBlockImport<Block, Arc<FullClient>, FullClient>, Sealing);
+pub type ConsensusResult = (MetaverseBlockImport<Block, Arc<FullClient>, FullClient>, Sealing);
 
 /// Provide a mock duration starting at 0 in millisecond for timestamp inherent.
 /// Each call will increment timestamp by slot_duration making Aura think time has passed.
@@ -156,7 +156,7 @@ pub fn new_partial(config: &Configuration, #[allow(unused_variables)] cli: &Cli)
 			.map_err(Into::into)
 			.map_err(sp_consensus::error::Error::InherentData)?;
 
-		let frontier_block_import = FrontierBlockImport::new(
+		let frontier_block_import = MetaverseBlockImport::new(
 			client.clone(),
 			client.clone(),
 			frontier_backend.clone(),
@@ -189,7 +189,7 @@ pub fn new_partial(config: &Configuration, #[allow(unused_variables)] cli: &Cli)
 			telemetry.as_ref().map(|x| x.handle()),
 		)?;
 
-		let frontier_block_import = FrontierBlockImport::new(
+		let frontier_block_import = MetaverseBlockImport::new(
 			grandpa_block_import.clone(),
 			client.clone(),
 			frontier_backend.clone(),
@@ -321,7 +321,7 @@ pub fn new_full(
 		backend, network_status_sinks, system_rpc_tx, config, telemetry: telemetry.as_mut(),
 	})?;
 
-	// Spawn Frontier EthFilterApi maintenance task.
+	// Spawn Metaverse EthFilterApi maintenance task.
 	if let Some(filter_pool) = filter_pool {
 		// Each filter is allowed to stay in the pool for 100 blocks.
 		const FILTER_RETAIN_THRESHOLD: u64 = 100;
@@ -335,7 +335,7 @@ pub fn new_full(
 		);
 	}
 
-	// Spawn Frontier pending transactions maintenance task (as essential, otherwise we leak).
+	// Spawn Metaverse pending transactions maintenance task (as essential, otherwise we leak).
 	if let Some(pending_transactions) = pending_transactions {
 		const TRANSACTION_RETAIN_THRESHOLD: u64 = 5;
 		task_manager.spawn_essential_handle().spawn(

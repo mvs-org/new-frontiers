@@ -63,7 +63,7 @@ Bob Contract account storage: 0x000000000000000000000000000000000000000000000000
 ## RPC
 
 This section describes how to use the web3.js SDK to interact with
-Frontier.
+Metaverse.
 
 ## Installation and Usage
 

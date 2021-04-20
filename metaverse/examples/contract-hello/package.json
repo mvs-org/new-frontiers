@@ -1,7 +1,7 @@
 {
   "name": "frontier-example-contract-hello",
   "version": "0.1.0",
-  "description": "Hello contract example for Frontier project",
+  "description": "Hello contract example for Metaverse project",
   "main": "index.js",
   "repository": {
     "type": "git",

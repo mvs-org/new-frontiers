@@ -1,4 +1,4 @@
-# Substrate Frontier Node Temlate
+# Substrate Metaverse Node Temlate
 
 A [FRAME](https://substrate.dev/docs/en/next/conceptual/runtime/frame)-based [Substrate](https://substrate.dev/en/) node with the Ethereum RPC support, ready for hacking :rocket:
 

@@ -14,7 +14,7 @@ RUN apt-get update -y && \
 # Install rust wasm. Needed for substrate wasm engine
 RUN rustup target add wasm32-unknown-unknown
 
-# Download Frontier repo
+# Download Metaverse repo
 RUN git clone https://github.com/paritytech/frontier /frontier
 RUN cd /frontier && git submodule init && git submodule update
 

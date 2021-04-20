@@ -1,9 +1,9 @@
 import { expect } from "chai";
 import { step } from "mocha-steps";
 
-import { describeWithFrontier, customRequest } from "./util";
+import { describeWithMetaverse, customRequest } from "./util";
 
-describeWithFrontier("Frontier RPC (Web3Api)", `simple-specs.json`, (context) => {
+describeWithMetaverse("Metaverse RPC (Web3Api)", `simple-specs.json`, (context) => {
 
 	step("should get client version", async function () {
 		const version = await context.web3.eth.getNodeInfo();

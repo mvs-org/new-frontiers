@@ -1,9 +1,9 @@
-# Frontier
+# Metaverse
 
 ![GitHub Workflow Status](https://img.shields.io/github/workflow/status/paritytech/frontier/Rust)
 ![Matrix](https://img.shields.io/matrix/frontier:matrix.org)
 
-Frontier is Substrate's Ethereum compatibility layer. It allows you to run
+Metaverse is Substrate's Ethereum compatibility layer. It allows you to run
 unmodified Ethereum dapps.
 
 The goal of Ethereum compatibility layer is to be able to:
@@ -21,7 +21,7 @@ It consists of the following components:
 
 ## Development notes
 
-Frontier is still work-in-progress. Below are some notes about the development.
+Metaverse is still work-in-progress. Below are some notes about the development.
 
 ### Runtime
 
