@@ -55,15 +55,9 @@ pub fn development_config() -> Result<ChainSpec, String> {
 			wasm_binary,
 			// Initial PoA authorities
 			vec![
-                (
-                    sr25519::Public::from_slice(&hex!("0x14cb71c93c6393a70fdee7e6b786a639d06ac55a6b47e7df9e05fbd44f195f29")).into(),
-                    ed25519::Public::from_slice(&hex!("0x2fbbdd17c5aa4c48ca0ecf31b8eeebfa017b49a668aaa873a3f9ef0399cf6107")).into(),
-                ),
-                (
-                    sr25519::Public::from_slice(&hex!("0x44ad4030c5f6c583905406c19085e00382e3d3336f430e84aab3816f704afc00")).into(),
-                    ed25519::Public::from_slice(&hex!("0xef722502cd41cfc69dd143d4c5db75a35a7e3d574b12f22b5a11b7f1bd36659d")).into(),
-                ),
-            ],
+				authority_keys_from_seed("5DtFw8yZ776C3BKrEWypLaGycL5QkQMHnHpeVEEkC6btFRCW"),
+				authority_keys_from_seed("5Cp1xHtUkLSNn3EUPcVUgT7ffhbmwr78UjzK6BN5dmBEBtPT"),
+			],
 			// Sudo account
 			get_account_id_from_seed::<sr25519::Public>("5EfTxKXzGSzX4QRXAL5yJz8qtSQ3iZJjykC2et8BBF1R11fd"),
 			// Pre-funded accounts
