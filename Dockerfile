@@ -1,7 +1,5 @@
 ### package stage
-FROM ubuntu:20.04
-
-
+FROM debian:bullseye-slim
 # metadata
 ARG VCS_REF
 ARG BUILD_DATE
@@ -23,8 +21,8 @@ RUN apt-get update && \
 	useradd -m -u 1000 -U -s /bin/sh -d /metaverse mvs
 # add binary to docker image
 COPY ./target/release/metaverse /usr/local/bin/metaverse
-COPY ./testnet.json ./testnet
-COPY ./testnet.json .
+COPY ./mainnet.json ./mainnet
+COPY ./mainnet.json .
 USER mvs
 # check if executable works in this container
 RUN /usr/local/bin/metaverse --version
@@ -32,6 +30,6 @@ RUN /usr/local/bin/metaverse --version
 # 9933 http rpc
 # 9944 ws rpc
 # 9615 prometheus
-EXPOSE 5252 3330 8831 9615
+EXPOSE 30333 9933 9944 9615
 VOLUME ["/metaverse"]
 ENTRYPOINT ["/usr/local/bin/metaverse", "--unsafe-rpc-external", "--unsafe-ws-external"]
