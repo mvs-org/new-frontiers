@@ -11,7 +11,7 @@ use std::collections::BTreeMap;
 use pallet_evm::GenesisAccount;
 use array_bytes::fixed_hex_bytes_unchecked;
 // The URL for the telemetry server.
-// const STAGING_TELEMETRY_URL: &str = "wss://telemetry.polkadot.io/submit/";
+const STAGING_TELEMETRY_URL: &str = "wss://telemetry.mvs.org/ws/submit";
 
 /// Specialized `ChainSpec`. This is a specialization of the general Substrate ChainSpec type.
 pub type ChainSpec = sc_service::GenericChainSpec<GenesisConfig>;
@@ -53,17 +53,16 @@ pub fn development_config() -> Result<ChainSpec, String> {
 			wasm_binary,
 			// Initial PoA authorities
 			vec![
-				authority_keys_from_seed("5CXyFUtpon3YHzevZZtRuu6beArR2DAAiwFo12Lh8HT54prM"),
-				authority_keys_from_seed("5D9Hv1ykRgZ4eThxrBcF3YdvZ7z1YeFZMXtG3r39hizhmubS"),
-				authority_keys_from_seed("5DckaZq9rXmuVUtnZBTMJhnsQbKx8wkjxJAzESq996bRTPi5"),
-				authority_keys_from_seed("5HUfD7SBbWGX6gnQSDbbL6A82ufi1wQ1d1643zSiKPVfqCT3"),
+				authority_keys_from_seed("Alice"),	
 			],
 			// Sudo account
-			get_account_id_from_seed::<sr25519::Public>("5EfTxKXzGSzX4QRXAL5yJz8qtSQ3iZJjykC2et8BBF1R11fd"),
+			get_account_id_from_seed::<sr25519::Public>("Alice"),
 			// Pre-funded accounts
 			vec![
-				get_account_id_from_seed::<sr25519::Public>("5Fq4FmzHHfTEPozeNoE9nQxvUHN9kEehKp5sCc4QAz3F1f1c"),
-				
+				get_account_id_from_seed::<sr25519::Public>("Alice"),
+				get_account_id_from_seed::<sr25519::Public>("Bob"),
+				get_account_id_from_seed::<sr25519::Public>("Alice//stash"),
+				get_account_id_from_seed::<sr25519::Public>("Bob//stash"),
 			],
 			true,
 		),
