@@ -11,7 +11,7 @@ use std::collections::BTreeMap;
 use pallet_evm::GenesisAccount;
 use array_bytes::fixed_hex_bytes_unchecked;
 // The URL for the telemetry server.
-const STAGING_TELEMETRY_URL: &str = "wss://telemetry.mvs.org/ws/submit";
+// const STAGING_TELEMETRY_URL: &str = "wss://telemetry.polkadot.io/submit/";
 
 /// Specialized `ChainSpec`. This is a specialization of the general Substrate ChainSpec type.
 pub type ChainSpec = sc_service::GenericChainSpec<GenesisConfig>;
@@ -45,7 +45,7 @@ pub fn development_config() -> Result<ChainSpec, String> {
 
 	Ok(ChainSpec::from_genesis(
 		// Name
-		"Metaverse",
+		"Development",
 		// ID
 		"dev",
 		ChainType::Development,
@@ -54,8 +54,8 @@ pub fn development_config() -> Result<ChainSpec, String> {
 			// Initial PoA authorities
 			vec![
 				authority_keys_from_seed("Alice"),
-				authority_keys_from_seed("5HL7N8DBd6eaNDCfTU6CWfLVAT1Zw8nETbAKEyocbtpdZbVo"),
-				authority_keys_from_seed("5CXyFUtpon3YHzevZZtRuu6beArR2DAAiwFo12Lh8HT54prM"),	
+				authority_keys_from_seed("Bob"),
+					
 			],
 			// Sudo account
 			get_account_id_from_seed::<sr25519::Public>("Alice"),
@@ -94,15 +94,25 @@ pub fn local_testnet_config() -> Result<ChainSpec, String> {
 			wasm_binary,
 			// Initial PoA authorities
 			vec![
-				authority_keys_from_seed("5DtFw8yZ776C3BKrEWypLaGycL5QkQMHnHpeVEEkC6btFRCW"),
-				
+				authority_keys_from_seed("Alice"),
+				authority_keys_from_seed("Bob"),
 			],
 			// Sudo account
-			get_account_id_from_seed::<sr25519::Public>("5DtFw8yZ776C3BKrEWypLaGycL5QkQMHnHpeVEEkC6btFRCW"),
+			get_account_id_from_seed::<sr25519::Public>("Alice"),
 			// Pre-funded accounts
 			vec![
-				get_account_id_from_seed::<sr25519::Public>("5DtFw8yZ776C3BKrEWypLaGycL5QkQMHnHpeVEEkC6btFRCW"),
-				
+				get_account_id_from_seed::<sr25519::Public>("Alice"),
+				get_account_id_from_seed::<sr25519::Public>("Bob"),
+				get_account_id_from_seed::<sr25519::Public>("Charlie"),
+				get_account_id_from_seed::<sr25519::Public>("Dave"),
+				get_account_id_from_seed::<sr25519::Public>("Eve"),
+				get_account_id_from_seed::<sr25519::Public>("Ferdie"),
+				get_account_id_from_seed::<sr25519::Public>("Alice//stash"),
+				get_account_id_from_seed::<sr25519::Public>("Bob//stash"),
+				get_account_id_from_seed::<sr25519::Public>("Charlie//stash"),
+				get_account_id_from_seed::<sr25519::Public>("Dave//stash"),
+				get_account_id_from_seed::<sr25519::Public>("Eve//stash"),
+				get_account_id_from_seed::<sr25519::Public>("Ferdie//stash"),
 			],
 			true,
 		),
