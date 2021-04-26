@@ -448,7 +448,7 @@ pub fn new_full(
 				gossip_duration: Duration::from_millis(333),
 				justification_period: 512,
 				name: Some(name),
-				observer_enabled: true ,
+				observer_enabled: false,
 				keystore,
 				is_authority: role.is_authority(),
 				telemetry: telemetry.as_ref().map(|x| x.handle()),

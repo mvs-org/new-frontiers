@@ -1,0 +1,11 @@
+{
+  "jsonrpc":"2.0",
+  "id":1,
+  "method":"author_insertKey",
+  "params": [
+    "gran",
+     "bomb hurt enemy flat hub board nature tail hello vessel nature panda",
+    "0x44ec919c15015ef68a87f7a1fd1f2c0dadfbfd11f78b9ef91394e18a53675905"
+  ]
+}
+
