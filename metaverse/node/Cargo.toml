@@ -19,35 +19,35 @@ structopt = "0.3.8"
 jsonrpc-core = "15.0.0"
 jsonrpc-pubsub = "15.0.0"
 hex-literal = "0.3.1"
-sp-api = { git = "https://github.com/mvs-org/substrate.git", branch = "new-frontiers" }
-sp-blockchain = { git = "https://github.com/mvs-org/substrate.git", branch = "new-frontiers" }
-sc-rpc-api = { git = "https://github.com/mvs-org/substrate.git", branch = "new-frontiers" }
-sc-rpc = { git = "https://github.com/mvs-org/substrate.git", branch = "new-frontiers" }
-substrate-frame-rpc-system = { git = "https://github.com/mvs-org/substrate.git", branch = "new-frontiers" }
-pallet-transaction-payment-rpc = { git = "https://github.com/mvs-org/substrate.git", branch = "new-frontiers" }
-sc-cli = { git = "https://github.com/mvs-org/substrate.git", branch = "new-frontiers" }
-sp-core = { git = "https://github.com/mvs-org/substrate.git", branch = "new-frontiers" }
-sc-executor = { git = "https://github.com/mvs-org/substrate.git", branch = "new-frontiers" }
-sc-service = { git = "https://github.com/mvs-org/substrate.git", branch = "new-frontiers" }
-sp-inherents = { git = "https://github.com/mvs-org/substrate.git", branch = "new-frontiers" }
-sc-transaction-pool = { git = "https://github.com/mvs-org/substrate.git", branch = "new-frontiers" }
-sp-transaction-pool = { git = "https://github.com/mvs-org/substrate.git", branch = "new-frontiers" }
-sc-network = { git = "https://github.com/mvs-org/substrate.git", branch = "new-frontiers" }
-sc-consensus-aura = { git = "https://github.com/mvs-org/substrate.git", branch = "new-frontiers" }
-sp-consensus-aura = { git = "https://github.com/mvs-org/substrate.git", branch = "new-frontiers" }
-sc-consensus-manual-seal = { git = "https://github.com/mvs-org/substrate.git", branch = "new-frontiers" }
-sp-consensus = { git = "https://github.com/mvs-org/substrate.git", branch = "new-frontiers" }
-sc-consensus = { git = "https://github.com/mvs-org/substrate.git", branch = "new-frontiers" }
-sp-timestamp = { git = "https://github.com/mvs-org/substrate.git", branch = "new-frontiers" }
+sp-api = { git = "https://github.com/mvs-org/substrate.git", branch = "master" }
+sp-blockchain = { git = "https://github.com/mvs-org/substrate.git", branch = "master" }
+sc-rpc-api = { git = "https://github.com/mvs-org/substrate.git", branch = "master" }
+sc-rpc = { git = "https://github.com/mvs-org/substrate.git", branch = "master" }
+substrate-frame-rpc-system = { git = "https://github.com/mvs-org/substrate.git", branch = "master" }
+pallet-transaction-payment-rpc = { git = "https://github.com/mvs-org/substrate.git", branch = "master" }
+sc-cli = { git = "https://github.com/mvs-org/substrate.git", branch = "master" }
+sp-core = { git = "https://github.com/mvs-org/substrate.git", branch = "master" }
+sc-executor = { git = "https://github.com/mvs-org/substrate.git", branch = "master" }
+sc-service = { git = "https://github.com/mvs-org/substrate.git", branch = "master" }
+sp-inherents = { git = "https://github.com/mvs-org/substrate.git", branch = "master" }
+sc-transaction-pool = { git = "https://github.com/mvs-org/substrate.git", branch = "master" }
+sp-transaction-pool = { git = "https://github.com/mvs-org/substrate.git", branch = "master" }
+sc-network = { git = "https://github.com/mvs-org/substrate.git", branch = "master" }
+sc-consensus-aura = { git = "https://github.com/mvs-org/substrate.git", branch = "master" }
+sp-consensus-aura = { git = "https://github.com/mvs-org/substrate.git", branch = "master" }
+sc-consensus-manual-seal = { git = "https://github.com/mvs-org/substrate.git", branch = "master" }
+sp-consensus = { git = "https://github.com/mvs-org/substrate.git", branch = "master" }
+sc-consensus = { git = "https://github.com/mvs-org/substrate.git", branch = "master" }
+sp-timestamp = { git = "https://github.com/mvs-org/substrate.git", branch = "master" }
 pallet-evm = { path = "../../frame/evm" }
 pallet-ethereum = { path = "../../frame/ethereum" }
-sc-finality-grandpa = { git = "https://github.com/mvs-org/substrate.git", branch = "new-frontiers" }
-sp-finality-grandpa = { git = "https://github.com/mvs-org/substrate.git", branch = "new-frontiers" }
-sc-client-api = { git = "https://github.com/mvs-org/substrate.git", branch = "new-frontiers" }
-sp-runtime = { git = "https://github.com/mvs-org/substrate.git", branch = "new-frontiers" }
-sc-basic-authorship = { git = "https://github.com/mvs-org/substrate.git", branch = "new-frontiers" }
-sp-block-builder = { git = "https://github.com/mvs-org/substrate.git", branch = "new-frontiers" }
-sc-telemetry = { git = "https://github.com/mvs-org/substrate.git", branch = "new-frontiers" }
+sc-finality-grandpa = { git = "https://github.com/mvs-org/substrate.git", branch = "master" }
+sp-finality-grandpa = { git = "https://github.com/mvs-org/substrate.git", branch = "master" }
+sc-client-api = { git = "https://github.com/mvs-org/substrate.git", branch = "master" }
+sp-runtime = { git = "https://github.com/mvs-org/substrate.git", branch = "master" }
+sc-basic-authorship = { git = "https://github.com/mvs-org/substrate.git", branch = "master" }
+sp-block-builder = { git = "https://github.com/mvs-org/substrate.git", branch = "master" }
+sc-telemetry = { git = "https://github.com/mvs-org/substrate.git", branch = "master" }
 
 fc-consensus = { path = "../../client/consensus" }
 fp-consensus = { path = "../../primitives/consensus" }
@@ -60,7 +60,7 @@ fc-db = { path = "../../client/db" }
 fc-mapping-sync = { path = "../../client/mapping-sync" }
 
 [build-dependencies]
-substrate-build-script-utils = { git = "https://github.com/mvs-org/substrate.git", branch = "new-frontiers" }
+substrate-build-script-utils = { git = "https://github.com/mvs-org/substrate.git", branch = "master" }
 
 [features]
 default = ["aura"]

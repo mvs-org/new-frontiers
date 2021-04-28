@@ -9,8 +9,8 @@ repository = "https://github.com/mvs-org/substrate/"
 description = "BLAKE2 precompiles for EVM pallet."
 
 [dependencies]
-sp-core = { version = "3.0.0", default-features = false, git = "https://github.com/mvs-org/substrate.git", branch = "new-frontiers" }
-sp-io = { version = "3.0.0", default-features = false, git = "https://github.com/mvs-org/substrate.git", branch = "new-frontiers" }
+sp-core = { version = "3.0.0", default-features = false, git = "https://github.com/mvs-org/substrate.git", branch = "master" }
+sp-io = { version = "3.0.0", default-features = false, git = "https://github.com/mvs-org/substrate.git", branch = "master" }
 fp-evm = { version = "0.8.0", default-features = false, path = "../../../../primitives/evm" }
 evm = { version = "0.25.0", default-features = false, features = ["with-codec"] }
 
