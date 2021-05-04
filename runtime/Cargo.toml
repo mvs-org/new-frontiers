@@ -1,11 +1,11 @@
 [package]
-authors = ['Substrate DevHub <https://github.com/substrate-developer-hub>']
+authors = ['Metaverse Foundation <https://github.com/mvs-org>']
 edition = '2018'
-homepage = 'https://substrate.dev'
+homepage = 'https://mvs.org'
 license = 'Unlicense'
-name = 'node-template-runtime'
-repository = 'https://github.com/substrate-developer-hub/substrate-node-template/'
-version = '3.0.0'
+name = 'metaverse-vm-runtime'
+repository = 'https://github.com/mvs-org/metaverse-vm'
+version = '0.2.1'
 
 [package.metadata.docs.rs]
 targets = ['x86_64-unknown-linux-gnu']

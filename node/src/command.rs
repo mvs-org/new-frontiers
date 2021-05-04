@@ -1,6 +1,7 @@
 // This file is part of Substrate.
 
 // Copyright (C) 2017-2021 Parity Technologies (UK) Ltd.
+// Copyright (C) 2021 Metaverse Foundation.
 // SPDX-License-Identifier: Apache-2.0
 
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,13 +18,13 @@
 
 use crate::{chain_spec, service};
 use crate::cli::{Cli, Subcommand};
-use sc_cli::{SubstrateCli, RuntimeVersion, Role, ChainSpec};
+use sc_cli::{SubstrateCli as MetaverseCli, RuntimeVersion, Role, ChainSpec};
 use sc_service::PartialComponents;
-use node_template_runtime::Block;
+use metaverse_vm_runtime::Block;
 
-impl SubstrateCli for Cli {
+impl MetaverseCli for Cli {
 	fn impl_name() -> String {
-		"Substrate Node".into()
+		"MetaverseVM Node".into()
 	}
 
 	fn impl_version() -> String {
@@ -57,7 +58,7 @@ impl SubstrateCli for Cli {
 	}
 
 	fn native_runtime_version(_: &Box<dyn ChainSpec>) -> &'static RuntimeVersion {
-		&node_template_runtime::VERSION
+		&metaverse_vm_runtime::VERSION
 	}
 }
 
