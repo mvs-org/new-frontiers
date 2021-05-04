@@ -1,16 +1,18 @@
 //! Service and ServiceFactory implementation. Specialized wrapper over substrate service.
 
-use std::sync::Arc;
-use std::time::Duration;
+use std::{sync::{Arc, Mutex}, time::Duration, collections::{HashMap, BTreeMap}};
+use fc_rpc_core::types::{FilterPool, PendingTransactions};
 use sc_client_api::{ExecutorProvider, RemoteBackend};
 use node_template_runtime::{self, opaque::Block, RuntimeApi};
-use sc_service::{error::Error as ServiceError, Configuration, TaskManager};
+use sc_service::{error::Error as ServiceError, Configuration, TaskManager, BasePath};
 use sp_inherents::InherentDataProviders;
 use sc_executor::native_executor_instance;
 pub use sc_executor::NativeExecutor;
 use sp_consensus_aura::sr25519::AuthorityPair as AuraPair;
 use sc_finality_grandpa::SharedVoterState;
 use sc_keystore::LocalKeystore;
+
+use crate::cli::Cli;
 
 // Our native executor instance.
 native_executor_instance!(
@@ -24,7 +26,24 @@ type FullClient = sc_service::TFullClient<Block, RuntimeApi, Executor>;
 type FullBackend = sc_service::TFullBackend<Block>;
 type FullSelectChain = sc_consensus::LongestChain<FullBackend, Block>;
 
-pub fn new_partial(config: &Configuration) -> Result<sc_service::PartialComponents<
+pub fn open_frontier_backend(config: &Configuration) -> Result<Arc<fc_db::Backend<Block>>, String> {
+	let config_dir = config.base_path.as_ref()
+		.map(|base_path| base_path.config_dir(config.chain_spec.id()))
+		.unwrap_or_else(|| {
+			BasePath::from_project("", "", "new-frontiers")
+				.config_dir(config.chain_spec.id())
+		});
+	let database_dir = config_dir.join("frontier").join("db");
+
+	Ok(Arc::new(fc_db::Backend::<Block>::new(&fc_db::DatabaseSettings {
+		source: fc_db::DatabaseSettingsSrc::RocksDb {
+			path: database_dir,
+			cache_size: 0,
+		}
+	})?))
+}
+
+pub fn new_partial(config: &Configuration, _cli: &Cli) -> Result<sc_service::PartialComponents<
 	FullClient, FullBackend, FullSelectChain,
 	sp_consensus::DefaultImportQueue<Block, FullClient>,
 	sc_transaction_pool::FullPool<Block, FullClient>,
@@ -36,6 +55,7 @@ pub fn new_partial(config: &Configuration) -> Result<sc_service::PartialComponen
 			AuraPair
 		>,
 		sc_finality_grandpa::LinkHalf<Block, FullClient, FullSelectChain>,
+        PendingTransactions, Option<FilterPool>, Arc<fc_db::Backend<Block>>,
 	)
 >, ServiceError> {
 	if config.keystore_remote.is_some() {
@@ -44,11 +64,21 @@ pub fn new_partial(config: &Configuration) -> Result<sc_service::PartialComponen
 	}
 	let inherent_data_providers = InherentDataProviders::new();
 
-	let (client, backend, keystore_container, task_manager) =
-		sc_service::new_full_parts::<Block, RuntimeApi, Executor>(&config)?;
+    let (client, backend, keystore_container, task_manager) =
+		sc_service::new_full_parts::<Block, RuntimeApi, Executor>(
+			&config,
+		)?;
 	let client = Arc::new(client);
 
 	let select_chain = sc_consensus::LongestChain::new(backend.clone());
+
+	let pending_transactions: PendingTransactions
+		= Some(Arc::new(Mutex::new(HashMap::new())));
+
+	let filter_pool: Option<FilterPool>
+		= Some(Arc::new(Mutex::new(BTreeMap::new())));
+
+	let frontier_backend = open_frontier_backend(config)?;
 
 	let transaction_pool = sc_transaction_pool::BasicPool::new_full(
 		config.transaction_pool.clone(),
@@ -88,7 +118,10 @@ pub fn new_partial(config: &Configuration) -> Result<sc_service::PartialComponen
 		select_chain,
 		transaction_pool,
 		inherent_data_providers,
-		other: (aura_block_import, grandpa_link),
+		other: (aura_block_import, grandpa_link, pending_transactions,
+				filter_pool,
+				frontier_backend,
+				),
 	})
 }
 
@@ -100,7 +133,10 @@ fn remote_keystore(_url: &String) -> Result<Arc<LocalKeystore>, &'static str> {
 }
 
 /// Builds a new service for a full client.
-pub fn new_full(mut config: Configuration) -> Result<TaskManager, ServiceError> {
+pub fn new_full(mut config: Configuration, cli: &Cli) -> Result<TaskManager, ServiceError> {
+
+    let enable_dev_signer = cli.run.enable_dev_signer;
+
 	let sc_service::PartialComponents {
 		client,
 		backend,
@@ -110,8 +146,8 @@ pub fn new_full(mut config: Configuration) -> Result<TaskManager, ServiceError> 
 		select_chain,
 		transaction_pool,
 		inherent_data_providers,
-		other: (block_import, grandpa_link),
-	} = new_partial(&config)?;
+		other: (block_import, grandpa_link, pending_transactions, filter_pool, frontier_backend),
+	} = new_partial(&config, cli)?;
 
 	if let Some(url) = &config.keystore_remote {
 		match remote_keystore(url) {
@@ -136,6 +172,8 @@ pub fn new_full(mut config: Configuration) -> Result<TaskManager, ServiceError> 
 			block_announce_validator_builder: None,
 		})?;
 
+    //let (command_sink, commands_stream) = futures::channel::mpsc::channel(1000);
+
 	if config.offchain_worker.enabled {
 		sc_service::build_offchain_workers(
 			&config, backend.clone(), task_manager.spawn_handle(), client.clone(), network.clone(),
@@ -148,19 +186,34 @@ pub fn new_full(mut config: Configuration) -> Result<TaskManager, ServiceError> 
 	let name = config.network.node_name.clone();
 	let enable_grandpa = !config.disable_grandpa;
 	let prometheus_registry = config.prometheus_registry().cloned();
+    let is_authority = role.is_authority();
+	let subscription_task_executor = sc_rpc::SubscriptionTaskExecutor::new(task_manager.spawn_handle());
 
 	let rpc_extensions_builder = {
 		let client = client.clone();
 		let pool = transaction_pool.clone();
+        let network = network.clone();
+		let pending = pending_transactions.clone();
+		let filter_pool = filter_pool.clone();
+		let frontier_backend = frontier_backend.clone();
+		let max_past_logs = cli.run.max_past_logs;
 
 		Box::new(move |deny_unsafe, _| {
 			let deps = crate::rpc::FullDeps {
 				client: client.clone(),
 				pool: pool.clone(),
 				deny_unsafe,
+                is_authority,
+				enable_dev_signer,
+				network: network.clone(),
+				pending_transactions: pending.clone(),
+				filter_pool: filter_pool.clone(),
+				backend: frontier_backend.clone(),
+				max_past_logs,
+				//command_sink: Some(command_sink.clone()),
 			};
 
-			crate::rpc::create_full(deps)
+			crate::rpc::create_full(deps, subscription_task_executor.clone())
 		})
 	};
 
