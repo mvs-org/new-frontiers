@@ -141,7 +141,7 @@ fn testnet_genesis(
 	// const GENESIS_VALIDATOR: &'static str = "Alice";
 	// const GENESIS_VALIDATOR_STASH: &'static str = "Alice//stash";
 	// const GENESIS_VALIDATOR_BOND: Balance = COIN;
-	const GENESIS_EVM_ACCOUNT: &'static str = "0x34249F7f5640A3c534AA4d5DBB1e999D922462E1";
+	const GENESIS_EVM_ACCOUNT: &'static str = "0xc1dd09Cc23a1A5A073a37D6Ea27E0e42908B8964";
 	// const GENESIS_ETHEREUM_RELAY_AUTHORITY_SIGNER: &'static str =
 	// 	"0x6aA70f55E5D770898Dd45aa1b7078b8A80AAbD6C";
 
