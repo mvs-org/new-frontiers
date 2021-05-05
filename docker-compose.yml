@@ -1,24 +1,17 @@
-version: "3.3"
+version: "3.2"
+
 services:
-
-  metaverse01: 
-    image: "metaverse"
+  dev:
+    container_name: node-template
+    image: paritytech/ci-linux:974ba3ac-20201006
+    working_dir: /var/www/node-template
     ports:
-      - "5252:5252"
-      - "8830:8830"
-      - "8831:8831"
-
-  metaverse02:
-    image: "metaverse"
-    ports:
-        - "5252:5252"
-        - "8832:8832"
-        - "8833:8833"
-
-  metaverse03:
-    image: "metaverse"
-    ports:
-        - "5252:5252"
-        - "8834:8834"
-        - "8835:8835"
-         
+      - "9944:9944"
+    environment:
+      - CARGO_HOME=/var/www/node-template/.cargo
+    volumes:
+      - .:/var/www/node-template
+      - type: bind
+        source: ./.local
+        target: /root/.local
+    command: bash -c "cargo build --release && ./target/release/node-template --dev --ws-external"
