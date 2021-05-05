@@ -66,7 +66,7 @@ runtime-benchmarks = [
     'sp-runtime/runtime-benchmarks',
 ]
 std = [
-    # "pallet-evm-precompile-dispatch/std",
+    "pallet-evm-precompile-dispatch/std",
     "pallet-evm-precompile-blake2/std",
     'codec/std',
     'frame-executive/std',
