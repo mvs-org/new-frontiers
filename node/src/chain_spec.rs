@@ -53,17 +53,14 @@ pub fn development_config() -> Result<ChainSpec, String> {
 			wasm_binary,
 			// Initial PoA authorities
 			vec![
-				authority_keys_from_seed("Alice"),
-				authority_keys_from_seed("Bob"),
+				authority_keys_from_seed("weekend want cousin fatigue ancient angry fix scissors aerobic oven original film"),
+				authority_keys_from_seed("lazy jealous ecology style crane banana flee midnight ship choose barely notable"),
 			],
 			// Sudo account
-			get_account_id_from_seed::<sr25519::Public>("Alice"),
+			get_account_id_from_seed::<sr25519::Public>("team spend crew glide rude turn spot report evoke outdoor busy someone"),
 			// Pre-funded accounts
 			vec![
-				get_account_id_from_seed::<sr25519::Public>("Alice"),
-				get_account_id_from_seed::<sr25519::Public>("Bob"),
-				get_account_id_from_seed::<sr25519::Public>("Alice//stash"),
-				get_account_id_from_seed::<sr25519::Public>("Bob//stash"),
+				get_account_id_from_seed::<sr25519::Public>("deer nice hawk crush sphere strike nose sugar capital universe luggage wisdom")
 			],
 			true,
 		),
