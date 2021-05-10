@@ -152,7 +152,8 @@ parameter_types! {
 		::with_sensible_defaults(2 * WEIGHT_PER_SECOND, NORMAL_DISPATCH_RATIO);
 	pub BlockLength: frame_system::limits::BlockLength = frame_system::limits::BlockLength
 		::max_with_normal_ratio(5 * 1024 * 1024, NORMAL_DISPATCH_RATIO);
-	pub const SS58Prefix: u8 = 1;
+	pub const SS58Prefix: u8 = 150;
+	
 }
 
 // Configure FRAME pallets to include in runtime.
@@ -302,7 +303,18 @@ impl pallet_evm::Config for Runtime {
 	type Currency = Balances;
 	type Event = Event;
 	type Runner = pallet_evm::runner::stack::Runner<Self>;
+	
+    
+    
+    
+    
 	type Precompiles = (
+	
+		
+		pallet_evm_precompile_modexp::Modexp,
+		
+		pallet_evm_precompile_sha3fips::Sha3FIPS256,
+		pallet_evm_precompile_sha3fips::Sha3FIPS512,
 	);
 	type ChainId = ChainId;
 	type BlockGasLimit = BlockGasLimit;

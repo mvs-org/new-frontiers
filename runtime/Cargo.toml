@@ -49,6 +49,11 @@ pallet-ethereum = { default-features = false, version = '1.0.0' }
 fp-rpc = { default-features = false, version = '1.0.0' }
 pallet-evm-precompile-blake2 = { default-features = false, version = "1.0.0" }
 pallet-evm-precompile-dispatch = { default-features = false, version = "1.0.0" }
+pallet-evm-precompile-ed25519 = { default-features = false, version = "1.0.0" }
+pallet-evm-precompile-bn128 = { default-features = false, version = "1.0.0" }
+pallet-evm-precompile-modexp = { default-features = false, version = "1.0.0" }
+pallet-evm-precompile-sha3fips = { default-features = false, version = "1.0.0" }
+
 # local dependencies
 pallet-template = { default-features = false, path = '../pallets/template', version = '3.0.0' }
 
@@ -67,6 +72,11 @@ runtime-benchmarks = [
     'sp-runtime/runtime-benchmarks',
 ]
 std = [
+    "pallet-evm-precompile-dispatch/std", 
+    "pallet-evm-precompile-ed25519/std", 
+    "pallet-evm-precompile-bn128/std", 
+    "pallet-evm-precompile-modexp/std", 
+    "pallet-evm-precompile-sha3fips/std",
     "pallet-evm-precompile-dispatch/std",
     "pallet-evm-precompile-blake2/std",
     'codec/std',
