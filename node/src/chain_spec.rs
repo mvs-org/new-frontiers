@@ -6,7 +6,7 @@ use metaverse_vm_runtime::{
 use sp_consensus_aura::sr25519::AuthorityId as AuraId;
 use sp_finality_grandpa::AuthorityId as GrandpaId;
 use sp_runtime::traits::{Verify, IdentifyAccount};
-use sc_service::ChainType;
+use sc_service::{ChainType, Properties};
 use std::collections::BTreeMap;
 use pallet_evm::GenesisAccount;
 use array_bytes::fixed_hex_bytes_unchecked;
@@ -39,6 +39,17 @@ pub fn authority_keys_from_seed(s: &str) -> (AuraId, GrandpaId) {
 		get_from_seed::<GrandpaId>(s),
 	)
 }
+
+pub fn properties() -> Properties {
+	let mut properties = Properties::new();
+
+	properties.insert("ss58Format".into(),150.into());
+	properties.insert("tokenDecimals".into(), vec![8, 8].into());
+	properties.insert("tokenSymbol".into(), vec!["ETP", "DNA"].into());
+
+	properties
+}
+
 
 pub fn development_config() -> Result<ChainSpec, String> {
 	let wasm_binary = WASM_BINARY.ok_or_else(|| "Development wasm not available".to_string())?;
@@ -73,7 +84,7 @@ pub fn development_config() -> Result<ChainSpec, String> {
 		// Protocol ID
 		None,
 		// Properties
-		None,
+		Some(properties()),
 		// Extensions
 		None,
 	))
