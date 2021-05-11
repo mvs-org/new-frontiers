@@ -8,9 +8,11 @@ use sc_service::{error::Error as ServiceError, Configuration, TaskManager, BaseP
 use sp_inherents::InherentDataProviders;
 use sc_executor::native_executor_instance;
 pub use sc_executor::NativeExecutor;
-use sp_consensus_aura::sr25519::AuthorityPair as AuraPair;
-use sc_finality_grandpa::SharedVoterState;
+use sc_finality_grandpa::{SharedVoterState, GrandpaBlockImport};
 use sc_keystore::LocalKeystore;
+use ethash-pow::*;
+use std::thread;
+use sp_core::{U256, Encode};
 
 use crate::cli::Cli;
 
@@ -25,6 +27,17 @@ native_executor_instance!(
 type FullClient = sc_service::TFullClient<Block, RuntimeApi, Executor>;
 type FullBackend = sc_service::TFullBackend<Block>;
 type FullSelectChain = sc_consensus::LongestChain<FullBackend, Block>;
+
+pub fn build_inherent_data_providers() -> Result<InherentDataProviders, ServiceError> {
+	let providers = InherentDataProviders::new();
+
+	providers
+		.register_provider(sp_timestamp::InherentDataProvider)
+		.map_err(Into::into)
+		.map_err(sp_consensus::error::Error::InherentData)?;
+
+	Ok(providers)
+}
 
 pub fn open_frontier_backend(config: &Configuration) -> Result<Arc<fc_db::Backend<Block>>, String> {
 	let config_dir = config.base_path.as_ref()
@@ -48,11 +61,13 @@ pub fn new_partial(config: &Configuration, _cli: &Cli) -> Result<sc_service::Par
 	sp_consensus::DefaultImportQueue<Block, FullClient>,
 	sc_transaction_pool::FullPool<Block, FullClient>,
 	(
-		sc_consensus_aura::AuraBlockImport<
+		sc_consensus_pow::PowBlockImport<
 			Block,
+			GrandpaBlockImport<FullBackend, Block, FullClient, FullSelectChain>,
 			FullClient,
-			sc_finality_grandpa::GrandpaBlockImport<FullBackend, Block, FullClient, FullSelectChain>,
-			AuraPair
+			FullSelectChain,
+			MinimalSha3Algorithm,
+			impl sp_consensus::CanAuthorWith<Block>,
 		>,
 		sc_finality_grandpa::LinkHalf<Block, FullClient, FullSelectChain>,
         PendingTransactions, Option<FilterPool>, Arc<fc_db::Backend<Block>>,
@@ -62,7 +77,7 @@ pub fn new_partial(config: &Configuration, _cli: &Cli) -> Result<sc_service::Par
 		return Err(ServiceError::Other(
 			format!("Remote Keystores are not supported.")))
 	}
-	let inherent_data_providers = InherentDataProviders::new();
+	let inherent_data_providers = build_inherent_data_providers()?;
 
     let (client, backend, keystore_container, task_manager) =
 		sc_service::new_full_parts::<Block, RuntimeApi, Executor>(
@@ -94,19 +109,23 @@ pub fn new_partial(config: &Configuration, _cli: &Cli) -> Result<sc_service::Par
 		select_chain.clone(),
 	)?;
 
-	let aura_block_import = sc_consensus_aura::AuraBlockImport::<_, _, _, AuraPair>::new(
-		grandpa_block_import.clone(), client.clone(),
+	let pow_block_import = sc_consensus_pow::PowBlockImport::new(
+		grandpa_block_import,
+		client.clone(),
+		ethash-pow::MinimalSha3Algorithm,
+		0, // check inherents starting at block 0
+		select_chain.clone(),
+		inherent_data_providers.clone(),
+		sp_consensus::CanAuthorWithNativeVersion::new(client.executor().clone()),
 	);
 
-	let import_queue = sc_consensus_aura::import_queue::<_, _, _, AuraPair, _, _>(
-		sc_consensus_aura::slot_duration(&*client)?,
-		aura_block_import.clone(),
-		Some(Box::new(grandpa_block_import.clone())),
-		client.clone(),
+	let import_queue = sc_consensus_pow::import_queue(
+		Box::new(pow_block_import.clone()),
+		None,
+		ethash-pow::MinimalSha3Algorithm,
 		inherent_data_providers.clone(),
 		&task_manager.spawn_handle(),
 		config.prometheus_registry(),
-		sp_consensus::CanAuthorWithNativeVersion::new(client.executor().clone()),
 	)?;
 
 	Ok(sc_service::PartialComponents {
@@ -118,7 +137,7 @@ pub fn new_partial(config: &Configuration, _cli: &Cli) -> Result<sc_service::Par
 		select_chain,
 		transaction_pool,
 		inherent_data_providers,
-		other: (aura_block_import, grandpa_link, pending_transactions,
+		other: (pow_block_import, grandpa_link, pending_transactions,
 				filter_pool,
 				frontier_backend,
 				),
@@ -146,7 +165,7 @@ pub fn new_full(mut config: Configuration, cli: &Cli) -> Result<TaskManager, Ser
 		select_chain,
 		transaction_pool,
 		inherent_data_providers,
-		other: (block_import, grandpa_link, pending_transactions, filter_pool, frontier_backend),
+		other: (pow_block_import, grandpa_link, pending_transactions, filter_pool, frontier_backend),
 	} = new_partial(&config, cli)?;
 
 	if let Some(url) = &config.keystore_remote {
@@ -245,31 +264,57 @@ pub fn new_full(mut config: Configuration, cli: &Cli) -> Result<TaskManager, Ser
 		let can_author_with =
 			sp_consensus::CanAuthorWithNativeVersion::new(client.executor().clone());
 
-		let aura = sc_consensus_aura::start_aura::<_, _, _, _, _, AuraPair, _, _, _,_>(
-			sc_consensus_aura::slot_duration(&*client)?,
-			client.clone(),
-			select_chain,
-			block_import,
-			proposer_factory,
-			network.clone(),
-			inherent_data_providers.clone(),
-			force_authoring,
-			backoff_authoring_blocks,
-			keystore_container.sync_keystore(),
-			can_author_with,
-		)?;
-
-		// the AURA authoring task is considered essential, i.e. if it
-		// fails we take down the service with it.
-		task_manager.spawn_essential_handle().spawn_blocking("aura", aura);
-	}
-
-	// if the node isn't actively participating in consensus then it doesn't
-	// need a keystore, regardless of which protocol we use below.
+			let (_worker, worker_task) = sc_consensus_pow::start_mining_worker(
+				Box::new(pow_block_import),
+				client,
+				select_chain,
+				MinimalSha3Algorithm,
+				proposer_factory,
+				network.clone(),
+				None,
+				inherent_data_providers,
+				// time to wait for a new block before starting to mine a new one
+				Duration::from_secs(10),
+				// how long to take to actually build the block (i.e. executing extrinsics)
+				Duration::from_secs(10),
+				can_author_with,
+			);
+	
+			task_manager
+				.spawn_essential_handle()
+				.spawn_blocking("pow", worker_task);
+	
+			// Start Mining
+			let mut nonce: U256 = U256::from(0);
+			thread::spawn(move || loop {
+				let worker = _worker.clone();
+				let metadata = worker.lock().metadata();
+				if let Some(metadata) = metadata {
+					let compute = Compute {
+						difficulty: metadata.difficulty,
+						pre_hash: metadata.pre_hash,
+						nonce,
+					};
+					let seal = compute.compute();
+					if hash_meets_difficulty(&seal.work, seal.difficulty) {
+						nonce = U256::from(0);
+						let mut worker = worker.lock();
+						worker.submit(seal.encode());
+					} else {
+						nonce = nonce.saturating_add(U256::from(1));
+						if nonce == U256::MAX {
+							nonce = U256::from(0);
+						}
+					}
+				} else {
+					thread::sleep(Duration::new(1, 0));
+				}
+			});
+		}
 	let keystore = if role.is_authority() {
-		Some(keystore_container.sync_keystore())
+			Some(keystore_container.sync_keystore())
 	} else {
-		None
+			None
 	};
 
 	let grandpa_config = sc_finality_grandpa::Config {
@@ -334,20 +379,25 @@ pub fn new_light(mut config: Configuration) -> Result<TaskManager, ServiceError>
 		select_chain.clone(),
 	)?;
 
-	let aura_block_import = sc_consensus_aura::AuraBlockImport::<_, _, _, AuraPair>::new(
-		grandpa_block_import.clone(),
+	let inherent_data_providers = build_inherent_data_providers()?;
+
+	let pow_block_import = sc_consensus_pow::PowBlockImport::new(
+		grandpa_block_import,
 		client.clone(),
+		MinimalSha3Algorithm,
+		0, // check inherents starting at block 0
+		select_chain,
+		inherent_data_providers.clone(),
+		sp_consensus::AlwaysCanAuthor,
 	);
 
-	let import_queue = sc_consensus_aura::import_queue::<_, _, _, AuraPair, _, _>(
-		sc_consensus_aura::slot_duration(&*client)?,
-		aura_block_import,
-		Some(Box::new(grandpa_block_import)),
-		client.clone(),
-		InherentDataProviders::new(),
+	let import_queue = sc_consensus_pow::import_queue(
+		Box::new(pow_block_import),
+		None,
+		MinimalSha3Algorithm,
+		inherent_data_providers,
 		&task_manager.spawn_handle(),
 		config.prometheus_registry(),
-		sp_consensus::NeverCanAuthor,
 	)?;
 
 	let (network, network_status_sinks, system_rpc_tx, network_starter) =
