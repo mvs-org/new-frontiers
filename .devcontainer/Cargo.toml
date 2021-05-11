@@ -33,8 +33,6 @@ sp-inherents = { git = "https://github.com/paritytech/substrate.git", branch = "
 sc-transaction-pool = { git = "https://github.com/paritytech/substrate.git", branch = "master" }
 sp-transaction-pool = { git = "https://github.com/paritytech/substrate.git", branch = "master" }
 sc-network = { git = "https://github.com/paritytech/substrate.git", branch = "master" }
-sc-consensus-aura = { git = "https://github.com/paritytech/substrate.git", branch = "master" }
-sp-consensus-aura = { git = "https://github.com/paritytech/substrate.git", branch = "master" }
 sc-consensus-manual-seal = { git = "https://github.com/paritytech/substrate.git", branch = "master" }
 sp-consensus = { git = "https://github.com/paritytech/substrate.git", branch = "master" }
 sc-consensus = { git = "https://github.com/paritytech/substrate.git", branch = "master" }
@@ -63,7 +61,5 @@ fc-mapping-sync = { path = "../../client/mapping-sync" }
 substrate-build-script-utils = { git = "https://github.com/paritytech/substrate.git", branch = "master" }
 
 [features]
-default = ["aura"]
-aura = ["metaverse-runtime/aura"]
 manual-seal = ["metaverse-runtime/manual-seal"]
 
