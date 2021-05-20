@@ -1,0 +1,20 @@
+[package]
+name = 'sha3pow'
+version = "3.0.0"
+edition = '2018'
+authors = ['Substrate DevHub <https://github.com/substrate-developer-hub>']
+repository = 'https://github.com/substrate-developer-hub/recipes'
+description = 'Sha3-based Proof of Work algorithms for Substrate'
+license = "GPL-3.0-or-later"
+
+[dependencies]
+parity-scale-codec = '2.0'
+rand = { version = "0.8", features = ["small_rng"] }
+sha3 = "0.9"
+
+# Substrate packages
+sc-consensus-pow = '0.9'
+sp-api = '3.0'
+sp-consensus-pow = '0.9'
+sp-core = '3.0'
+sp-runtime = '3.0'
