@@ -53,7 +53,7 @@ pallet-evm-precompile-ed25519 = { default-features = false, version = "1.0.0" }
 pallet-evm-precompile-bn128 = { default-features = false, version = "1.0.0" }
 pallet-evm-precompile-modexp = { default-features = false, version = "1.0.0" }
 pallet-evm-precompile-sha3fips = { default-features = false, version = "1.0.0" }
-sp-finality-grandpa = { version = '3.0', default-features = false }
+
 # local dependencies
 pallet-template = { default-features = false, path = '../pallets/template', version = '3.0.0' }
 
