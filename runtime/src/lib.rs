@@ -17,7 +17,7 @@ use sp_runtime::traits::{
 	BlakeTwo256, Block as BlockT, AccountIdLookup, Verify, IdentifyAccount, NumberFor,
 };
 use sp_api::impl_runtime_apis;
-use sp_consensus_aura::sr25519::AuthorityId as AuraId;
+// use sp_consensus_aura::sr25519::AuthorityId as AuraId;
 use pallet_grandpa::{AuthorityId as GrandpaId, AuthorityList as GrandpaAuthorityList};
 use pallet_grandpa::fg_primitives;
 use sp_version::RuntimeVersion;
@@ -30,6 +30,11 @@ use pallet_evm::{
 	Account as EVMAccount, FeeCalculator, HashedAddressMapping,
 	EnsureAddressTruncated, Runner,
 };
+
+/// An instant or duration in time.
+pub type Moment = u64;
+/// A slot number.
+
 
 // A few exports that help ease life for downstream crates.
 #[cfg(any(feature = "std", test))]
@@ -95,7 +100,7 @@ pub mod opaque {
 
 	impl_opaque_keys! {
 		pub struct SessionKeys {
-			pub aura: Aura,
+			pub babe: Babe,
 			pub grandpa: Grandpa,
 		}
 	}
@@ -104,8 +109,8 @@ pub mod opaque {
 // To learn more about runtime versioning and what each of the following value means:
 //   https://substrate.dev/docs/en/knowledgebase/runtime/upgrades#runtime-versioning
 pub const VERSION: RuntimeVersion = RuntimeVersion {
-	spec_name: create_runtime_str!("metaverse-new-frontiers"),
-	impl_name: create_runtime_str!("metaverse-new-frontiers"),
+	spec_name: create_runtime_str!("hyperspace"),
+	impl_name: create_runtime_str!("hyperspace"),
 	authoring_version: 1,
 	// The version of the runtime specification. A full node will not attempt to use its native
 	//   runtime in substitute for the on-chain Wasm runtime unless all of `spec_name`,
@@ -132,6 +137,10 @@ pub const SLOT_DURATION: u64 = MILLISECS_PER_BLOCK;
 pub const MINUTES: BlockNumber = 60_000 / (MILLISECS_PER_BLOCK as BlockNumber);
 pub const HOURS: BlockNumber = MINUTES * 60;
 pub const DAYS: BlockNumber = HOURS * 24;
+// 1 in 4 blocks (on average, not counting collisions) will be primary babe blocks.
+pub const PRIMARY_PROBABILITY: (u64, u64) = (1, 4);
+
+pub const BLOCKS_PER_SESSION: BlockNumber = 2057 * MINUTES;
 
 /// The version information used to identify this runtime when compiled natively.
 #[cfg(feature = "std")]
@@ -207,8 +216,28 @@ impl frame_system::Config for Runtime {
 	type SS58Prefix = SS58Prefix;
 }
 
-impl pallet_aura::Config for Runtime {
-	type AuthorityId = AuraId;
+// impl pallet_aura::Config for Runtime {
+//	type AuthorityId = AuraId;
+//}
+parameter_types! {
+	pub const EpochDuration: u64 = BLOCKS_PER_SESSION as _;
+	pub const ExpectedBlockTime: Moment = MILLISECS_PER_BLOCK;
+}
+impl pallet_babe::Config for Runtime {
+	type EpochDuration = EpochDuration;
+	type ExpectedBlockTime = ExpectedBlockTime;
+	type EpochChangeTrigger = pallet_babe::ExternalTrigger;
+	type KeyOwnerProofSystem = ();
+	type KeyOwnerProof = <Self::KeyOwnerProofSystem as KeyOwnerProofSystem<(
+		KeyTypeId,
+		pallet_babe::AuthorityId,
+	)>>::Proof;
+	type KeyOwnerIdentification = <Self::KeyOwnerProofSystem as KeyOwnerProofSystem<(
+		KeyTypeId,
+		pallet_babe::AuthorityId,
+	)>>::IdentificationTuple;
+	type HandleEquivocation =();
+	type WeightInfo = ();
 }
 
 impl pallet_grandpa::Config for Runtime {
@@ -237,7 +266,7 @@ parameter_types! {
 impl pallet_timestamp::Config for Runtime {
 	/// A timestamp: milliseconds since the unix epoch.
 	type Moment = u64;
-	type OnTimestampSet = Aura;
+	type OnTimestampSet = Babe;
 	type MinimumPeriod = MinimumPeriod;
 	type WeightInfo = ();
 }
@@ -328,8 +357,10 @@ impl<F: FindAuthor<u32>> FindAuthor<H160> for EthereumFindAuthor<F>
 		I: 'a + IntoIterator<Item=(ConsensusEngineId, &'a [u8])>
 	{
 		if let Some(author_index) = F::find_author(digests) {
-			let authority_id = Aura::authorities()[author_index as usize].clone();
-			return Some(H160::from_slice(&authority_id.to_raw_vec()[4..24]));
+			//let authority_id = Aura::authorities()[author_index as usize].clone();
+			//return Some(H160::from_slice(&authority_id.to_raw_vec()[4..24]));
+			let authority_id = Babe::authorities()[author_index as usize].clone();
+			return Some(H160::from_slice(&authority_id.0.to_raw_vec()[4..24]));
 		}
 		None
 	}
@@ -337,7 +368,7 @@ impl<F: FindAuthor<u32>> FindAuthor<H160> for EthereumFindAuthor<F>
 
 impl pallet_ethereum::Config for Runtime {
 	type Event = Event;
-	type FindAuthor = EthereumFindAuthor<Aura>;
+	type FindAuthor = EthereumFindAuthor<Babe>;
 	type StateRoot = pallet_ethereum::IntermediateStateRoot;
 }
 
@@ -351,7 +382,8 @@ construct_runtime!(
 		System: frame_system::{Module, Call, Config, Storage, Event<T>},
 		RandomnessCollectiveFlip: pallet_randomness_collective_flip::{Module, Call, Storage},
 		Timestamp: pallet_timestamp::{Module, Call, Storage, Inherent},
-		Aura: pallet_aura::{Module, Config<T>},
+		//Aura: pallet_aura::{Module, Config<T>},
+		Babe: pallet_babe::{Module, Call, Storage, Config, Inherent, ValidateUnsigned},
 		Grandpa: pallet_grandpa::{Module, Call, Storage, Config, Event},
 		Balances: pallet_balances::{Module, Call, Storage, Config<T>, Event<T>},
 		TransactionPayment: pallet_transaction_payment::{Module, Storage},
@@ -473,15 +505,64 @@ impl_runtime_apis! {
 		}
 	}
 
-	impl sp_consensus_aura::AuraApi<Block, AuraId> for Runtime {
-		fn slot_duration() -> u64 {
-			Aura::slot_duration()
-		}
+	//impl sp_consensus_aura::AuraApi<Block, AuraId> for Runtime {
+	//	fn slot_duration() -> u64 {
+	//		Aura::slot_duration()
+	//	}
 
-		fn authorities() -> Vec<AuraId> {
-			Aura::authorities()
+//		fn authorities() -> Vec<AuraId> {
+//			Aura::authorities()
+//		}
+//	}
+impl sp_consensus_babe::BabeApi<Block> for Runtime {
+	fn configuration() -> sp_consensus_babe::BabeGenesisConfiguration {
+		// The choice of `c` parameter (where `1 - c` represents the
+		// probability of a slot being empty), is done in accordance to the
+		// slot duration and expected target block time, for safely
+		// resisting network delays of maximum two seconds.
+		// <https://research.web3.foundation/en/latest/polkadot/BABE/Babe/#6-practical-results>
+		sp_consensus_babe::BabeGenesisConfiguration {
+			slot_duration: Babe::slot_duration(),
+			epoch_length: EpochDuration::get(),
+			c: PRIMARY_PROBABILITY,
+			genesis_authorities: Babe::authorities(),
+			randomness: Babe::randomness(),
+			allowed_slots: sp_consensus_babe::AllowedSlots::PrimaryAndSecondaryPlainSlots,
 		}
 	}
+
+	fn current_epoch_start() -> sp_consensus_babe::Slot {
+		Babe::current_epoch_start()
+	}
+
+	fn current_epoch() -> sp_consensus_babe::Epoch {
+		Babe::current_epoch()
+	}
+
+	fn next_epoch() -> sp_consensus_babe::Epoch {
+		Babe::next_epoch()
+	}
+
+	fn generate_key_ownership_proof(
+		_slot_number: sp_consensus_babe::Slot,
+		authority_id: sp_consensus_babe::AuthorityId,
+	) -> Option<sp_consensus_babe::OpaqueKeyOwnershipProof> {
+		None
+	}
+
+	fn submit_report_equivocation_unsigned_extrinsic(
+		equivocation_proof: sp_consensus_babe::EquivocationProof<<Block as BlockT>::Header>,
+		key_owner_proof: sp_consensus_babe::OpaqueKeyOwnershipProof,
+	) -> Option<()> {
+		let key_owner_proof = key_owner_proof.decode()?;
+
+		Babe::submit_unsigned_equivocation_report(
+			equivocation_proof,
+			key_owner_proof,
+		)
+	}
+}
+
 
 	impl sp_session::SessionKeys<Block> for Runtime {
 		fn generate_session_keys(seed: Option<Vec<u8>>) -> Vec<u8> {

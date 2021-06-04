@@ -19,12 +19,25 @@ use jsonrpc_pubsub::manager::SubscriptionManager;
 use pallet_ethereum::EthereumStorageSchema;
 use fc_rpc::{StorageOverride, SchemaV1Override, };
 
+/// Extra dependencies for BABE.
+pub struct BabeDeps {
+	/// BABE protocol config.
+	pub babe_config: sc_consensus_babe::Config,
+	/// BABE pending epoch changes.
+	pub shared_epoch_changes:
+		sc_consensus_epochs::SharedEpochChanges<Block, sc_consensus_babe::Epoch>,
+	/// The keystore that manages the keys of the node.
+	pub keystore: sp_keystore::SyncCryptoStorePtr,
+}
+
 /// Full client dependencies.
-pub struct FullDeps<C, P> {
+pub struct FullDeps<C, P, SC> {
 	/// The client instance to use.
 	pub client: Arc<C>,
 	/// Transaction pool instance.
 	pub pool: Arc<P>,
+	/// The SelectChain Strategy
+	pub select_chain: SC,
 	/// Whether to deny unsafe calls
 	pub deny_unsafe: DenyUnsafe,
 	/// The Node authority flag
@@ -35,6 +48,8 @@ pub struct FullDeps<C, P> {
 	pub network: Arc<NetworkService<Block, Hash>>,
 	/// Ethereum pending transactions.
 	pub pending_transactions: PendingTransactions,
+	/// BABE specific dependencies.
+	pub babe: BabeDeps,
 	/// EthFilterApi pool.
 	pub filter_pool: Option<FilterPool>,
 	/// Backend.
@@ -44,8 +59,8 @@ pub struct FullDeps<C, P> {
 }
 
 /// Instantiate all Full RPC extensions.
-pub fn create_full<C, P, BE>(
-	deps: FullDeps<C, P>,
+pub fn create_full<C, P, SC, BE>(
+	deps: FullDeps<C, P, SC>,
 	subscription_task_executor: SubscriptionTaskExecutor
 ) -> jsonrpc_core::IoHandler<sc_rpc::Metadata> where
 	BE: Backend<Block> + 'static,
@@ -58,7 +73,9 @@ pub fn create_full<C, P, BE>(
 	C::Api: BlockBuilder<Block>,
 	C::Api: pallet_transaction_payment_rpc::TransactionPaymentRuntimeApi<Block, Balance>,
 	C::Api: fp_rpc::EthereumRuntimeRPCApi<Block>,
+	C::Api: sc_consensus_babe::BabeApi<Block>,
 	P: TransactionPool<Block=Block> + 'static,
+	SC: 'static + sp_consensus::SelectChain<Block>,
 {
 	use substrate_frame_rpc_system::{FullSystem, SystemApi};
 	use pallet_transaction_payment_rpc::{TransactionPayment, TransactionPaymentApi};
@@ -67,16 +84,19 @@ pub fn create_full<C, P, BE>(
 		EthPubSubApi, EthPubSubApiServer, Web3Api, Web3ApiServer, EthDevSigner, EthSigner,
 		HexEncodedIdProvider,
 	};
+	use sc_consensus_babe_rpc::{BabeApi, BabeRpcHandler};
 
 	let mut io = jsonrpc_core::IoHandler::default();
     #[allow(unused)]
 	let FullDeps {
 		client,
 		pool,
+		select_chain,
 		deny_unsafe,
 		is_authority,
 		network,
 		pending_transactions,
+		babe,
 		filter_pool,
 		backend,
 		enable_dev_signer,
@@ -89,7 +109,19 @@ pub fn create_full<C, P, BE>(
 	io.extend_with(
 		TransactionPaymentApi::to_delegate(TransactionPayment::new(client.clone()))
 	);
-
+	let BabeDeps {
+		keystore,
+		babe_config,
+		shared_epoch_changes,
+	} = babe;
+	io.extend_with(BabeApi::to_delegate(BabeRpcHandler::new(
+		client.clone(),
+		shared_epoch_changes.clone(),
+		keystore,
+		babe_config,
+		select_chain,
+		deny_unsafe,
+	)));
 	let mut signers = Vec::new();
 	if enable_dev_signer {
 		signers.push(Box::new(EthDevSigner::new()) as Box<dyn EthSigner>);

@@ -8,12 +8,13 @@ use sc_service::{error::Error as ServiceError, Configuration, TaskManager, BaseP
 use sp_inherents::InherentDataProviders;
 use sc_executor::native_executor_instance;
 pub use sc_executor::NativeExecutor;
-use sp_consensus_aura::sr25519::AuthorityPair as AuraPair;
+//use sp_consensus_aura::sr25519::AuthorityPair as AuraPair;
+use sc_consensus_babe::{BabeBlockImport, BabeLink, BabeParams, Config as BabeConfig};
 use sc_finality_grandpa::SharedVoterState;
 use sc_keystore::LocalKeystore;
 
 use crate::cli::Cli;
-
+use crate::rpc::BabeDeps;
 // Our native executor instance.
 native_executor_instance!(
 	pub Executor,
@@ -48,14 +49,27 @@ pub fn new_partial(config: &Configuration, _cli: &Cli) -> Result<sc_service::Par
 	sp_consensus::DefaultImportQueue<Block, FullClient>,
 	sc_transaction_pool::FullPool<Block, FullClient>,
 	(
-		sc_consensus_aura::AuraBlockImport<
-			Block,
-			FullClient,
-			sc_finality_grandpa::GrandpaBlockImport<FullBackend, Block, FullClient, FullSelectChain>,
-			AuraPair
-		>,
-		sc_finality_grandpa::LinkHalf<Block, FullClient, FullSelectChain>,
-        PendingTransactions, Option<FilterPool>, Arc<fc_db::Backend<Block>>,
+		//sc_consensus_aura::AuraBlockImport<
+		//	Block,
+		//	FullClient,
+		//	sc_finality_grandpa::GrandpaBlockImport<FullBackend, Block, FullClient, FullSelectChain>,
+		//	AuraPair
+		//>,
+		//sc_finality_grandpa::LinkHalf<Block, FullClient, FullSelectChain>,
+        //PendingTransactions, Option<FilterPool>, Arc<fc_db::Backend<Block>>,
+		BabeBlockImport<
+					Block,
+					FullClient,
+					sc_finality_grandpa::GrandpaBlockImport<
+						FullBackend, 
+						Block, 
+						FullClient, 
+						FullSelectChain
+					>,
+				>,
+				sc_finality_grandpa::LinkHalf<Block, FullClient, FullSelectChain>,
+				BabeLink<Block>,
+				PendingTransactions, Option<FilterPool>, Arc<fc_db::Backend<Block>>,
 	)
 >, ServiceError> {
 	if config.keystore_remote.is_some() {
@@ -79,6 +93,7 @@ pub fn new_partial(config: &Configuration, _cli: &Cli) -> Result<sc_service::Par
 		= Some(Arc::new(Mutex::new(BTreeMap::new())));
 
 	let frontier_backend = open_frontier_backend(config)?;
+	
 
 	let transaction_pool = sc_transaction_pool::BasicPool::new_full(
 		config.transaction_pool.clone(),
@@ -87,27 +102,48 @@ pub fn new_partial(config: &Configuration, _cli: &Cli) -> Result<sc_service::Par
 		task_manager.spawn_handle(),
 		client.clone(),
 	);
-
+	
 	let (grandpa_block_import, grandpa_link) = sc_finality_grandpa::block_import(
 		client.clone(),
 		&(client.clone() as Arc<_>),
 		select_chain.clone(),
 	)?;
 
-	let aura_block_import = sc_consensus_aura::AuraBlockImport::<_, _, _, AuraPair>::new(
-		grandpa_block_import.clone(), client.clone(),
-	);
-
-	let import_queue = sc_consensus_aura::import_queue::<_, _, _, AuraPair, _, _>(
-		sc_consensus_aura::slot_duration(&*client)?,
-		aura_block_import.clone(),
-		Some(Box::new(grandpa_block_import.clone())),
+	let (babe_import, babe_link) = sc_consensus_babe::block_import(
+		BabeConfig::get_or_compute(&*client)?,
+		grandpa_block_import.clone(),
 		client.clone(),
+	)?;
+
+	//let aura_block_import = sc_consensus_aura::AuraBlockImport::<_, _, _, AuraPair>::new(
+	//	grandpa_block_import.clone(), client.clone(),
+	//);
+
+	//let import_queue = sc_consensus_aura::import_queue::<_, _, _, AuraPair, _, _>(
+	//	sc_consensus_aura::slot_duration(&*client)?,
+	//	aura_block_import.clone(),
+	//	Some(Box::new(grandpa_block_import.clone())),
+	//	client.clone(),
+	//	inherent_data_providers.clone(),
+	//	&task_manager.spawn_handle(),
+	//	config.prometheus_registry(),
+	//	sp_consensus::CanAuthorWithNativeVersion::new(client.executor().clone()),
+	//)?;
+	let justification_import = grandpa_block_import.clone();
+	let import_queue = sc_consensus_babe::import_queue(
+		babe_link.clone(),
+		babe_import.clone(),
+		Some(Box::new(justification_import)),
+		client.clone(),
+		select_chain.clone(),
 		inherent_data_providers.clone(),
 		&task_manager.spawn_handle(),
 		config.prometheus_registry(),
 		sp_consensus::CanAuthorWithNativeVersion::new(client.executor().clone()),
 	)?;
+	//let import_setup = (babe_import.clone(), grandpa_link, babe_link.clone());
+	let shared_epoch_changes = babe_link.epoch_changes().clone();
+	let babe_config = babe_link.config().clone();
 
 	Ok(sc_service::PartialComponents {
 		client,
@@ -118,7 +154,7 @@ pub fn new_partial(config: &Configuration, _cli: &Cli) -> Result<sc_service::Par
 		select_chain,
 		transaction_pool,
 		inherent_data_providers,
-		other: (aura_block_import, grandpa_link, pending_transactions,
+		other: (babe_import, grandpa_link, babe_link, pending_transactions,
 				filter_pool,
 				frontier_backend,
 				),
@@ -146,7 +182,7 @@ pub fn new_full(mut config: Configuration, cli: &Cli) -> Result<TaskManager, Ser
 		select_chain,
 		transaction_pool,
 		inherent_data_providers,
-		other: (block_import, grandpa_link, pending_transactions, filter_pool, frontier_backend),
+		other: (block_import, grandpa_link, babe_link, pending_transactions, filter_pool, frontier_backend),
 	} = new_partial(&config, cli)?;
 
 	if let Some(url) = &config.keystore_remote {
@@ -179,7 +215,10 @@ pub fn new_full(mut config: Configuration, cli: &Cli) -> Result<TaskManager, Ser
 			&config, backend.clone(), task_manager.spawn_handle(), client.clone(), network.clone(),
 		);
 	}
-
+	
+	//let (block_import, grandpa_link, babe_link) = import_setup;
+	let babe_config = babe_link.config().clone();
+	
 	let role = config.role.clone();
 	let force_authoring = config.force_authoring;
 	let backoff_authoring_blocks: Option<()> = None;
@@ -188,10 +227,13 @@ pub fn new_full(mut config: Configuration, cli: &Cli) -> Result<TaskManager, Ser
 	let prometheus_registry = config.prometheus_registry().cloned();
     let is_authority = role.is_authority();
 	let subscription_task_executor = sc_rpc::SubscriptionTaskExecutor::new(task_manager.spawn_handle());
+	let shared_epoch_changes = babe_link.epoch_changes().clone();
+	let keystore = keystore_container.sync_keystore();
 
 	let rpc_extensions_builder = {
 		let client = client.clone();
 		let pool = transaction_pool.clone();
+		let select_chain = select_chain.clone();
         let network = network.clone();
 		let pending = pending_transactions.clone();
 		let filter_pool = filter_pool.clone();
@@ -202,10 +244,16 @@ pub fn new_full(mut config: Configuration, cli: &Cli) -> Result<TaskManager, Ser
 			let deps = crate::rpc::FullDeps {
 				client: client.clone(),
 				pool: pool.clone(),
+				select_chain: select_chain.clone(),
 				deny_unsafe,
                 is_authority,
 				enable_dev_signer,
 				network: network.clone(),
+				babe: BabeDeps {
+					babe_config: babe_config.clone(),
+					shared_epoch_changes: shared_epoch_changes.clone(),
+					keystore: keystore.clone(),
+				},
 				pending_transactions: pending.clone(),
 				filter_pool: filter_pool.clone(),
 				backend: frontier_backend.clone(),
@@ -233,8 +281,9 @@ pub fn new_full(mut config: Configuration, cli: &Cli) -> Result<TaskManager, Ser
 			config,
 		},
 	)?;
-
+	
 	if role.is_authority() {
+		
 		let proposer_factory = sc_basic_authorship::ProposerFactory::new(
 			task_manager.spawn_handle(),
 			client.clone(),
@@ -245,23 +294,37 @@ pub fn new_full(mut config: Configuration, cli: &Cli) -> Result<TaskManager, Ser
 		let can_author_with =
 			sp_consensus::CanAuthorWithNativeVersion::new(client.executor().clone());
 
-		let aura = sc_consensus_aura::start_aura::<_, _, _, _, _, AuraPair, _, _, _,_>(
-			sc_consensus_aura::slot_duration(&*client)?,
-			client.clone(),
+		//let aura = sc_consensus_aura::start_aura::<_, _, _, _, _, AuraPair, _, _, _,_>(
+		//	sc_consensus_aura::slot_duration(&*client)?,
+		//	client.clone(),
+		//	select_chain,
+		//	block_import,
+		//	proposer_factory,
+		//	network.clone(),
+		//	inherent_data_providers.clone(),
+		//	force_authoring,
+		//	backoff_authoring_blocks,
+		//	keystore_container.sync_keystore(),
+		//	can_author_with,
+		//)?;
+
+		let babe_config = BabeParams {
+			keystore: keystore_container.sync_keystore(),
+			client: client.clone(),
 			select_chain,
 			block_import,
-			proposer_factory,
-			network.clone(),
-			inherent_data_providers.clone(),
+			env: proposer_factory,
+			sync_oracle: network.clone(),
+			inherent_data_providers: inherent_data_providers.clone(),
 			force_authoring,
 			backoff_authoring_blocks,
-			keystore_container.sync_keystore(),
+			babe_link,
 			can_author_with,
-		)?;
-
+		};
+		let babe = sc_consensus_babe::start_babe(babe_config)?;
 		// the AURA authoring task is considered essential, i.e. if it
 		// fails we take down the service with it.
-		task_manager.spawn_essential_handle().spawn_blocking("aura", aura);
+		task_manager.spawn_essential_handle().spawn_blocking("babe", babe);
 	}
 
 	// if the node isn't actively participating in consensus then it doesn't
@@ -334,16 +397,33 @@ pub fn new_light(mut config: Configuration) -> Result<TaskManager, ServiceError>
 		select_chain.clone(),
 	)?;
 
-	let aura_block_import = sc_consensus_aura::AuraBlockImport::<_, _, _, AuraPair>::new(
-		grandpa_block_import.clone(),
+	//let aura_block_import = sc_consensus_aura::AuraBlockImport::<_, _, _, AuraPair>::new(
+	//	grandpa_block_import.clone(),
+	//	client.clone(),
+	//);
+	let justification_import = grandpa_block_import.clone();
+	let (babe_block_import, babe_link) = sc_consensus_babe::block_import(
+		BabeConfig::get_or_compute(&*client)?,
+		grandpa_block_import,
 		client.clone(),
-	);
+	)?;
 
-	let import_queue = sc_consensus_aura::import_queue::<_, _, _, AuraPair, _, _>(
-		sc_consensus_aura::slot_duration(&*client)?,
-		aura_block_import,
-		Some(Box::new(grandpa_block_import)),
+	//let import_queue = sc_consensus_aura::import_queue::<_, _, _, AuraPair, _, _>(
+	//	sc_consensus_aura::slot_duration(&*client)?,
+	//	aura_block_import,
+	//	Some(Box::new(grandpa_block_import)),
+	//	client.clone(),
+	//	InherentDataProviders::new(),
+	//	&task_manager.spawn_handle(),
+	//	config.prometheus_registry(),
+	//	sp_consensus::NeverCanAuthor,
+	//)?;
+	let import_queue = sc_consensus_babe::import_queue(
+		babe_link,
+		babe_block_import,
+		Some(Box::new(justification_import)),
 		client.clone(),
+		select_chain.clone(),
 		InherentDataProviders::new(),
 		&task_manager.spawn_handle(),
 		config.prometheus_registry(),
