@@ -1,6 +1,6 @@
 //! Service and ServiceFactory implementation. Specialized wrapper over substrate service.
 
-use std::{sync::{Arc, Mutex}, time::Duration, collections::{HashMap, BTreeMap}};
+use std::{sync::{Arc, Mutex}, time::{Duration, SystemTime, UNIX_EPOCH}, collections::{HashMap, BTreeMap}};
 use fc_rpc_core::types::{FilterPool, PendingTransactions};
 use sc_client_api::{ExecutorProvider, RemoteBackend};
 use metaverse_vm_runtime::{self, opaque::Block, RuntimeApi};
@@ -8,11 +8,21 @@ use sc_service::{error::Error as ServiceError, Configuration, TaskManager, BaseP
 use sp_inherents::InherentDataProviders;
 use sc_executor::native_executor_instance;
 pub use sc_executor::NativeExecutor;
-use sp_consensus_aura::sr25519::AuthorityPair as AuraPair;
-use sc_finality_grandpa::SharedVoterState;
+use sc_finality_grandpa::{SharedVoterState, GrandpaBlockImport};
 use sc_keystore::LocalKeystore;
-
 use crate::cli::Cli;
+
+use sp_consensus::import_queue::BasicQueue;
+use sp_api::{ProvideRuntimeApi, TransactionFor};
+use sp_runtime::traits::{Block as BlockT, Header as HeaderT, UniqueSaturatedInto};
+use ethash::{self, SeedHashCompute};
+use ethpow::{MinimalEthashAlgorithm, EthashAlgorithm, WorkSeal};
+use ethash_rpc::{self, EtheminerCmd, RpcError};
+use sc_consensus_pow::{PowAlgorithm, MiningWorker, MiningMetadata, MiningBuild};
+use parity_scale_codec::{Decode, Encode};
+use ethereum_types::{self, U256 as EU256, H256 as EH256};
+use log::{error, info, debug, trace, warn};
+
 
 // Our native executor instance.
 native_executor_instance!(
@@ -25,6 +35,17 @@ native_executor_instance!(
 type FullClient = sc_service::TFullClient<Block, RuntimeApi, Executor>;
 type FullBackend = sc_service::TFullBackend<Block>;
 type FullSelectChain = sc_consensus::LongestChain<FullBackend, Block>;
+
+pub fn build_inherent_data_providers() -> Result<InherentDataProviders, ServiceError> {
+	let providers = InherentDataProviders::new();
+
+	providers
+		.register_provider(sp_timestamp::InherentDataProvider)
+		.map_err(Into::into)
+		.map_err(sp_consensus::error::Error::InherentData)?;
+
+	Ok(providers)
+}
 
 pub fn open_frontier_backend(config: &Configuration) -> Result<Arc<fc_db::Backend<Block>>, String> {
 	let config_dir = config.base_path.as_ref()
@@ -45,24 +66,27 @@ pub fn open_frontier_backend(config: &Configuration) -> Result<Arc<fc_db::Backen
 
 pub fn new_partial(config: &Configuration, _cli: &Cli) -> Result<sc_service::PartialComponents<
 	FullClient, FullBackend, FullSelectChain,
-	sp_consensus::DefaultImportQueue<Block, FullClient>,
+	BasicQueue<Block, TransactionFor<FullClient, Block>>,
 	sc_transaction_pool::FullPool<Block, FullClient>,
 	(
-		sc_consensus_aura::AuraBlockImport<
+		sc_consensus_pow::PowBlockImport<
 			Block,
+			GrandpaBlockImport<FullBackend, Block, FullClient, FullSelectChain>,
 			FullClient,
-			sc_finality_grandpa::GrandpaBlockImport<FullBackend, Block, FullClient, FullSelectChain>,
-			AuraPair
+			FullSelectChain,
+			EthashAlgorithm<FullClient>,
+			impl sp_consensus::CanAuthorWith<Block>,
 		>,
 		sc_finality_grandpa::LinkHalf<Block, FullClient, FullSelectChain>,
         PendingTransactions, Option<FilterPool>, Arc<fc_db::Backend<Block>>,
+		EthashAlgorithm<FullClient>,
 	)
 >, ServiceError> {
 	if config.keystore_remote.is_some() {
 		return Err(ServiceError::Other(
 			format!("Remote Keystores are not supported.")))
 	}
-	let inherent_data_providers = InherentDataProviders::new();
+	let inherent_data_providers = build_inherent_data_providers()?;
 
     let (client, backend, keystore_container, task_manager) =
 		sc_service::new_full_parts::<Block, RuntimeApi, Executor>(
@@ -94,19 +118,26 @@ pub fn new_partial(config: &Configuration, _cli: &Cli) -> Result<sc_service::Par
 		select_chain.clone(),
 	)?;
 
-	let aura_block_import = sc_consensus_aura::AuraBlockImport::<_, _, _, AuraPair>::new(
-		grandpa_block_import.clone(), client.clone(),
+	let can_author_with = sp_consensus::CanAuthorWithNativeVersion::new(client.executor().clone());
+	let ethash_alg = EthashAlgorithm::new(client.clone());
+
+	let pow_block_import = sc_consensus_pow::PowBlockImport::new(
+		grandpa_block_import,
+		client.clone(),
+		ethash_alg.clone(),
+		0, // check inherents starting at block 0
+		select_chain.clone(),
+		inherent_data_providers.clone(),
+		can_author_with,
 	);
 
-	let import_queue = sc_consensus_aura::import_queue::<_, _, _, AuraPair, _, _>(
-		sc_consensus_aura::slot_duration(&*client)?,
-		aura_block_import.clone(),
-		Some(Box::new(grandpa_block_import.clone())),
-		client.clone(),
+	let import_queue = sc_consensus_pow::import_queue(
+		Box::new(pow_block_import.clone()),
+		None,
+		ethash_alg.clone(),
 		inherent_data_providers.clone(),
 		&task_manager.spawn_handle(),
 		config.prometheus_registry(),
-		sp_consensus::CanAuthorWithNativeVersion::new(client.executor().clone()),
 	)?;
 
 	Ok(sc_service::PartialComponents {
@@ -118,9 +149,11 @@ pub fn new_partial(config: &Configuration, _cli: &Cli) -> Result<sc_service::Par
 		select_chain,
 		transaction_pool,
 		inherent_data_providers,
-		other: (aura_block_import, grandpa_link, pending_transactions,
+		other: (pow_block_import, grandpa_link, 
+				pending_transactions,
 				filter_pool,
 				frontier_backend,
+				ethash_alg,
 				),
 	})
 }
@@ -146,7 +179,7 @@ pub fn new_full(mut config: Configuration, cli: &Cli) -> Result<TaskManager, Ser
 		select_chain,
 		transaction_pool,
 		inherent_data_providers,
-		other: (block_import, grandpa_link, pending_transactions, filter_pool, frontier_backend),
+		other: (pow_block_import, grandpa_link, pending_transactions, filter_pool, frontier_backend, ethash_alg),
 	} = new_partial(&config, cli)?;
 
 	if let Some(url) = &config.keystore_remote {
@@ -172,7 +205,8 @@ pub fn new_full(mut config: Configuration, cli: &Cli) -> Result<TaskManager, Ser
 			block_announce_validator_builder: None,
 		})?;
 
-    //let (command_sink, commands_stream) = futures::channel::mpsc::channel(1000);
+	// Channel for the rpc handler to communicate with the authorship task.
+	let (command_sink, commands_stream) = futures::channel::mpsc::channel(1000);
 
 	if config.offchain_worker.enabled {
 		sc_service::build_offchain_workers(
@@ -210,7 +244,7 @@ pub fn new_full(mut config: Configuration, cli: &Cli) -> Result<TaskManager, Ser
 				filter_pool: filter_pool.clone(),
 				backend: frontier_backend.clone(),
 				max_past_logs,
-				//command_sink: Some(command_sink.clone()),
+				command_sink: command_sink.clone(),
 			};
 
 			crate::rpc::create_full(deps, subscription_task_executor.clone())
@@ -235,33 +269,40 @@ pub fn new_full(mut config: Configuration, cli: &Cli) -> Result<TaskManager, Ser
 	)?;
 
 	if role.is_authority() {
-		let proposer_factory = sc_basic_authorship::ProposerFactory::new(
+		let proposer = sc_basic_authorship::ProposerFactory::new(
 			task_manager.spawn_handle(),
 			client.clone(),
-			transaction_pool,
+			transaction_pool.clone(),
 			prometheus_registry.as_ref(),
 		);
 
 		let can_author_with =
 			sp_consensus::CanAuthorWithNativeVersion::new(client.executor().clone());
 
-		let aura = sc_consensus_aura::start_aura::<_, _, _, _, _, AuraPair, _, _, _,_>(
-			sc_consensus_aura::slot_duration(&*client)?,
+		let (worker, worker_task) = sc_consensus_pow::start_mining_worker(
+			Box::new(pow_block_import),
 			client.clone(),
 			select_chain,
-			block_import,
-			proposer_factory,
+			ethash_alg,
+			proposer,
 			network.clone(),
-			inherent_data_providers.clone(),
-			force_authoring,
-			backoff_authoring_blocks,
-			keystore_container.sync_keystore(),
+			None,
+			inherent_data_providers,
+			// time to wait for a new block before starting to mine a new one
+			Duration::from_secs(10),
+			// how long to take to actually build the block (i.e. executing extrinsics)
+			Duration::from_secs(10),
 			can_author_with,
-		)?;
+		);
 
-		// the AURA authoring task is considered essential, i.e. if it
-		// fails we take down the service with it.
-		task_manager.spawn_essential_handle().spawn_blocking("aura", aura);
+		task_manager
+			.spawn_essential_handle()
+			.spawn_blocking("pow", worker_task);
+		
+		// Start Mining
+		// task_manager
+		// 	.spawn_essential_handle()
+		// 	.spawn_blocking("mining", run_mining_svc(worker.clone(), commands_stream));
 	}
 
 	// if the node isn't actively participating in consensus then it doesn't
@@ -334,20 +375,27 @@ pub fn new_light(mut config: Configuration) -> Result<TaskManager, ServiceError>
 		select_chain.clone(),
 	)?;
 
-	let aura_block_import = sc_consensus_aura::AuraBlockImport::<_, _, _, AuraPair>::new(
-		grandpa_block_import.clone(),
+	let inherent_data_providers = build_inherent_data_providers()?;
+	let ethash_alg = EthashAlgorithm::new(client.clone());
+
+	let pow_block_import = sc_consensus_pow::PowBlockImport::new(
+		grandpa_block_import,
 		client.clone(),
+		ethash_alg.clone(),
+		0, // check inherents starting at block 0
+		select_chain,
+		inherent_data_providers.clone(),
+		// FixMe #375
+		sp_consensus::AlwaysCanAuthor,
 	);
 
-	let import_queue = sc_consensus_aura::import_queue::<_, _, _, AuraPair, _, _>(
-		sc_consensus_aura::slot_duration(&*client)?,
-		aura_block_import,
-		Some(Box::new(grandpa_block_import)),
-		client.clone(),
-		InherentDataProviders::new(),
+	let import_queue = sc_consensus_pow::import_queue(
+		Box::new(pow_block_import),
+		None,
+		ethash_alg.clone(),
+		inherent_data_providers,
 		&task_manager.spawn_handle(),
 		config.prometheus_registry(),
-		sp_consensus::NeverCanAuthor,
 	)?;
 
 	let (network, network_status_sinks, system_rpc_tx, network_starter) =

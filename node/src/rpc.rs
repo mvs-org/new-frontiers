@@ -18,6 +18,8 @@ use sc_network::NetworkService;
 use jsonrpc_pubsub::manager::SubscriptionManager;
 use pallet_ethereum::EthereumStorageSchema;
 use fc_rpc::{StorageOverride, SchemaV1Override, };
+use futures::channel::mpsc::Sender;
+use ethash_rpc::EtheminerCmd;
 
 /// Full client dependencies.
 pub struct FullDeps<C, P> {
@@ -41,6 +43,8 @@ pub struct FullDeps<C, P> {
 	pub backend: Arc<fc_db::Backend<Block>>,
     /// Maximum number of logs in a query.
 	pub max_past_logs: u32,
+	/// A command stream to send commands to ethash consensus engine
+	pub command_sink: Sender<EtheminerCmd<Hash>>,
 }
 
 /// Instantiate all Full RPC extensions.
@@ -81,6 +85,7 @@ pub fn create_full<C, P, BE>(
 		backend,
 		enable_dev_signer,
         max_past_logs,
+		command_sink,
 	} = deps;
 
 	io.extend_with(
@@ -148,6 +153,11 @@ pub fn create_full<C, P, BE>(
 			),
 		))
 	);
+
+	// Add Ethash RPC
+	io.extend_with(ethash_rpc::EthashRpc::to_delegate(
+		ethash_rpc::EthashData::new(client, command_sink),
+	));
 
 	io
 }

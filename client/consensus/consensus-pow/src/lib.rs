@@ -65,7 +65,6 @@ use log::*;
 use sp_timestamp::{InherentError as TIError, TimestampInherentData};
 
 use crate::worker::UntilImportedOrTimeout;
-use sp_core::U256;
 // use sp_std::{
 // 	convert::TryFrom,
 // };

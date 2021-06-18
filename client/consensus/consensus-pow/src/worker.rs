@@ -22,7 +22,6 @@ use sp_runtime::{DigestItem, traits::Block as BlockT, generic::BlockId, traits::
 use sp_consensus::{Proposal, BlockOrigin, BlockImportParams, import_queue::BoxBlockImport};
 use futures::{prelude::*, task::{Context, Poll}};
 use futures_timer::Delay;
-use sp_core::U256;
 use log::*;
 
 use crate::{INTERMEDIATE_KEY, POW_ENGINE_ID, Seal, PowAlgorithm, PowIntermediate};
