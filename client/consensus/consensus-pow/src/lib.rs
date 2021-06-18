@@ -37,7 +37,7 @@ pub use crate::worker::{MiningWorker, MiningMetadata, MiningBuild};
 
 use std::{
 	sync::Arc, any::Any, borrow::Cow, collections::HashMap, marker::PhantomData,
-	cmp::Ordering, time::Duration,
+	cmp::Ordering, time::{Duration, SystemTime, UNIX_EPOCH},
 };
 use futures::{prelude::*, future::Either};
 use parking_lot::Mutex;
@@ -352,7 +352,8 @@ impl<B, I, C, S, Algorithm, CAW> BlockImport<B> for PowBlockImport<B, I, C, S, A
 		if let Some(inner_body) = block.body.take() {
 			let inherent_data = self.inherent_data_providers
 				.create_inherent_data().map_err(|e| e.into_string())?;
-			let timestamp_now = inherent_data.timestamp_inherent_data().map_err(|e| e.into_string())?;
+			//let timestamp_now = inherent_data.timestamp_inherent_data().map_err(|e| e.into_string())?;
+			let timestamp_now = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs();
 
 			let check_block = B::new(block.header.clone(), inner_body);
 
@@ -691,7 +692,8 @@ pub fn start_mining_worker<Block, C, S, Algorithm, E, SO, CAW>(
 					pre_runtime: pre_runtime.clone(),
 					difficulty,
 					number: (*proposal.block.header().number()),
-					timestamp: inherent_data.timestamp_inherent_data().unwrap(),
+					//timestamp: inherent_data.timestamp_inherent_data().unwrap(),
+					timestamp: SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs(),
 				},
 				proposal,
 			};

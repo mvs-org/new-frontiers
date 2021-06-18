@@ -12,15 +12,18 @@ use sc_finality_grandpa::{SharedVoterState, GrandpaBlockImport};
 use sc_keystore::LocalKeystore;
 use crate::cli::Cli;
 
+use futures::prelude::*;
+use parking_lot::{Mutex as PMutex};
 use sp_consensus::import_queue::BasicQueue;
 use sp_api::{ProvideRuntimeApi, TransactionFor};
 use sp_runtime::traits::{Block as BlockT, Header as HeaderT, UniqueSaturatedInto};
 use ethash::{self, SeedHashCompute};
 use ethpow::{MinimalEthashAlgorithm, EthashAlgorithm, WorkSeal};
-use ethash_rpc::{self, EtheminerCmd, RpcError};
+use ethash_rpc::{self, EtheminerCmd, Work, RpcError};
 use sc_consensus_pow::{PowAlgorithm, MiningWorker, MiningMetadata, MiningBuild};
-use parity_scale_codec::{Decode, Encode};
+use sp_core::{U256, H256};
 use ethereum_types::{self, U256 as EU256, H256 as EH256};
+use parity_scale_codec::{Decode, Encode};
 use log::{error, info, debug, trace, warn};
 
 
@@ -39,10 +42,10 @@ type FullSelectChain = sc_consensus::LongestChain<FullBackend, Block>;
 pub fn build_inherent_data_providers() -> Result<InherentDataProviders, ServiceError> {
 	let providers = InherentDataProviders::new();
 
-	providers
-		.register_provider(sp_timestamp::InherentDataProvider)
-		.map_err(Into::into)
-		.map_err(sp_consensus::error::Error::InherentData)?;
+	// providers
+	// 	.register_provider(sp_timestamp::InherentDataProvider)
+	// 	.map_err(Into::into)
+	// 	.map_err(sp_consensus::error::Error::InherentData)?;
 
 	Ok(providers)
 }
@@ -300,9 +303,9 @@ pub fn new_full(mut config: Configuration, cli: &Cli) -> Result<TaskManager, Ser
 			.spawn_blocking("pow", worker_task);
 		
 		// Start Mining
-		// task_manager
-		// 	.spawn_essential_handle()
-		// 	.spawn_blocking("mining", run_mining_svc(worker.clone(), commands_stream));
+		task_manager
+			.spawn_essential_handle()
+			.spawn_blocking("mining", run_mining_svc(worker.clone(), commands_stream));
 	}
 
 	// if the node isn't actively participating in consensus then it doesn't
@@ -434,3 +437,66 @@ pub fn new_light(mut config: Configuration) -> Result<TaskManager, ServiceError>
 
 	Ok(task_manager)
 }
+
+
+pub async fn run_mining_svc<B, Algorithm, C, CS>(
+	worker : Arc<PMutex<MiningWorker<B, Algorithm, C>>>,
+	mut commands_stream: CS,
+)
+	where 
+	B: BlockT<Hash = H256>,
+	Algorithm: PowAlgorithm<B, Difficulty = U256>,
+	C: sp_api::ProvideRuntimeApi<B>,
+	CS: Stream<Item=EtheminerCmd<<B as BlockT>::Hash>> + Unpin + 'static,
+{
+	let seed_compute = SeedHashCompute::default();
+
+	while let Some(command) = commands_stream.next().await {
+		match command {
+			EtheminerCmd::GetWork { mut sender } => {
+				let metadata = worker.lock().metadata();
+				if let Some(metadata) = metadata {
+					let nr :u64 = UniqueSaturatedInto::<u64>::unique_saturated_into(metadata.number);
+					let pow_hash:H256 = metadata.pre_hash;
+					let seed_hash:H256 = seed_compute.hash_block_number(nr).into();
+					let tmp:[u8; 32] = metadata.difficulty.into();
+					let tmp:[u8; 32] = ethash::difficulty_to_boundary(&EU256::from(tmp)).into();
+					let target:H256 = H256::from(tmp);
+
+					let ret = Ok(Work { 
+						pow_hash, 
+						seed_hash,
+						target, 
+						number: Some(nr),
+					 });
+
+					ethash_rpc::send_result(&mut sender, ret)
+					// ethash_rpc::send_result(&mut sender, future.await)
+				} else {
+					ethash_rpc::send_result(&mut sender, Err(RpcError::NoWork))
+				}
+			}
+			EtheminerCmd::SubmitWork {  nonce, pow_hash, mix_digest, mut sender } => {
+				let mut worker = worker.lock();
+				let metadata = worker.metadata();
+				if let Some(metadata) = metadata {
+					let non_nr :u64 = UniqueSaturatedInto::<u64>::unique_saturated_into(nonce);
+					let header_nr :u64 = UniqueSaturatedInto::<u64>::unique_saturated_into(metadata.number);
+					let timestamp :u64 = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs();
+					let seal = WorkSeal{nonce:non_nr, pow_hash, mix_digest, difficulty:metadata.difficulty, header_nr, timestamp};
+					debug!(target:"pow", "worker.submit pow_hash: {}", pow_hash);
+					worker.submit(seal.encode());
+					ethash_rpc::send_result(&mut sender, Ok(true))
+				} else {
+					ethash_rpc::send_result(&mut sender, Err(RpcError::NoMetaData))
+				}
+
+						
+			}
+			EtheminerCmd::SubmitHashrate { hash, mut sender } => {
+				
+			}
+		}
+	}
+}
+
