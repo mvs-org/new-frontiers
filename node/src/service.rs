@@ -39,13 +39,14 @@ type FullClient = sc_service::TFullClient<Block, RuntimeApi, Executor>;
 type FullBackend = sc_service::TFullBackend<Block>;
 type FullSelectChain = sc_consensus::LongestChain<FullBackend, Block>;
 
+// :TODO: fix timestamp
 pub fn build_inherent_data_providers() -> Result<InherentDataProviders, ServiceError> {
 	let providers = InherentDataProviders::new();
 
-	// providers
-	// 	.register_provider(sp_timestamp::InherentDataProvider)
-	// 	.map_err(Into::into)
-	// 	.map_err(sp_consensus::error::Error::InherentData)?;
+	providers
+		.register_provider(sp_timestamp::InherentDataProvider)
+		.map_err(Into::into)
+		.map_err(sp_consensus::error::Error::InherentData)?;
 
 	Ok(providers)
 }

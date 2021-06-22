@@ -39,8 +39,6 @@ pub struct MiningMetadata<H, D, B: BlockT> {
 	pub difficulty: D,
 	/// block number
 	pub number: NumberFor<B>,
-	/// block timestamp
-	pub timestamp: u64,
 }
 
 /// A build of mining, containing the metadata and the block proposal.

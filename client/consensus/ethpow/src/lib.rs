@@ -278,11 +278,9 @@ where
 			seal.difficulty + (seal.difficulty / difficulty_bound_divisor)
 		};
 		target = cmp::max(min_difficulty, target);
-		// debug!(target:"pow", "duration: {}, pTime: {}, cTime: {}, old_dif: {}, new_dif: {}", 
-		// 	seal.timestamp-parent_seal.timestamp, parent_seal.timestamp, seal.timestamp, seal.difficulty, target);
-		println!("******duration: {}, pTime: {}, cTime: {}, old_dif: {}, new_dif: {}", 
+		debug!(target:"pow", "duration: {}, pTime: {}, cTime: {}, old_dif: {}, new_dif: {}", 
 			seal.timestamp-parent_seal.timestamp, parent_seal.timestamp, seal.timestamp, seal.difficulty, target);
-			
+		
 		// parent header difficulty
 		Ok(target)
 	}
