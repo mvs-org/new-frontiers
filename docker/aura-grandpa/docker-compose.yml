@@ -1,0 +1,49 @@
+version: "3.3"
+services:
+  bootnode:
+    image: metaversedocker
+    user: root
+    volumes:
+        - "./data/bootnode/network:/tmp/chaindata/chains/dev/network"
+        - "./data/bootnode-spec.json:/tmp/chainspec.json"
+    ports:
+        - "9931:9933"
+    networks:
+        metaverse:
+          ipv4_address: 172.30.0.10
+    command: "--chain=/tmp/chainspec.json --base-path=/tmp/chaindata --no-mdns --name bootnode --pruning=archive"
+  validator-01:
+    image: metaversedocker
+    user: root
+    volumes:
+        - "./data/validator-01/keystore:/tmp/chaindata/chains/dev/keystore"
+        - "./data/validator-spec.json:/tmp/chainspec.json"
+    ports:
+        - "9932:9933"
+    networks:
+        metaverse:
+          ipv4_address: 172.30.0.20
+    command: "--chain=/tmp/chainspec.json --rpc-methods Unsafe --rpc-cors=all --base-path=/tmp/chaindata --no-mdns --name validator-1 --validator"
+    depends_on: 
+        - bootnode
+  validator-02:
+    image: metaversedocker
+    user: root
+    volumes:
+        - "./data/validator-02/keystore:/tmp/chaindata/chains/dev/keystore"
+        - "./data/validator-spec.json:/tmp/chainspec.json"
+    ports:
+        - "9933:9933"
+    networks:
+        metaverse:
+          ipv4_address: 172.30.0.30
+    depends_on: 
+        - bootnode
+    command: "--chain=/tmp/chainspec.json --rpc-methods Unsafe --rpc-cors=all --base-path=/tmp/chaindata --no-mdns --name validator-2 --validator"
+
+networks:
+    metaverse:
+        driver: bridge
+        ipam:
+            config:
+                - subnet: 172.30.0.0/16
