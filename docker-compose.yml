@@ -1,17 +1,42 @@
-version: "3.2"
-
+version: "3.3"
 services:
-  dev:
-    container_name: node-template
-    image: paritytech/ci-linux:974ba3ac-20201006
-    working_dir: /var/www/node-template
-    ports:
-      - "9944:9944"
-    environment:
-      - CARGO_HOME=/var/www/node-template/.cargo
-    volumes:
-      - .:/var/www/node-template
-      - type: bind
-        source: ./.local
-        target: /root/.local
-    command: bash -c "cargo build --release && ./target/release/node-template --dev --ws-external"
+  rpc-01:
+    image: metaversevm
+    user: root
+    networks:
+        metaverse:
+          ipv4_address: 172.30.0.10
+    # ports:
+    #   - "9615:9615"
+    #   - "9933:9933"
+    #   - "9944:9944"
+    entrypoint: ["/usr/local/bin/metaversevm", "--dev", "--rpc-cors=all", "--rpc-methods=safe", "--ws-external", "--unsafe-rpc-external", "--prometheus-external", "--telemetry-url", "wss://telemetry.mvs.org/ws/submit 0", "--name", "regular-X"]
+  vm:
+    image: metaversevm
+    user: root
+    networks:
+        metaverse:
+          ipv4_address: 172.30.0.20
+    # ports:
+    #   - "9615:9615"
+    #   - "9933:9933"
+    #   - "9944:9944"
+    #   - "30333:30333"
+    entrypoint: ["/usr/local/bin/metaversevm", "--dev", "--base-path=/tmp/chaindata", "--telemetry-url", "wss://telemetry.mvs.org/ws/submit 0", "--name", "validator-X", "--validator"]
+  rpc-archive-01:
+    image: metaversevm
+    user: root
+    networks:
+        metaverse:
+          ipv4_address: 172.30.0.30
+    # ports:
+    #   - "18835:9933"
+    #   - "18845:9944"
+    entrypoint: ["/usr/local/bin/metaversevm", "--dev", "--rpc-cors=all", "--rpc-methods=safe", "--ws-external", "--unsafe-rpc-external", "--prometheus-external", "--telemetry-url", "wss://telemetry.mvs.org/ws/submit 0", "--name", "rpc-archive-X", "--pruning=archive"]
+networks:
+    metaverse:
+        driver: bridge
+        ipam:
+            config:
+                - subnet: 172.30.0.0/16
+  
