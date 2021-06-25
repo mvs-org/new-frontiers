@@ -1,7 +1,7 @@
 version: "3.3"
 services:
   bootnode:
-    image: metaversedocker
+    build: ../..
     user: root
     volumes:
         - "./data/bootnode/network:/tmp/chaindata/chains/dev/network"
@@ -13,7 +13,7 @@ services:
           ipv4_address: 172.30.0.10
     command: "--chain=/tmp/chainspec.json --base-path=/tmp/chaindata --no-mdns --name bootnode --pruning=archive"
   validator-01:
-    image: metaversedocker
+    build: ../..
     user: root
     volumes:
         - "./data/validator-01/keystore:/tmp/chaindata/chains/dev/keystore"
@@ -27,7 +27,7 @@ services:
     depends_on: 
         - bootnode
   validator-02:
-    image: metaversedocker
+    build: ../..
     user: root
     volumes:
         - "./data/validator-02/keystore:/tmp/chaindata/chains/dev/keystore"
