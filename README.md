@@ -10,14 +10,6 @@ Follow the steps below to take control and compile your own node. :hammer_and_wr
 
 First, complete the [basic Rust setup instructions](./doc/rust-setup.md).
 
-### Run
-
-Use Rust's native `cargo` command to build and launch the template node:
-
-```sh
-cargo run --release -- --dev --tmp
-```
-
 ### Build
 
 The `cargo run` command will perform an initial build. Use the following command to build the node
@@ -25,6 +17,126 @@ without launching it:
 
 ```sh
 cargo build --release
+```
+
+### Run
+
+Launch one metaverse node:
+
+```sh
+./target/release/metaversevm --validator --tmp --rpc-cors all 
+```
+
+
+
+Launch a test net with 3 metaverse node at localhost :
+
+On console for node01:
+
+```sh
+./target/release/metaversevm --validator --tmp --rpc-cors all \
+    --node-key 0000000000000000000000000000000000000000000000000000000000000111
+```
+
+On console for node02:
+
+```
+./target/release/metaversevm --validator --tmp --rpc-cors all \
+    --port 30334 \
+    --ws-port 9946 \
+    --rpc-port 9934 \
+    --bootnodes /ip4/127.0.0.1/tcp/30333/p2p/12D3KooWRBaMZHnFYtT1B143sSLHkx8G6ysPSg8PMzqXkymm38Ld
+```
+
+On console for node03:
+```
+./target/release/metaversevm --validator --tmp --rpc-cors all \
+    --port 30335 \
+    --ws-port 9947 \
+    --rpc-port 9935 \
+    --bootnodes /ip4/127.0.0.1/tcp/30333/p2p/12D3KooWRBaMZHnFYtT1B143sSLHkx8G6ysPSg8PMzqXkymm38Ld
+```
+
+### GPU mining
+
+**Install miner**
+
+Access the project's [releases page](https://github.com/ethereum-mining/ethminer/releases), and pick up the latest Linux tarball. Unpack the tarball in the directory where you want to run Ethminer. It's a pre-compiled binary, so that's all you need to do before you start using it.
+
+```sh
+$ mkdir ethminer
+$ wget -O ethminer/ethminer.tar.gz https://github.com/ethereum-mining/ethminer/releases/download/v0.18.0/ethminer-0.18.0-cuda-9-linux-x86_64.tar.gz
+$ tar xzf ethminer/ethminer.tar.gz -C ethminer/
+$ ethminer/bin/ethminer --help
+ethminer 0.18.0
+Build: linux/release/gnu
+
+Ethminer - GPU ethash miner
+minimal usage : ethminer [DEVICES_TYPE] [OPTIONS] -P... [-P...]
+```
+
+**Run miner**
+
+```sh
+// Change to correct RPC port to get work
+ethminer/bin/ethminer -P http://127.0.0.1:9933
+```
+
+### CPU mining(only for test)
+
+**Dependencies:**
+
+Linux-based:
+
+```
+sudo apt-get install libleveldb-dev libcurl4-openssl-dev libmicrohttpd-dev libudev-dev cmake
+```
+
+macOS:
+
+```
+brew install leveldb libmicrohttpd
+```
+
+**Install:**
+
+```
+git clone --depth=1 https://github.com/avatar-lavventura/ethminer.git 
+cd ethminer
+./scripts/install_deps.sh
+```
+
+**Build:**
+
+```
+cmake -H. -Bbuild
+cd build/ethminer
+make -j $(nproc)
+```
+
+**Run miner**
+
+```sh
+// Change to correct RPC port to get work
+./ethminer -F http://localhost:9933 --mining-threads 4
+```
+
+**Notice**
+
+If the compilation doesn't work through, it could be the C++ compiler version problem, please follow these step:
+
+```sh
+vi cmake/EthCompilerSettings.cmake
+...
+# comment out this line
+#add_compile_options(-Werror)
+...
+...
+# at last line add
+add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-Wno-deprecated-copy>)
+add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-Wno-implicit-fallthrough>)
+add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-Wno-maybe-uninitialized>)
+...
 ```
 
 ### Embedded Docs

@@ -17,7 +17,7 @@ use sp_runtime::traits::{
 	BlakeTwo256, Block as BlockT, AccountIdLookup, Verify, IdentifyAccount, NumberFor,
 };
 use sp_api::impl_runtime_apis;
-use sp_consensus_aura::sr25519::AuthorityId as AuraId;
+//use sp_consensus_aura::sr25519::AuthorityId as AuraId;
 use pallet_grandpa::{AuthorityId as GrandpaId, AuthorityList as GrandpaAuthorityList};
 use pallet_grandpa::fg_primitives;
 use sp_version::RuntimeVersion;
@@ -95,7 +95,7 @@ pub mod opaque {
 
 	impl_opaque_keys! {
 		pub struct SessionKeys {
-			pub aura: Aura,
+			//pub aura: Aura,
 			pub grandpa: Grandpa,
 		}
 	}
@@ -124,7 +124,8 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
 /// up by `pallet_aura` to implement `fn slot_duration()`.
 ///
 /// Change this to adjust the block time.
-pub const MILLISECS_PER_BLOCK: u64 = 6000;
+// :TODO: may need discussion on the minimum time value between blocks
+pub const MILLISECS_PER_BLOCK: u64 = 100; //6000;
 
 pub const SLOT_DURATION: u64 = MILLISECS_PER_BLOCK;
 
@@ -207,9 +208,9 @@ impl frame_system::Config for Runtime {
 	type SS58Prefix = SS58Prefix;
 }
 
-impl pallet_aura::Config for Runtime {
-	type AuthorityId = AuraId;
-}
+// impl pallet_aura::Config for Runtime {
+// 	type AuthorityId = AuraId;
+// }
 
 impl pallet_grandpa::Config for Runtime {
 	type Event = Event;
@@ -237,7 +238,7 @@ parameter_types! {
 impl pallet_timestamp::Config for Runtime {
 	/// A timestamp: milliseconds since the unix epoch.
 	type Moment = u64;
-	type OnTimestampSet = Aura;
+	type OnTimestampSet = ();
 	type MinimumPeriod = MinimumPeriod;
 	type WeightInfo = ();
 }
@@ -321,23 +322,24 @@ impl pallet_evm::Config for Runtime {
 	type OnChargeTransaction = ();
 }
 
-pub struct EthereumFindAuthor<F>(PhantomData<F>);
-impl<F: FindAuthor<u32>> FindAuthor<H160> for EthereumFindAuthor<F>
-{
-	fn find_author<'a, I>(digests: I) -> Option<H160> where
-		I: 'a + IntoIterator<Item=(ConsensusEngineId, &'a [u8])>
-	{
-		if let Some(author_index) = F::find_author(digests) {
-			let authority_id = Aura::authorities()[author_index as usize].clone();
-			return Some(H160::from_slice(&authority_id.to_raw_vec()[4..24]));
-		}
-		None
-	}
-}
+// pub struct EthereumFindAuthor<F>(PhantomData<F>);
+// impl<F: FindAuthor<u32>> FindAuthor<H160> for EthereumFindAuthor<F>
+// {
+// 	fn find_author<'a, I>(digests: I) -> Option<H160> where
+// 		I: 'a + IntoIterator<Item=(ConsensusEngineId, &'a [u8])>
+// 	{
+// 		if let Some(author_index) = F::find_author(digests) {
+// 			let authority_id = Aura::authorities()[author_index as usize].clone();
+// 			return Some(H160::from_slice(&authority_id.to_raw_vec()[4..24]));
+// 		}
+// 		None
+// 	}
+// }
 
 impl pallet_ethereum::Config for Runtime {
 	type Event = Event;
-	type FindAuthor = EthereumFindAuthor<Aura>;
+	// () means we will never record a block author in the Ethereum-formatted blocks
+	type FindAuthor = (); //EthereumFindAuthor<Aura>;
 	type StateRoot = pallet_ethereum::IntermediateStateRoot;
 }
 
@@ -351,7 +353,7 @@ construct_runtime!(
 		System: frame_system::{Module, Call, Config, Storage, Event<T>},
 		RandomnessCollectiveFlip: pallet_randomness_collective_flip::{Module, Call, Storage},
 		Timestamp: pallet_timestamp::{Module, Call, Storage, Inherent},
-		Aura: pallet_aura::{Module, Config<T>},
+		//Aura: pallet_aura::{Module, Config<T>},
 		Grandpa: pallet_grandpa::{Module, Call, Storage, Config, Event},
 		Balances: pallet_balances::{Module, Call, Storage, Config<T>, Event<T>},
 		TransactionPayment: pallet_transaction_payment::{Module, Storage},
@@ -473,15 +475,15 @@ impl_runtime_apis! {
 		}
 	}
 
-	impl sp_consensus_aura::AuraApi<Block, AuraId> for Runtime {
-		fn slot_duration() -> u64 {
-			Aura::slot_duration()
-		}
+	// impl sp_consensus_aura::AuraApi<Block, AuraId> for Runtime {
+	// 	fn slot_duration() -> u64 {
+	// 		Aura::slot_duration()
+	// 	}
 
-		fn authorities() -> Vec<AuraId> {
-			Aura::authorities()
-		}
-	}
+	// 	fn authorities() -> Vec<AuraId> {
+	// 		Aura::authorities()
+	// 	}
+	// }
 
 	impl sp_session::SessionKeys<Block> for Runtime {
 		fn generate_session_keys(seed: Option<Vec<u8>>) -> Vec<u8> {
