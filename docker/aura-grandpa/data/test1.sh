@@ -1,0 +1,1 @@
+curl -X POST -d '{"method": "rpc_methods", "params":[""], "jsonrpc":"2.0", "id": 0}' -H "Content-Type: application/json" http://172.30.0.10:9933
