@@ -11,7 +11,8 @@ services:
     networks:
         metaverse:
           ipv4_address: 172.30.0.10
-    command: "--chain=/tmp/chainspec.json --base-path=/tmp/chaindata --no-mdns --name bootnode --pruning=archive --rpc-methods Unsafe --rpc-cors=all"
+    command: "--chain=/tmp/chainspec.json --base-path=/tmp/chaindata --no-mdns --name bootnode --pruning=archive --rpc-methods Unsafe --rpc-cors=all -lsubstrate_basic_authorship=trace,txpool=trace"
+    # command: "--chain=/tmp/chainspec.json --base-path=/tmp/chaindata --no-mdns --name bootnode --pruning=archive --rpc-methods Unsafe --rpc-cors=all -ltxpool=trace -lrpc=trace -ldebug "
   validator-01:
     build: ../..
     user: root
@@ -40,22 +41,7 @@ services:
     depends_on: 
         - bootnode
     command: "--chain=/tmp/chainspec.json --rpc-methods Unsafe --rpc-cors=all --base-path=/tmp/chaindata --no-mdns --name validator-2 --validator"
-  tester-002:
-    image: ubuntu
-    user: root
-    volumes:
-        - "./data/test1.sh:/tmp/test1.sh"
-    networks:
-        metaverse:
-          ipv4_address: 172.30.0.40
-    depends_on: 
-        - validator-01
-        - validator-02
-    command: "bash -c \"\
-    apt-get update && \
-    apt-get install jq curl -y && \
-    sh /tmp/test1.sh
-    \""
+  
 networks:
     metaverse:
         driver: bridge
