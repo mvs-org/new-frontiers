@@ -287,7 +287,7 @@ where
 
 	fn verify(
 		&self,
-		_parent: &BlockId<B>,
+		parent: &BlockId<B>,
 		pre_hash: &H256,
 		_pre_digest: Option<&[u8]>,
 		seal: &RawSeal,
@@ -298,7 +298,40 @@ where
 			Ok(seal) => seal,
 			Err(_) => return Ok(false),
 		};
-		
+
+		let parent_header = self.client.header(*parent).map_err(|err| {
+				sc_consensus_pow::Error::Other(format!("{:?}", err))
+			})?.ok_or_else(|| {
+				sc_consensus_pow::Error::Other(format!("there should be header"))
+			})?;
+		let nr :u64 = UniqueSaturatedInto::<u64>::unique_saturated_into(*parent_header.number());
+		// Basic seal check
+		if nr != 0 { //:NOTICE: genesis header doesn't contain seal
+			let raw_seal = sc_consensus_pow::fetch_seal::<B>(
+					parent_header.digest().logs.last(),
+					parent_header.hash(),
+				).map_err(|err| {
+					sc_consensus_pow::Error::Other(format!("{:?}", err))
+				})?;
+			let parent_seal = WorkSeal::decode(&mut &raw_seal[..]).map_err(|err| {
+					sc_consensus_pow::Error::Other(format!("{:?}", err))
+				})?;
+			
+			if seal.timestamp < parent_seal.timestamp {
+				return Err(sc_consensus_pow::Error::InvalidSeal);
+			}
+
+			if seal.header_nr != parent_seal.header_nr + 1 {
+				return Err(sc_consensus_pow::Error::InvalidSeal);
+			}
+
+			const ACCEPTABLE_DRIFT: u64 = 15;
+			let timestamp_now = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs();
+			if seal.timestamp > timestamp_now + ACCEPTABLE_DRIFT {
+				return Err(sc_consensus_pow::Error::TooFarInFuture);
+			}
+		}
+
 		self.verify_seal(&seal).map_err(|err| {
 				sc_consensus_pow::Error::Other(format!("{:?}", err))
 			})?;

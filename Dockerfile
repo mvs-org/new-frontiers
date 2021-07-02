@@ -1,5 +1,16 @@
+### build stage
+FROM rust:1.51-slim as builder
+ENV USER root
+ENV CI_PROJECT_NAME docker
+RUN apt-get update && apt-get install -y git cmake pkg-config libssl-dev git clang libclang-dev
+RUN rustup default nightly && rustup target add wasm32-unknown-unknown
+RUN rustup default nightly && rustup target add wasm32-unknown-unknown
+COPY . .
+RUN CI_PROJECT_NAME=docker sh scripts/init.sh
+RUN cargo build --release
+
 ### package stage
-FROM debian:bullseye-slim
+FROM debian:stretch-slim
 # metadata
 ARG VCS_REF
 ARG BUILD_DATE
@@ -11,7 +22,6 @@ RUN apt-get update && \
 	DEBIAN_FRONTEND=noninteractive apt-get install -y \
 		libssl1.1 \
 		ca-certificates \
-		glibc \
 		curl && \
 # apt cleanup
 	apt-get autoremove -y && \
@@ -20,9 +30,7 @@ RUN apt-get update && \
 # add user
 	useradd -m -u 1000 -U -s /bin/sh -d /metaverse mvs
 # add binary to docker image
-COPY ./target/release/metaverse /usr/local/bin/metaverse
-COPY ./mainnet.json ./mainnet
-COPY ./mainnet.json .
+COPY --from=builder /target/release/metaversevm /usr/local/bin/metaverse
 USER mvs
 # check if executable works in this container
 RUN /usr/local/bin/metaverse --version

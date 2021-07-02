@@ -23,10 +23,10 @@
 /// Error code for rpc
 mod codes {
 	pub const MISMATCHED_H256_SEAL: i64 = 10_000;
-	pub const INVALID_POW: i64 = 11_000;
+	pub const INVALID_SEAL: i64 = 11_000;
 	pub const EMPTY_TRANSACTION_POOL: i64 = 12_000;
 	pub const BLOCK_NOT_FOUND: i64 = 13_000;
-	pub const CONSENSUS_ERROR: i64 = 14_000;
+	pub const INVALID_POW: i64 = 14_000;
 	pub const INHERENTS_ERROR: i64 = 15_000;
 	pub const BLOCKCHAIN_ERROR: i64 = 16_000;
 	pub const UNKNOWN_ERROR: i64 = 20_000;
@@ -41,6 +41,8 @@ pub enum Error {
 	EmptyTransactionPool,
 	#[display(fmt = "Mismatched H256 Seal Element")]
 	MismatchedH256SealElement,
+	#[display(fmt = "Invalid WorkSeal")]
+	InvalidWorkSeal,
 	//#[display(fmt = "Invalid ProofOfWork: expected: {}, found: {}", _0, _1)]
 	#[display(fmt = "Invalid ProofOfWork, Invalid Difficulty")]
 	InvalidProofOfWork,
@@ -53,7 +55,8 @@ impl Error {
 		use Error::*;
 		match self {
 			MismatchedH256SealElement => codes::MISMATCHED_H256_SEAL,
-			InvalidProofOfWork => codes::BLOCK_NOT_FOUND,
+			InvalidWorkSeal => codes::INVALID_SEAL,
+			InvalidProofOfWork => codes::INVALID_POW,
 			EmptyTransactionPool => codes::EMPTY_TRANSACTION_POOL,
 			// ConsensusError(_) => codes::CONSENSUS_ERROR,
 			// InherentError(_) => codes::INHERENTS_ERROR,
