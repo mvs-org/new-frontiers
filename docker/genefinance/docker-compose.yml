@@ -1,0 +1,76 @@
+version: "3.3"
+services:
+  bootnode:
+    build: ../..
+    user: root
+    volumes:
+        - "./data/bootnode/network:/tmp/chaindata/chains/dev/network"
+        - "./data/bootnode-spec.json:/tmp/chainspec.json"
+    ports:
+        - "9931:9933"
+    networks:
+        metaverse-genefinance:
+          ipv4_address: 172.40.0.10
+    command: "--chain=/tmp/chainspec.json --base-path=/tmp/chaindata --no-mdns --name bootnode --pruning=archive --rpc-methods Unsafe --rpc-cors=all -lsubstrate_basic_authorship=trace,txpool=trace"
+    # command: "--chain=/tmp/chainspec.json --base-path=/tmp/chaindata --no-mdns --name bootnode --pruning=archive --rpc-methods Unsafe --rpc-cors=all -ltxpool=trace -lrpc=trace -ldebug "
+  validator-01:
+    build: ../..
+    user: root
+    volumes:
+        - "./data/validator-01/keystore:/tmp/chaindata/chains/dev/keystore"
+        - "./data/validator-spec.json:/tmp/chainspec.json"
+    ports:
+        - "9932:9933"
+        - "9942:9944"
+    networks:
+        metaverse-genefinance:
+          ipv4_address: 172.40.0.20
+    command: "--chain=/tmp/chainspec.json --rpc-methods Unsafe --rpc-cors=all --base-path=/tmp/chaindata --no-mdns --name validator-1 --validator"
+    depends_on: 
+        - bootnode
+  validator-02:
+    build: ../..
+    user: root
+    volumes:
+        - "./data/validator-02/keystore:/tmp/chaindata/chains/dev/keystore"
+        - "./data/validator-spec.json:/tmp/chainspec.json"
+    ports:
+        - "9933:9933"
+    networks:
+        metaverse-genefinance:
+          ipv4_address: 172.40.0.30
+    depends_on: 
+        - bootnode
+    command: "--chain=/tmp/chainspec.json --rpc-methods Unsafe --rpc-cors=all --base-path=/tmp/chaindata --no-mdns --name validator-2 --validator"
+  tester:
+    image: debian
+    user: root
+    volumes:
+        - "./genefinance:/tmp/genefinance"
+    networks:
+        metaverse-genefinance:
+          ipv4_address: 172.40.0.40
+    depends_on:
+        - bootnode 
+        - validator-01
+        - validator-02
+    command: "bash -c \"\
+    apt-get update && \
+    apt-get install  curl -y && \
+    curl -sL https://deb.nodesource.com/setup_15.x  | bash - && \ 
+    apt-get install nodejs -y && \
+    npm install -g truffle dotenv &&\
+    chmod -R 777 /tmp/genefinance/build/contracts && \
+    cd /tmp/genefinance && \
+    echo '**********************************TESTS*********************************************************' && \
+    truffle migrate && \
+    echo '**********************************TESTS DONE*********************************************************' 
+     
+    \""
+
+networks:
+    metaverse-genefinance:
+        driver: bridge
+        ipam:
+            config:
+                - subnet: 172.40.0.0/16

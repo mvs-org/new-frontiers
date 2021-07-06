@@ -56,7 +56,7 @@ return new Promise(function(resolve,reject){
                 var _hex_gasPrice = web3.utils.toHex(_gasPrice.toString());
                 var _hex_value = web3.utils.toHex(web3.utils.toWei(_value,'ether'));
                 //var _trx_count = web3.eth.getTransactionCount(_from);
-                var _hex_Gas = web3.utils.toHex('4294967295'); //web3.utils.toWei('1', 'Gwei')
+                var _hex_Gas = web3.utils.toWei('10', 'Gwei')
 
                 console.log('------------------------------------------');
                 web3.eth.getTransactionCount(_from).then(
