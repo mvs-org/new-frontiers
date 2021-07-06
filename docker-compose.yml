@@ -1,17 +1,52 @@
-version: "3.2"
-
+version: "3.3"
 services:
-  dev:
-    container_name: node-template
-    image: paritytech/ci-linux:974ba3ac-20201006
-    working_dir: /var/www/node-template
-    ports:
-      - "9944:9944"
-    environment:
-      - CARGO_HOME=/var/www/node-template/.cargo
+  bootnode:
+    build: .
+    container_name: bootnode
+    image: metaverse-pow:ver1
+    user: root
     volumes:
-      - .:/var/www/node-template
-      - type: bind
-        source: ./.local
-        target: /root/.local
-    command: bash -c "cargo build --release && ./target/release/node-template --dev --ws-external"
+        - "/tmp:/tmp"
+    ports:
+        - "9333:9933"
+    networks:
+        pow-net:
+          ipv4_address: 172.100.0.10
+    command: "--name bootnode --validator --rpc-cors all --base-path /tmp/bootnode --node-key 0000000000000000000000000000000000000000000000000000000000000111"
+  node-01:
+    build: .
+    container_name: node01
+    image: metaverse-pow:ver1
+    user: root
+    volumes:
+        - "/tmp:/tmp"
+    ports:
+        - "9334:9933"
+    networks:
+        pow-net:
+          ipv4_address: 172.100.0.20
+    command: "--name node01 --validator --rpc-cors all --base-path /tmp/node01 --bootnodes /ip4/172.100.0.10/tcp/30333/p2p/12D3KooWRBaMZHnFYtT1B143sSLHkx8G6ysPSg8PMzqXkymm38Ld"
+    depends_on: 
+        - bootnode
+  node-02:
+    build: .
+    container_name: node02
+    image: metaverse-pow:ver1
+    user: root
+    volumes:
+        - "/tmp:/tmp"
+    ports:
+        - "9335:9933"
+    networks:
+        pow-net:
+          ipv4_address: 172.100.0.30
+    depends_on: 
+        - bootnode
+    command: "--name node02 --validator --rpc-cors all --base-path /tmp/node02 --bootnodes /ip4/172.100.0.10/tcp/30333/p2p/12D3KooWRBaMZHnFYtT1B143sSLHkx8G6ysPSg8PMzqXkymm38Ld"
+
+networks:
+    pow-net:
+        driver: bridge
+        ipam:
+            config:
+                - subnet: 172.100.0.0/16
