@@ -2,7 +2,8 @@
 
 use std::{sync::{Arc, Mutex}, time::Duration, collections::{HashMap, BTreeMap}};
 use fc_rpc_core::types::{FilterPool, PendingTransactions};
-use sc_client_api::{ExecutorProvider, RemoteBackend};
+use fc_mapping_sync::MappingSyncWorker;
+use sc_client_api::{ExecutorProvider, RemoteBackend, BlockchainEvents};
 use metaverse_vm_runtime::{self, opaque::Block, RuntimeApi};
 use sc_service::{error::Error as ServiceError, Configuration, TaskManager, BasePath};
 use sp_inherents::InherentDataProviders;
@@ -11,7 +12,7 @@ pub use sc_executor::NativeExecutor;
 use sp_consensus_aura::sr25519::AuthorityPair as AuraPair;
 use sc_finality_grandpa::SharedVoterState;
 use sc_keystore::LocalKeystore;
-
+use futures::StreamExt;
 use crate::cli::Cli;
 
 // Our native executor instance.
@@ -216,6 +217,17 @@ pub fn new_full(mut config: Configuration, cli: &Cli) -> Result<TaskManager, Ser
 			crate::rpc::create_full(deps, subscription_task_executor.clone())
 		})
 	};
+
+	task_manager.spawn_essential_handle().spawn(
+		"metaverse-mapping-sync-worker",
+		MappingSyncWorker::new(
+			client.import_notification_stream(),
+			Duration::new(6, 0),
+			client.clone(),
+			backend.clone(),
+			frontier_backend.clone(),
+		).for_each(|()| futures::future::ready(()))
+	);
 
 	let (_rpc_handlers, telemetry_connection_notifier) = sc_service::spawn_tasks(
 		sc_service::SpawnTasksParams {
