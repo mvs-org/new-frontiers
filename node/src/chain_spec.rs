@@ -1,4 +1,5 @@
-use sp_core::{Pair, Public, sr25519};
+use std::{str::FromStr, collections::BTreeMap};
+use sp_core::{H160, Pair, Public, sr25519};
 use metaverse_vm_runtime::{
 	AccountId, AuraConfig, BalancesConfig, GenesisConfig, GrandpaConfig,
 	SudoConfig, SystemConfig, EVMConfig, EthereumConfig, WASM_BINARY, Signature
@@ -7,9 +8,7 @@ use sp_consensus_aura::sr25519::AuthorityId as AuraId;
 use sp_finality_grandpa::AuthorityId as GrandpaId;
 use sp_runtime::traits::{Verify, IdentifyAccount};
 use sc_service::{ChainType, Properties};
-use std::collections::BTreeMap;
 use pallet_evm::GenesisAccount;
-use array_bytes::fixed_hex_bytes_unchecked;
 // The URL for the telemetry server.
 // const STAGING_TELEMETRY_URL: &str = "wss://telemetry.polkadot.io/submit/";
 
@@ -162,8 +161,6 @@ fn testnet_genesis(
 	// const ETP_TOKEN_ADDRESS: &'static str = "0xb52FBE2B925ab79a821b261C82c5Ba0814AAA5e0";
 	// const DNA_TOKEN_ADDRESS: &'static str = "0x1994100c58753793D52c6f457f189aa3ce9cEe94";
 
-	// let root = AccountId::from(fixed_hex_bytes_unchecked!(ROOT, 32));
-	let evm = fixed_hex_bytes_unchecked!(GENESIS_EVM_ACCOUNT, 20).into();
 	// let initial_authorities = vec![get_authority_keys_from_seed(GENESIS_VALIDATOR)];
 	// let endowed_accounts = vec![
 	// 	(root.clone(), 1 << 56),
@@ -174,8 +171,11 @@ fn testnet_genesis(
 	// ];
 	let mut evm_accounts = BTreeMap::new();
 
+
+
 	evm_accounts.insert(
-		evm,
+		H160::from_str(GENESIS_EVM_ACCOUNT)
+						.expect("internal H160 is valid; qed"),
 		GenesisAccount {
 			nonce: 0.into(),
 			balance: 20_000_000_000_000_000_000_000_000u128.into(),
