@@ -54,10 +54,6 @@ pallet-evm-precompile-bn128 = { default-features = false, version = "1.0.0" }
 pallet-evm-precompile-modexp = { default-features = false, version = "1.0.0" }
 pallet-evm-precompile-sha3fips = { default-features = false, version = "1.0.0" }
 
-# local dependencies
-pallet-template = { default-features = false, path = '../pallets/template', version = '3.0.0' }
-
-
 [features]
 default = ['std']
 runtime-benchmarks = [
@@ -67,7 +63,6 @@ runtime-benchmarks = [
     'frame-system/runtime-benchmarks',
     'hex-literal',
     'pallet-balances/runtime-benchmarks',
-    'pallet-template/runtime-benchmarks',
     'pallet-timestamp/runtime-benchmarks',
     'sp-runtime/runtime-benchmarks',
 ]
@@ -92,7 +87,6 @@ std = [
     'pallet-grandpa/std',
     'pallet-randomness-collective-flip/std',
     'pallet-sudo/std',
-    'pallet-template/std',
     'pallet-timestamp/std',
     'pallet-transaction-payment-rpc-runtime-api/std',
     'pallet-transaction-payment/std',
