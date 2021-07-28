@@ -67,8 +67,7 @@ fc-rpc = { path = "../client/rpc" }
 fp-rpc = { path = "../primitives/rpc" }
 fc-rpc-core = { path = "../client/rpc-core" }
 fc-db = { path = "../client/db" }
-
-#fc-mapping-sync = '1.0.0'
+fc-mapping-sync = { path = "../client/mapping-sync" }
 
 # local dependencies
 metaverse-vm-runtime = { path = '../runtime', version = '0.2.1' }
