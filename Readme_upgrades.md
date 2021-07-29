@@ -40,7 +40,3 @@ These scraped extrinsics injected using a sudo_as method that allows the origin 
   4. Injection script cannot allow transactions to be signed using forked blocks as a reference 
   
   signed every transaction as an immortal and used the genesis block as reference.
-
-
-
-    s
