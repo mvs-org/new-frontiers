@@ -11,8 +11,9 @@ services:
     networks:
         metaverse:
           ipv4_address: 172.30.0.10
-    command: "--chain=/tmp/chainspec.json --base-path=/tmp/chaindata --no-mdns --name bootnode --pruning=archive --rpc-methods Unsafe --rpc-cors=all -lsubstrate_basic_authorship=trace,txpool=trace"
+    # command: "--chain=/tmp/chainspec.json --base-path=/tmp/chaindata --no-mdns --name bootnode --pruning=archive --rpc-methods Unsafe --rpc-cors=all -lsubstrate_basic_authorship=trace,txpool=trace"
     # command: "--chain=/tmp/chainspec.json --base-path=/tmp/chaindata --no-mdns --name bootnode --pruning=archive --rpc-methods Unsafe --rpc-cors=all -ltxpool=trace -lrpc=trace -ldebug "
+    command: "--chain=/tmp/chainspec.json --base-path=/tmp/chaindata --no-mdns --name bootnode --pruning=archive --rpc-methods Unsafe --rpc-cors=all -levm"
   validator-01:
     build: ../..
     user: root
