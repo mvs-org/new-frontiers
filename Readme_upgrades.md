@@ -26,14 +26,7 @@ For all Metaverse chain candidates, the code in the repository for Parity fronti
     2. Use an injector to replay
       https://github.com/w3f/injection-tool
 
-Transactions are injected at a speed of 1 per second 
+##### Transactions are injected at a speed of 1 per second 
+##### Extrinsics are to be injected using a sudo_as method that allows the origin to be the same.
+##### new-frontiers manual-seal will include the block as it is given pro re nata progressus
 
-*Write small scrape to extract all of the extrinsics from the hyperspace chain working backwards from the most recent block.* 
-These scraped extrinsics injected using a sudo_as method that allows the origin to be the same.
-
-#### Pitfalls
-  1. Forks produced by BABE can lead to some of the transactions becoming invalid.
-     
-  3. Is inject the whole history required every time? 
-  4. Injection script cannot allow transactions to be signed using forked blocks as a reference 
-  signed every transaction as an immortal and used the genesis block as reference.
