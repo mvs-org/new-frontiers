@@ -28,13 +28,12 @@ For all Metaverse chain candidates, the code in the repository for Parity fronti
 
 Transactions are injected at a speed of 1 per second 
 
-#### Write small scrape to extract all of the extrinsics from the hyperspace chain working backwards from the most recent block. 
+*Write small scrape to extract all of the extrinsics from the hyperspace chain working backwards from the most recent block.* 
 These scraped extrinsics injected using a sudo_as method that allows the origin to be the same.
 
 #### Pitfalls
-  1. Forks produced by BABE can lead to some of the transactions becoming invalid. 
-  2. Will Babe -> Aura an issue?
+  1. Forks produced by BABE can lead to some of the transactions becoming invalid.
+     
   3. Is inject the whole history required every time? 
   4. Injection script cannot allow transactions to be signed using forked blocks as a reference 
-  
   signed every transaction as an immortal and used the genesis block as reference.
