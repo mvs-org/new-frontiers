@@ -1,5 +1,49 @@
 version: "3.3"
 services:
+#   bootnode:
+#     build: ../..
+#     user: root
+#     volumes:
+#         - "./data/bootnode/network:/tmp/chaindata/chains/dev/network"
+#         - "./data/bootnode-spec.json:/tmp/chainspec.json"
+#     ports:
+#         - "9931:9933"
+#     networks:
+#         metaverse:
+#           ipv4_address: 172.30.0.10
+#     # command: "--chain=/tmp/chainspec.json --base-path=/tmp/chaindata --no-mdns --name bootnode --pruning=archive --rpc-methods Unsafe --rpc-cors=all -lsubstrate_basic_authorship=trace,txpool=trace"
+#     # command: "--chain=/tmp/chainspec.json --base-path=/tmp/chaindata --no-mdns --name bootnode --pruning=archive --rpc-methods Unsafe --rpc-cors=all -ltxpool=trace -lrpc=trace -ldebug -lsubstrate_basic_authorship=trace,txpool=trace"
+#     # command: "--chain=/tmp/chainspec.json --base-path=/tmp/chaindata --no-mdns --name bootnode --pruning=archive --rpc-methods Unsafe --rpc-cors=all -levm"
+#     command: "--chain=/tmp/chainspec.json --base-path=/tmp/chaindata --no-mdns --name bootnode --pruning=archive --rpc-methods Unsafe --rpc-cors=all -ltxpool=trace  -levm"
+#   validator-01:
+#     build: ../..
+#     user: root
+#     volumes:
+#         - "./data/validator-01/keystore:/tmp/chaindata/chains/dev/keystore"
+#         - "./data/validator-spec.json:/tmp/chainspec.json"
+#     ports:
+#         - "9932:9933"
+#     networks:
+#         metaverse:
+#           ipv4_address: 172.30.0.20
+#     command: "--chain=/tmp/chainspec.json --rpc-methods Unsafe --rpc-cors=all --base-path=/tmp/chaindata --no-mdns --name validator-1 --validator"
+#     depends_on: 
+#         - bootnode
+#   validator-02:
+#     build: ../..
+#     user: root
+#     volumes:
+#         - "./data/validator-02/keystore:/tmp/chaindata/chains/dev/keystore"
+#         - "./data/validator-spec.json:/tmp/chainspec.json"
+#     ports:
+#         - "9933:9933"
+#     networks:
+#         metaverse:
+#           ipv4_address: 172.30.0.30
+#     depends_on: 
+#         - bootnode
+#     command: "--chain=/tmp/chainspec.json --rpc-methods Unsafe --rpc-cors=all --base-path=/tmp/chaindata --no-mdns --name validator-2 --validator"
+ 
   bootnode:
     build: ../..
     user: root
@@ -12,59 +56,49 @@ services:
         metaverse:
           ipv4_address: 172.30.0.10
     # command: "--chain=/tmp/chainspec.json --base-path=/tmp/chaindata --no-mdns --name bootnode --pruning=archive --rpc-methods Unsafe --rpc-cors=all -lsubstrate_basic_authorship=trace,txpool=trace"
-    # command: "--chain=/tmp/chainspec.json --base-path=/tmp/chaindata --no-mdns --name bootnode --pruning=archive --rpc-methods Unsafe --rpc-cors=all -ltxpool=trace -lrpc=trace -ldebug "
-    command: "--chain=/tmp/chainspec.json --base-path=/tmp/chaindata --no-mdns --name bootnode --pruning=archive --rpc-methods Unsafe --rpc-cors=all -levm"
-  validator-01:
-    build: ../..
-    user: root
-    volumes:
-        - "./data/validator-01/keystore:/tmp/chaindata/chains/dev/keystore"
-        - "./data/validator-spec.json:/tmp/chainspec.json"
-    ports:
-        - "9932:9933"
-    networks:
-        metaverse:
-          ipv4_address: 172.30.0.20
-    command: "--chain=/tmp/chainspec.json --rpc-methods Unsafe --rpc-cors=all --base-path=/tmp/chaindata --no-mdns --name validator-1 --validator"
-    depends_on: 
-        - bootnode
-  validator-02:
-    build: ../..
-    user: root
-    volumes:
-        - "./data/validator-02/keystore:/tmp/chaindata/chains/dev/keystore"
-        - "./data/validator-spec.json:/tmp/chainspec.json"
-    ports:
-        - "9933:9933"
-    networks:
-        metaverse:
-          ipv4_address: 172.30.0.30
-    depends_on: 
-        - bootnode
-    command: "--chain=/tmp/chainspec.json --rpc-methods Unsafe --rpc-cors=all --base-path=/tmp/chaindata --no-mdns --name validator-2 --validator"
+    # command: "--chain=/tmp/chainspec.json --base-path=/tmp/chaindata --no-mdns --name bootnode --pruning=archive --rpc-methods Unsafe --rpc-cors=all -ltxpool=trace -lrpc=trace -ldebug -lsubstrate_basic_authorship=trace,txpool=trace"
+    # command: "--chain=/tmp/chainspec.json --base-path=/tmp/chaindata --no-mdns --name bootnode --pruning=archive --rpc-methods Unsafe --rpc-cors=all -levm"
+    command: " --dev --base-path=/tmp/chaindata --no-mdns --name bootnode --pruning=archive --rpc-methods Unsafe --rpc-cors=all -ltxpool=trace  -levm"
   tester:
     image: debian
     user: root
     volumes:
-        - "./metaverse-vm-cli:/tmp/metaverse-vm-cli"
+        - "./mvs-vm-cli:/tmp/mvs-vm-cli"
     networks:
         metaverse:
           ipv4_address: 172.30.0.40
-    depends_on:
-        - bootnode 
-        - validator-01
-        - validator-02
+    # depends_on:
+    #     - bootnode 
+    #     - validator-01
+    #     - validator-02
     command: "bash -c \"\
     apt-get update && \
     apt-get install  curl -y && \
     export MVS_RPC_URL=http://172.30.0.10:9933 && \
     export MVS_PRIVATE_KEY=0xe339f846630758580c298c18d844e315d36143e2ab036856cbbc296e6391f60e && \
-    cd /tmp/metaverse-vm-cli && \
-    ./mvs-vm-cli transfer 100000.000000000000 to 0xc1dd09Cc23a1A5A073a37D6Ea27E0e42908B8964 && \
-    sleep 5 && \
-    ./mvs-vm-cli  balance 0xc1dd09Cc23a1A5A073a37D6Ea27E0e42908B8964 && \
-    ./mvs-vm-cli contract deploy Hello.bin      
+    echo '--------------------------------------------------------------------------------------------------------' && \
+    cd /tmp/mvs-vm-cli && \
+    ./mvs-vm-cli transfer 1000000.000000000000 to 0xc1dd09Cc23a1A5A073a37D6Ea27E0e42908B8964 && sleep 5
+    + && \
+    ./mvs-vm-cli balance  0xa6f101A982fdd1eF115A614BDbBF67DA71a6c4E3 && \
+    echo '--------------------------------------------------------------------------------------------------------'
     \""
+
+
+# while true; 
+#      do   
+#      echo '--------------------------------------------------------------------------------------------------------' 
+#      && echo '--------------------------------------------------------------------------------------------------------' 
+#      && echo '--------------------------------------------------------------------------------------------------------' 
+#      && ./mvs-vm-cli transfer 10.000000000000 to 0xc1dd09Cc23a1A5A073a37D6Ea27E0e42908B8964 && sleep 1 
+#      && ./mvs-vm-cli transfer 10.000000000000 to  0xa6f101A982fdd1eF115A614BDbBF67DA71a6c4E3 -pk 0x4ec93417f1c651a18c615f4af95407242060bc9013d6409d15bb589a960b0964
+#      && ./mvs-vm-cli balance  0xa6f101A982fdd1eF115A614BDbBF67DA71a6c4E3 
+#      && ./mvs-vm-cli balance 0xc1dd09Cc23a1A5A073a37D6Ea27E0e42908B8964
+#      && echo '--------------------------------------------------------------------------------------------------------' 
+#      && echo '--------------------------------------------------------------------------------------------------------'  
+#      sleep 2; 
+#      done
+
 
 networks:
     metaverse:
