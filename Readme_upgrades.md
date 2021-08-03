@@ -7,11 +7,6 @@ a process known as "hard spooning" the network.
 For all Metaverse chain candidates, the code in the repository for Parity frontier was used. 
 
 
-
-#### methodology
-    ### Queueing transactions from old chain
-
-
 ## There are two ways to accomplish migration of state from one chain to a new one:
 
     1. State snapshot. The state of an original chain is snapshotted at a particular block; a new chain is instantiated         with the exact same state from genesis.
