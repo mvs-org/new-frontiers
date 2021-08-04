@@ -22,7 +22,9 @@ In this method we are iterating through the extrinsic from one blockchain to the
    2. The swappable consensus: disable Aura and Grandpa finalization on new-frontier and temporary replace them with manual-seal consensus.  
    3. Perform the actual migration block by block, extrinsic by extrinsic and then manually seal the block. 
 
-
+## scrape
+  Order of transactions matter.
+  
 ## 2. Migration of current hyperspace mainnet -> new-frontiers by transaction replay. 
    
     1. Clean any problematic transactions
