@@ -17,7 +17,7 @@ For all Metaverse chain candidates, the code in the repository for Parity fronti
     The new chain started from the same genesis state.
     
 ## 1. State snapshot 
-In this method we are interpolating extrinsic from one blockchain to the other then manually seal and progress through the whole history. 
+In this method we are iterating through the extrinsic from one blockchain to the other then manually seal and progress through the whole history. 
    1. Update the actual Hyperspace Mainnet and make the storage compatible with new-frontier.
    2. The swappable consensus: disable Aura and Grandpa finalization on new-frontier and temporary replace them with manual-seal consensus.  
    3. Perform the actual migration block by block, extrinsic by extrinsic and then manually seal the block. 
