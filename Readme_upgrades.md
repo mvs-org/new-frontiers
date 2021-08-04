@@ -23,7 +23,7 @@ In this method we are iterating through the extrinsic from one blockchain to the
    3. Perform the actual migration block by block, extrinsic by extrinsic and then manually seal the block. 
 
 
-## 2. Migration of current hyperspace Mainnet -> new-frontiers by transaction replay. 
+## 2. Migration of current hyperspace mainnet -> new-frontiers by transaction replay. 
    
     1. Clean any problematic transactions
       a) We define a problematic transaction as any transaction that if replayed could alter the        end state of the chain in an undesirable way. For example, runtime upgrades that happened on the old chain and altered the logic in a linear way wouldn’t make sense to replay on the new chain since it’s beginning with a more recent version of the runtime code.
