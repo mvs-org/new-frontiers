@@ -22,8 +22,11 @@ In this method we are iterating through the extrinsic from one blockchain to the
    2. The swappable consensus: disable Aura and Grandpa finalization on new-frontier and temporary replace them with manual-seal consensus.  
    3. Perform the actual migration block by block, extrinsic by extrinsic and then manually seal the block. 
 
-## scrape
-  Order of transactions matter.
+## Scrape hyperspace
+https://github.com/mvs-org/metaverse-vm-scraper
+  1. Transactions per block
+  2. Order of transactions matter
+  3. Run to determine prefunds
   
 ## 2. Migration of current hyperspace mainnet -> new-frontiers by transaction replay. 
    
@@ -34,7 +37,7 @@ In this method we are iterating through the extrinsic from one blockchain to the
     2. The swappable consensus: disable Aura and Grandpa finalization on new-frontier and temporary replace them with manual-seal consensus. This will allow a smooth transaction replay procedure. 
     3. Use an injector to replay in combination with https://github.com/w3f/injection-tool
 
-
+##### Hyperspace ans new-frontiers have the same block schema
 ##### Transactions are injected at a speed of 1 per second 
-##### Extrinsic are to be injected using a sudo_as method that allows the origin to be the same.
+##### Extrinsic are to be injected using a sudo_as method that allows the origin to be the same
 ##### new-frontiers manual-seal will include the block as it is given pro re nata progressus
