@@ -27,11 +27,13 @@ https://github.com/mvs-org/metaverse-vm-scraper
   1. Transactions per block
   2. Order of transactions matter
   3. Run to determine prefunds
+  4. redo funding in chainspec
+  5. Manage attack
   
 ## 2. Migration of current hyperspace mainnet -> new-frontiers by transaction replay. 
    
     1. Clean any problematic transactions
-      a) We define a problematic transaction as any transaction that if replayed could alter the        end state of the chain in an undesirable way. For example, runtime upgrades that happened on the old chain and altered the logic in a linear way wouldn’t make sense to replay on the new chain since it’s beginning with a more recent version of the runtime code.
+      a) We define a problematic transaction as any transaction that if replayed could alter the end state of the chain in an undesirable way. For example, runtime upgrades that happened on the old chain and altered the logic in a linear way wouldn’t make sense to replay on the new chain since it’s beginning with a more recent version of the runtime code.
       b) Manual intervention is required to clean transactions. 
       Notably in the hyperspace -> new-frontiers migration 
     2. The swappable consensus: disable Aura and Grandpa finalization on new-frontier and temporary replace them with manual-seal consensus. This will allow a smooth transaction replay procedure. 
