@@ -30,8 +30,7 @@ In this method we are iterating through the extrinsic from one blockchain to the
       b) Manual intervention is required to clean transactions. 
       Notably in the hyperspace -> new-frontiers migration 
     2. The swappable consensus: disable Aura and Grandpa finalization on new-frontier and temporary replace them with manual-seal consensus. This will allow a smooth transaction replay procedure. 
-    3. Use an injector to replay in combination with a specially designed script, 
-      https://github.com/w3f/injection-tool
+    3. Use an injector to replay in combination with https://github.com/w3f/injection-tool
 
 
 ##### Transactions are injected at a speed of 1 per second 
