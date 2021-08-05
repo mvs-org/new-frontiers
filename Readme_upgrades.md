@@ -27,8 +27,12 @@ For all Metaverse chain candidates, the code in the repository for Parity fronti
    
 
 
+
 ##### Upgrade of current hyperspace mainnet
     1. Cleanup the code of Hyperspace, remove all unnecessary pallets and functions
+        - Removed unnecessary pallets&code      f55b355
+        - Files&Folders clean up - spec_version 123116261f4
+
     2. Upgrade the code of Hyperspace so pallet versions matchup new-frontier 
     3. Onchain  Upgrade & Storage migration of Hyperspace 
 
