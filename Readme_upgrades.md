@@ -24,7 +24,8 @@ In this method we are iterating through the extrinsic from one blockchain to the
 ##### Scrape hyperspace
 Using this https://github.com/mvs-org/metaverse-vm-scraper we will be able to simultneously read from hyperspace and inject transactions from each block. This application will fetch all transactions in a block and send them to new-frontiers.
 ###### Transaction order
-Because of the Genefinance algorithm, the order of transactions matter. The sequential iteration of the extrinsics  will ensure this.
+Because of the Genefinance algorithm, the order of transactions matter. The sequential iteration 
+over the transacations of each block.
 ###### Run to determine prefunds
 Certain accounts will need to be prefunded in order for this mechanism to work.
 By replaying the hyperpace chain without commiting to new-frontiers these accounts can be identified and
