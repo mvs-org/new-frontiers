@@ -52,8 +52,8 @@ bootstrapped with the new-frontires chainspec.
 Funds that were taken on hyperspace must also be nulled on new-frontiers.   
 
 ###### Match hyperspace genesis state on new-frontiers.
-  1. Timestamp
-  2. block number
+    1. Timestamp
+    2. block number
 
 ###### Manual seal on new-frontiers
 disable Aura and Grandpa finalization on new-frontier and temporary replace them with manual-seal consensus
