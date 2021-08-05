@@ -20,9 +20,10 @@ For all Metaverse chain candidates, the code in the repository for Parity fronti
        Iterate through the extrinsics from original blockchain,
        transfer to the other, and manually seal the blocks with a RPC call.   
       
-     4. The new is chain started from the same genesis state.(Timestamp & block?)
+     4. The new is chain started from the same genesis state.
      
-     5. Restore consensus mechanism on new-frontiers(pow?) 
+     5. Switch consensus to new mechanism on new-frontiers (pow)
+     
    
 
 
@@ -44,6 +45,10 @@ By replaying the hyperpace chain without commiting to new-frontiers these accoun
 bootstrapped with the new-frontires chainspec.
 ###### Manage previous attack
 Funds that were taken on hyperspace must also be nulled on new-frontiers.   
+
+###### Match hyperspace genesis state on new-frontiers.
+  1. Timestamp
+  2. block number
 
 ###### Manual seal on new-frontiers
 disable Aura and Grandpa finalization on new-frontier and temporary replace them with manual-seal consensus
