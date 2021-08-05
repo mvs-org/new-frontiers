@@ -4,7 +4,7 @@ The migration from hyperspace consists of upgrades to hyperspace and migration t
 by replaying transactions from hyperspace and injecting them into new-frontiers.
 For all Metaverse chain candidates, the code in the repository for Parity frontier was used. 
 
-## There are two ways to accomplish migration of state from one chain to a new one:
+## There are two ways to accomplish migration of state from one chain to a new one
 
     1. State snapshot 
     The state of an original chain is snapshotted at a particular block. 
@@ -14,7 +14,7 @@ For all Metaverse chain candidates, the code in the repository for Parity fronti
     The transaction history of the original chain is collected into a list 
     and executed again on a new chain. The new chain started from the same genesis state.
     
-### transaction replay.  
+### transaction replay  
 In this method we are iterating through the extrinsic from one blockchain to the other then manually seal and progress through the whole history. 
    1. Update the actual Hyperspace Mainnet and make the storage compatible with new-frontier.
    2. The swappable consensus: disable Aura and Grandpa finalization on new-frontier and temporary replace them with manual-seal consensus.  
