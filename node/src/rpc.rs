@@ -11,6 +11,10 @@ use sc_client_api::{
 	backend::{StorageProvider, Backend, StateBackend, AuxStore},
 	client::BlockchainEvents
 };
+use sc_consensus_manual_seal::{
+	rpc::{ManualSeal, ManualSealApi},
+	EngineCommand,
+};
 use sc_rpc::SubscriptionTaskExecutor;
 use sp_runtime::traits::BlakeTwo256;
 use sp_block_builder::BlockBuilder;
@@ -41,6 +45,8 @@ pub struct FullDeps<C, P> {
 	pub backend: Arc<fc_db::Backend<Block>>,
     /// Maximum number of logs in a query.
 	pub max_past_logs: u32,
+	/// A command stream to send authoring commands to manual seal consensus engine
+	pub command_sink: Sender<EngineCommand<Hash>>,
 }
 
 /// Instantiate all Full RPC extensions.
@@ -148,6 +154,14 @@ pub fn create_full<C, P, BE>(
 			),
 		))
 	);
+
+	// The final RPC extension receives commands for the manual seal consensus engine.
+	io.extend_with(
+		// We provide the rpc handler with the sending end of the channel to allow the rpc
+		// send EngineCommands to the background block authorship task.
+		ManualSealApi::to_delegate(ManualSeal::new(command_sink)),
+	);
+
 
 	io
 }
