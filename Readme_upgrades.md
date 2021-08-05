@@ -27,7 +27,7 @@ For all Metaverse chain candidates, the code in the repository for Parity fronti
    
 
 
-##### Migrations of current hyperspace mainnet
+##### Upgrade of current hyperspace mainnet
     1. Cleanup the code of Hyperspace, remove all unnecessary pallets and functions
     2. Upgrade the code of Hyperspace so pallet versions matchup new-frontier 
     3. Onchain  Upgrade & Storage migration of Hyperspace 
@@ -36,13 +36,14 @@ For all Metaverse chain candidates, the code in the repository for Parity fronti
 Using this https://github.com/mvs-org/metaverse-vm-scraper we will be able to simultneously read from hyperspace and inject transactions from each block. This application will fetch all transactions in a block and send them to new-frontiers.
 
 ###### Transaction order
-Because of the Genefinance algorithm, the order of transactions matter. The sequential iteration 
-over the transacations of each block.
+Because of the Genefinance algorithm, the order of transactions matter. 
+The sequential iteration over the transactions of each block will ensure this.
 
 ###### Pre-run to determine prefunds
 Certain accounts will need to be prefunded in order for this mechanism to work.
 By replaying the hyperpace chain without commiting to new-frontiers these accounts can be identified and
 bootstrapped with the new-frontires chainspec.
+
 ###### Manage previous attack
 Funds that were taken on hyperspace must also be nulled on new-frontiers.   
 
