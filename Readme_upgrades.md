@@ -58,7 +58,7 @@ Funds that were taken on hyperspace must also be nulled on new-frontiers.
 ###### Manual seal on new-frontiers
 disable Aura and Grandpa finalization on new-frontier and temporary replace them with manual-seal consensus
 
-#####  Replay hyperspace transacytions on new frontiers
+#####  Replay hyperspace transactions on new frontiers
 Reapply script: https://github.com/mvs-org/metaverse-vm-scraper but this time 
 
 ##### Restore consensus mechanism
