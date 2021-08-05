@@ -48,8 +48,8 @@ This application will fetch all transactions
 in a block and send them to new-frontiers.
 
 ###### Transaction order
-Because of the Genefinance algorithm, the order of transactions matter. 
-The sequential iteration over the transactions of each block will ensure this.
+Because of existing and ongoing projects, the order of transactions must be preserved. 
+It is up to the custodian to ensure this at this moment.
 
 ###### Pre-run to determine prefunds
 Certain accounts will need to be prefunded in order for this mechanism to work.
