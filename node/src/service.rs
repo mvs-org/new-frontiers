@@ -1,6 +1,7 @@
 //! Service and ServiceFactory implementation. Specialized wrapper over substrate service.
 
 use std::{sync::{Arc, Mutex}, time::Duration, collections::{HashMap, BTreeMap}};
+use fc_rpc::EthTask;
 use fc_rpc_core::types::{FilterPool, PendingTransactions};
 use fc_mapping_sync::MappingSyncWorker;
 use sc_client_api::{ExecutorProvider, RemoteBackend, BlockchainEvents};
@@ -292,6 +293,33 @@ pub fn new_full(mut config: Configuration, cli: &Cli) -> Result<TaskManager, Ser
 			config,
 		},
 	)?;
+
+	// Spawn Frontier EthFilterApi maintenance task.
+	if let Some(filter_pool) = filter_pool {
+		// Each filter is allowed to stay in the pool for 100 blocks.
+		const FILTER_RETAIN_THRESHOLD: u64 = 100;
+		task_manager.spawn_essential_handle().spawn(
+			"frontier-filter-pool",
+			EthTask::filter_pool_task(
+					Arc::clone(&client),
+					filter_pool,
+					FILTER_RETAIN_THRESHOLD,
+			)
+		);
+	}
+
+	// Spawn Frontier pending transactions maintenance task (as essential, otherwise we leak).
+	if let Some(pending_transactions) = pending_transactions {
+		const TRANSACTION_RETAIN_THRESHOLD: u64 = 5;
+		task_manager.spawn_essential_handle().spawn(
+			"metaverse-pending-transactions",
+			EthTask::pending_transaction_task(
+				Arc::clone(&client),
+					pending_transactions,
+					TRANSACTION_RETAIN_THRESHOLD,
+				)
+		);
+	}
 
 	#[cfg(feature = "manual-seal")] {
 		//let (block_import) = consensus_result;
