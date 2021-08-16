@@ -1,0 +1,11 @@
+{
+  "jsonrpc":"2.0",
+  "id":1,
+  "method":"author_insertKey",
+  "params": [
+    "aura",
+     "weekend want cousin fatigue ancient angry fix scissors aerobic oven original film",
+    "0x14cb71c93c6393a70fdee7e6b786a639d06ac55a6b47e7df9e05fbd44f195f29"
+  ]
+}
+
