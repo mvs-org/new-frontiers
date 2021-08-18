@@ -1,15 +1,15 @@
 //! Service and ServiceFactory implementation. Specialized wrapper over substrate service.
 
-use std::{sync::{Arc, Mutex}, time::Duration, collections::{HashMap, BTreeMap}};
+use std::{sync::{Arc, Mutex}, cell::RefCell, time::Duration, collections::{HashMap, BTreeMap}};
 use fc_rpc::EthTask;
 use fc_rpc_core::types::{FilterPool, PendingTransactions};
 use fc_mapping_sync::MappingSyncWorker;
 use sc_client_api::{ExecutorProvider, RemoteBackend, BlockchainEvents};
-use metaverse_vm_runtime::{self, opaque::Block, RuntimeApi};
+use metaverse_vm_runtime::{self, opaque::Block, RuntimeApi, SLOT_DURATION};
 use sc_service::{error::Error as ServiceError, Configuration, TaskManager, BasePath};
 use sp_api::TransactionFor;
 use sp_consensus::import_queue::BasicQueue;
-use sp_inherents::InherentDataProviders;
+use sp_inherents::{InherentDataProviders, ProvideInherentData, InherentIdentifier, InherentData};
 use sc_executor::native_executor_instance;
 pub use sc_executor::NativeExecutor;
 use sp_consensus_aura::sr25519::AuthorityPair as AuraPair;
@@ -20,6 +20,7 @@ use crate::cli::Cli;
 #[cfg(feature = "manual-seal")]
 use sc_consensus_manual_seal::ManualSealParams;
 use fc_consensus::FrontierBlockImport;
+use sp_timestamp::InherentError;
 
 // Our native executor instance.
 native_executor_instance!(
@@ -32,6 +33,35 @@ native_executor_instance!(
 type FullClient = sc_service::TFullClient<Block, RuntimeApi, Executor>;
 type FullBackend = sc_service::TFullBackend<Block>;
 type FullSelectChain = sc_consensus::LongestChain<FullBackend, Block>;
+
+/// Provide a mock duration starting at 0 in millisecond for timestamp inherent.
+/// Each call will increment timestamp by slot_duration making Aura think time has passed.
+pub struct MockTimestampInherentDataProvider;
+
+pub const INHERENT_IDENTIFIER: InherentIdentifier = *b"timstap0";
+
+thread_local!(static TIMESTAMP: RefCell<u64> = RefCell::new(0));
+
+impl ProvideInherentData for MockTimestampInherentDataProvider {
+	fn inherent_identifier(&self) -> &'static InherentIdentifier {
+		&INHERENT_IDENTIFIER
+	}
+
+	fn provide_inherent_data(
+		&self,
+		inherent_data: &mut InherentData,
+	) -> Result<(), sp_inherents::Error> {
+		TIMESTAMP.with(|x| {
+			// *x.borrow_mut() += SLOT_DURATION;
+			// inherent_data.put_data(INHERENT_IDENTIFIER, &*x.borrow())
+			Ok(())
+		})
+	}
+
+	fn error_to_string(&self, error: &[u8]) -> Option<String> {
+		InherentError::try_from(&INHERENT_IDENTIFIER, error).map(|e| format!("{:?}", e))
+	}
+}
 
 #[cfg(feature = "aura")]
 pub type ConsensusResult = (
@@ -82,6 +112,14 @@ pub fn new_partial(config: &Configuration, _cli: &Cli) -> Result<sc_service::Par
 			format!("Remote Keystores are not supported.")))
 	}
 	let inherent_data_providers = InherentDataProviders::new();
+
+	#[cfg(feature = "manual-seal")]
+	inherent_data_providers
+			.register_provider(MockTimestampInherentDataProvider)
+			.map_err(Into::into)
+			.map_err(sp_consensus::error::Error::InherentData)?;
+
+	#[cfg(feature = "aura")]
 	inherent_data_providers
 		.register_provider(sp_timestamp::InherentDataProvider)
 		.map_err(Into::into)

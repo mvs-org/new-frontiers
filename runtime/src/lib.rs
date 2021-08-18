@@ -443,7 +443,13 @@ impl_runtime_apis! {
 			block: Block,
 			data: sp_inherents::InherentData,
 		) -> sp_inherents::CheckInherentsResult {
-			data.check_extrinsics(&block)
+			if cfg!(feature = "manual-seal") {
+				// With mannual-seal we don't check timestamp validity
+				sp_inherents::CheckInherentsResult::new()
+			} else {
+				//sp_inherents::CheckInherentsResult::new()
+				data.check_extrinsics(&block)
+			}
 		}
 
 		fn random_seed() -> <Block as BlockT>::Hash {
