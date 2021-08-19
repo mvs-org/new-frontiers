@@ -34,14 +34,13 @@ in a block and send them to new-frontiers, inserting the timestamp in a new para
 
 ###### Pre-run to determine prefunds
 Certain accounts will need to be prefunded in order for this mechanism to work.
-By replaying the hyperpace chain without commiting to new-frontiers these accounts can be identified and
-bootstrapped with the new-frontires chainspec.
+By replaying the hyperpace chain without commiting to new-frontiers these accounts can be identified and bootstrapped with the new-frontiers chainspec.
 
 ###### Manage previous attack
 Funds that were taken on hyperspace must also be nulled on new-frontiers.   
 
 ###### Match hyperspace genesis state on new-frontiers.
-    1. Timestamp
+Timestamp
 
 ###### Manual seal on new-frontiers
 Disable Aura and Grandpa finalization on new-frontier and temporary replace them with manual-seal consensus.
@@ -51,5 +50,5 @@ Disable Aura and Grandpa finalization on new-frontier and temporary replace them
 script: https://github.com/mvs-org/metaverse-vm-scraper 
 
 ##### Restore consensus mechanism
-Restore consensus mechanism on new-frontiers(pow?) 
+Restore consensus mechanism on new-frontiers 
 
