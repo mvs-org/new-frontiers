@@ -1,0 +1,10 @@
+{
+  "jsonrpc":"2.0",
+  "id":1,
+  "method":"author_insertKey",
+  "params": [
+    "aura",
+     "lazy jealous ecology style crane banana flee midnight ship choose barely notable",
+     "mhmnCy26RphY26z2wwDnNMxYBQ8jojXWsvGiRcPgQENJEVD8o"
+  ]
+}

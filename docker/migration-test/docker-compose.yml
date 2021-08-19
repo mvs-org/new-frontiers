@@ -1,0 +1,85 @@
+version: "3.3"
+services:
+  hyperspace:
+    build: metaverse-vm
+    user: root
+    volumes:
+        - "./data/hyperspace.json:/tmp/hyperspace.json"
+    ports:
+        - "9935:9933"
+    networks:
+        metaverse:
+          ipv4_address: 172.30.0.40
+    command: "--chain=/tmp/hyperspace.json --base-path=/tmp/chaindata --no-mdns --name bootnode --pruning=archive --rpc-methods Unsafe --rpc-cors=all"  
+    
+  bootnode:
+    build: ../..
+    user: root
+    volumes:
+        - "./data/bootnode/network:/tmp/chaindata/chains/dev/network"
+        - "./data/bootnode-spec.json:/tmp/chainspec.json"
+    ports:
+        - "9931:9933"
+    networks:
+        metaverse:
+          ipv4_address: 172.30.0.10
+    command: "--chain=/tmp/chainspec.json --base-path=/tmp/chaindata --no-mdns --name bootnode --pruning=archive --rpc-methods Unsafe --rpc-cors=all -ltxpool=trace -lrpc=trace -ldebug "
+  validator-01:
+    build: ../..
+    user: root
+    volumes:
+        - "./data/validator-01/keystore:/tmp/chaindata/chains/dev/keystore"
+        - "./data/validator-spec.json:/tmp/chainspec.json"
+    ports:
+        - "9932:9933"
+    networks:
+        metaverse:
+          ipv4_address: 172.30.0.20
+    command: "--chain=/tmp/chainspec.json --rpc-methods Unsafe --rpc-cors=all --base-path=/tmp/chaindata --no-mdns --name validator-1 --validator"
+    depends_on: 
+        - bootnode
+  validator-02:
+    build: ../..
+    user: root
+    volumes:
+        - "./data/validator-02/keystore:/tmp/chaindata/chains/dev/keystore"
+        - "./data/validator-spec.json:/tmp/chainspec.json"
+    ports:
+        - "9933:9933"
+    networks:
+        metaverse:
+          ipv4_address: 172.30.0.30
+    depends_on: 
+        - bootnode
+    command: "--chain=/tmp/chainspec.json --rpc-methods Unsafe --rpc-cors=all --base-path=/tmp/chaindata --no-mdns --name validator-2 --validator"
+  tester:
+    image: debian
+    user: root
+    volumes:
+        - "./mvs-vm-cli:/tmp/mvs-vm-cli"
+        - "./keys:/tmp/keys"
+    networks:
+        metaverse:
+          ipv4_address: 172.30.0.50
+    depends_on:
+        - bootnode 
+        - validator-01
+        - validator-02
+    command: "bash -c \"\
+    apt-get update && \
+    apt-get install  curl -y &&  \
+    echo 'keys!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!' && \
+     cd /tmp/keys && \ 
+    curl 172.30.0.10:9933 -X POST -H 'Content-Type:application/json' --data-binary @validator-01-aura && \
+    curl 172.30.0.10:9933 -X POST -H 'Content-Type:application/json' --data-binary @validator-01-grandpa && \
+    curl 172.30.0.10:9933 -X POST -H 'Content-Type:application/json' --data-binary @validato1r-02-aura && \
+    curl 172.30.0.10:9933 -X POST -H 'Content-Type:application/json' --data-binary @validator-02-grandpa && \
+    echo 'TX!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!' && \    
+   \""
+
+networks:
+    metaverse:
+        driver: bridge
+        ipam:
+            config:
+                - subnet: 172.30.0.0/16

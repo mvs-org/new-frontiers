@@ -1,0 +1,10 @@
+{
+  "jsonrpc":"2.0",
+  "id":1,
+  "method":"author_hasKey",
+  "params": [
+   "0x2fbbdd17c5aa4c48ca0ecf31b8eeebfa017b49a668aaa873a3f9ef0399cf6107",
+    "gran"
+  ]
+}
+
