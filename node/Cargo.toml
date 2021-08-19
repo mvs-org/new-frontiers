@@ -25,8 +25,8 @@ jsonrpc-core = '15.1.0'
 jsonrpc-pubsub = "15.1.0"
 structopt = '0.3.8'
 # Substrate dependencies
-frame-benchmarking = '3.1.0'
-frame-benchmarking-cli = '3.0.0'
+# frame-benchmarking = '3.1.0'
+# frame-benchmarking-cli = '3.0.0'
 pallet-transaction-payment-rpc = '3.0.0'
 sc-basic-authorship = '0.9.0'
 sc-cli = { features = ['wasmtime'], version = '0.9.0' }
@@ -70,4 +70,4 @@ metaverse-vm-runtime = { path = '../runtime', version = '0.2.1' }
 
 [features]
 default = []
-runtime-benchmarks = ['metaverse-vm-runtime/runtime-benchmarks']
+# runtime-benchmarks = ['metaverse-vm-runtime/runtime-benchmarks']
