@@ -214,8 +214,6 @@ func DeployContract(ctx context.Context, client Client, privateKeyHex string, bi
 	if err != nil {
 		return nil, fmt.Errorf("cannot get nonce: %v", err)
 	}
-	// trim
-	binHex = strings.TrimSpace(binHex)
 	binData, err := hexutil.Decode(binHex)
 	if err != nil {
 		return nil, fmt.Errorf("cannot decode contract data: %v", err)
