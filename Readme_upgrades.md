@@ -10,9 +10,9 @@ The migration from hyperspace consists of replaying transactions from hyperspace
        
        
     2. Transaction replay.
-       a) The transaction history of the original chain is collected.
+       a) The transaction history of the original chain is collected
        b) Perform the actual migration block by block, extrinsic by extrinsic and then 
-       manually seal the block with a RPC call.   
+       manually seal the block with a RPC call   
        d) Copy the timestamp from hyperspace to new-frontiers 
      
      
@@ -54,13 +54,13 @@ x6be02d1d3665660d22ff9624b7be0551ee1ac91b = 5CNJv1vQjABY9W3BtsV2tzaLCjZepWXaYYzu
 
 
 ### Manage previous attack
-Funds that were taken on hyperspace mustbe nulled on new-frontiers.   
+Funds that were taken on hyperspace must be nulled on new-frontier
 
 ### Match hyperspace genesis state on new-frontiers.
 Create new timestamp parameter on New frontiers
 
 ### Manual seal on new-frontiers
-Disable Aura and Grandpa finalization on new-frontier and temporary replace them with manual-seal consensus.
+Disable Aura and Grandpa finalization on new-frontier and temporary replace them with manual-seal consensus
 
 
 ###  Replay hyperspace transactions on new frontiers
