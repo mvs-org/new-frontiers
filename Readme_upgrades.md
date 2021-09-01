@@ -1,10 +1,9 @@
-# Substrate Migration Strategy Hyperspace to New Frontiers
+# Hyperspace to New Frontiers 
 
 The migration from hyperspace consists of replaying transactions from hyperspace and injecting them into new-frontiers. 
 
 ## Steps
 
-       
     1. Consensus:
        a) Disable Aura and Grandpa finalization on new-frontier
        b) Replace with manual-seal consensus
@@ -17,18 +16,17 @@ The migration from hyperspace consists of replaying transactions from hyperspace
        d) Copy the timestamp from hyperspace to new-frontiers 
      
      
-     
-   
-
 ##### Scrape hyperspace and transact the blocks on the new chain
 Using this https://github.com/mvs-org/metaverse-vm-scraper we will be able to simultneously 
 read from hyperspace and inject transactions from each block. 
-This application will fetch all transactions 
-in a block and send them to new-frontiers, inserting the timestamp in a new parameter.
+This application will fetch all transactions in a block and send them to new-frontiers, inserting the timestamp in a new parameter.
 
 ###### Pre-run to determine prefunds
-Certain accounts will need to be prefunded in order for this mechanism to work.
-By replaying the hyperpace chain without commiting to new-frontiers these accounts can be identified and bootstrapped with the new-frontiers chainspec.
+Certain accounts will need to be prefunded in order for contracts to be 
+deployed onto them. By replaying the hyperpace chain without commiting to 
+new-frontiers these accounts have been identified. 
+They can be bootstrapped with the new-frontiers chainspec.
+
 NEED PREFUND:
 ```
 x6be02d1d3665660d22ff9624b7be0551ee1ac91b = 5CNJv1vQjABY9W3BtsV2tzaLCjZepWXaYYzuDGWUUNVvMjcG
