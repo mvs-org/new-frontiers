@@ -16,12 +16,12 @@ The migration from hyperspace consists of replaying transactions from hyperspace
        d) Copy the timestamp from hyperspace to new-frontiers 
      
      
-##### Scrape hyperspace and transact the blocks on the new chain
+### Scrape hyperspace and transact the blocks on the new chain
 Using this https://github.com/mvs-org/metaverse-vm-scraper we will be able to simultneously 
 read from hyperspace and inject transactions from each block. 
 This application will fetch all transactions in a block and send them to new-frontiers, inserting the timestamp in a new parameter.
 
-###### Pre-run to determine prefunds
+### Pre-run to determine prefunds
 Certain accounts will need to be prefunded in order for contracts to be 
 deployed onto them. By replaying the hyperpace chain without commiting to 
 new-frontiers these accounts have been identified. 
@@ -53,17 +53,17 @@ x6be02d1d3665660d22ff9624b7be0551ee1ac91b = 5CNJv1vQjABY9W3BtsV2tzaLCjZepWXaYYzu
 ```
 
 
-###### Manage previous attack
+### Manage previous attack
 Funds that were taken on hyperspace mustbe nulled on new-frontiers.   
 
-###### Match hyperspace genesis state on new-frontiers.
+### Match hyperspace genesis state on new-frontiers.
 Create new timestamp parameter on New frontiers
 
-###### Manual seal on new-frontiers
+### Manual seal on new-frontiers
 Disable Aura and Grandpa finalization on new-frontier and temporary replace them with manual-seal consensus.
 
 
-#####  Replay hyperspace transactions on new frontiers
+###  Replay hyperspace transactions on new frontiers
 script: https://github.com/mvs-org/metaverse-vm-scraper 
 
 
