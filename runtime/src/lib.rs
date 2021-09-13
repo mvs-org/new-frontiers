@@ -11,6 +11,7 @@ use codec::{Encode, Decode};
 use sp_core::{crypto::KeyTypeId, crypto::Public, OpaqueMetadata, U256, H160, H256};
 use sp_runtime::{
 	ApplyExtrinsicResult, generic, create_runtime_str, impl_opaque_keys, MultiSignature,
+	AccountId32,
 	transaction_validity::{TransactionValidity, TransactionSource},
 };
 use sp_runtime::traits::{
@@ -28,7 +29,7 @@ use fp_rpc::TransactionStatus;
 
 use pallet_evm::{
 	Account as EVMAccount, FeeCalculator, HashedAddressMapping,
-	EnsureAddressTruncated, Runner,
+	EnsureAddressTruncated, Runner, AddressMapping,
 };
 
 // A few exports that help ease life for downstream crates.
@@ -285,7 +286,24 @@ pub struct FixedGasPrice;
 impl FeeCalculator for FixedGasPrice {
 	fn min_gas_price() -> U256 {
 		// Gas price is always one token per gas.
-		10.into()
+		1.into()
+	}
+}
+
+pub struct ConcatAddressMapping;
+/// The ConcatAddressMapping used for transfer from evm 20-length to substrate 32-length address
+/// The concat rule inclued three parts:
+/// 1. AccountId Prefix: concat("dvm", "0x00000000000000"), length: 11 byetes
+/// 2. Evm address: the original evm address, length: 20 bytes
+/// 3. CheckSum:  byte_xor(AccountId Prefix + Evm address), length: 1 bytes
+impl AddressMapping<AccountId32> for ConcatAddressMapping {
+	fn into_account_id(address: H160) -> AccountId32 {
+		let mut data = [0u8; 32];
+		data[0..4].copy_from_slice(b"dvm:");
+		data[11..31].copy_from_slice(&address[..]);
+		let checksum: u8 = data[1..31].iter().fold(data[0], |sum, &byte| sum ^ byte);
+		data[31] = checksum;
+		AccountId32::from(data)
 	}
 }
 
@@ -294,20 +312,25 @@ impl pallet_evm::Config for Runtime {
 	type GasWeightMapping = ();
 	type CallOrigin = EnsureAddressTruncated;
 	type WithdrawOrigin = EnsureAddressTruncated;
-	type AddressMapping = HashedAddressMapping<BlakeTwo256>;
+	type AddressMapping = ConcatAddressMapping;
 	type Currency = Balances;
 	type Event = Event;
 	type Runner = pallet_evm::runner::stack::Runner<Self>;
-	
-    
-    
-    
-    
+
 	type Precompiles = (
-	
-		
 		pallet_evm_precompile_modexp::Modexp,
-		
+		pallet_evm_precompile_simple::ECRecover,
+		pallet_evm_precompile_simple::Sha256,
+		pallet_evm_precompile_simple::Ripemd160,
+		pallet_evm_precompile_simple::Identity,
+		pallet_evm_precompile_bn128::Bn128Add,
+		pallet_evm_precompile_bn128::Bn128Mul,
+		pallet_evm_precompile_bn128::Bn128Pairing,
+
+		pallet_evm_precompile_blake2::Blake2F,
+		pallet_evm_precompile_dispatch::Dispatch<Self>,
+		pallet_evm_precompile_ed25519::Ed25519Verify,
+
 		pallet_evm_precompile_sha3fips::Sha3FIPS256,
 		pallet_evm_precompile_sha3fips::Sha3FIPS512,
 	);

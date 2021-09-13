@@ -181,8 +181,14 @@ pub fn new_partial(config: &Configuration, _cli: &Cli) -> Result<sc_service::Par
 			select_chain.clone(),
 		)?;
 
+		let frontier_block_import = FrontierBlockImport::new(
+			grandpa_block_import.clone(),
+			client.clone(),
+			frontier_backend.clone(),
+		);
+
 		let aura_block_import = sc_consensus_aura::AuraBlockImport::<_, _, _, AuraPair>::new(
-			grandpa_block_import.clone(), client.clone(),
+			frontier_block_import.clone(), client.clone(),
 		);
 
 		let import_queue = sc_consensus_aura::import_queue::<_, _, _, AuraPair, _, _>(
