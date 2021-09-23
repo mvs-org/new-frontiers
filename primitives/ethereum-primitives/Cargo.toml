@@ -1,0 +1,95 @@
+[package]
+authors     = ["Hyperspace Network <contact@mvs.org>"]
+description = "Ethereum primitives for Hyperspace Relay"
+edition     = "2018"
+homepage    = "https://mvs.org/"
+license     = "GPL-3.0"
+name        = "ethereum-primitives"
+readme      = "README.md"
+repository  = "https://github.com/mvs-org/Hyperspace"
+version     = "1.4.0"
+
+[dependencies]
+# crates
+array-bytes = { version = "1.1.0" }
+codec  = { package = "parity-scale-codec", version = "1.3.7", default-features = false, features = ["derive"] }
+# ethash = { default-features = false, git = "https://github.com/new-mvs/rust-ethash" }
+ethash = "0.4.0"
+serde  = { version = "1.0.124", optional = true, features = ["derive"] }
+# hyperspace
+merkle-patricia-trie = { default-features = false, path = "../merkle-patricia-trie" }
+# github
+# ethbloom        = { default-features = false, git = "https://github.com/new-mvs/parity-common.git" }
+ethbloom = "0.11.0"
+# ethereum-types  = { default-features = false, git = "https://github.com/new-mvs/parity-common.git" }
+ethereum-types = "0.12.0"
+# fixed-hash      = { default-features = false, git = "https://github.com/new-mvs/parity-common.git" }
+fixed-hash = "0.7.0"
+# impl-codec      = { default-features = false, git = "https://github.com/new-mvs/parity-common.git" }
+impl-codec = "0.5.1"
+# impl-rlp        = { default-features = false, git = "https://github.com/new-mvs/parity-common.git" }
+impl-rlp = "0.3.0"
+# keccak-hash     = { default-features = false, git = "https://github.com/new-mvs/parity-common.git" }
+keccak-hash = "0.8.0"
+# primitive-types = { default-features = false, features = ["codec", "rlp"], git = "https://github.com/new-mvs/parity-common.git" }
+primitive-types = "0.10.1"
+# rlp             = { default-features = false, git = "https://github.com/new-mvs/parity-common.git" }
+rlp = "0.5.1"
+# rlp-derive      = { git = "https://github.com/new-mvs/parity-common.git" }
+rlp-derive = "0.1.0"
+# substrate
+# sp-io      = { default-features = false, git = "https://github.com/new-mvs/substrate", branch = "latest" }
+sp-io = "3.0.0"
+# sp-runtime = { default-features = false, git = "https://github.com/new-mvs/substrate", branch = "latest" }
+sp-runtime = "3.0.0"
+# sp-std     = { default-features = false, git = "https://github.com/new-mvs/substrate", branch = "latest" }
+sp-std = { default-features = false, version = '3.0.0' }
+
+[dev-dependencies]
+# crates
+keccak-hasher = { version = "0.15.3" }
+serde_json    = { version = "1.0.62" }
+# github
+# triehash = { git = "https://github.com/new-mvs/parity-common.git" }
+triehash = "0.8.4"
+# substrate
+# frame-support = { git = "https://github.com/new-mvs/substrate", branch = "latest" }
+frame-support = { default-features = false, version = '3.0.0' }
+
+[features]
+default = ["std"]
+
+std = [
+	"crates-std",
+	"github-std",
+	"hyperspace-std",
+	"substrate-std",
+]
+
+crates-std    = [
+	"codec/std",
+	"serde",
+]
+hyperspace-std  = [
+	"ethash/std",
+	"merkle-patricia-trie/std",
+]
+github-std    = [
+	"ethbloom/std",
+	"ethereum-types/std",
+	"ethereum-types/serialize",
+	"fixed-hash/std",
+	"impl-codec/std",
+	"impl-rlp/std",
+	"keccak-hash/std",
+	"primitive-types/std",
+	"rlp/std",
+]
+substrate-std = [
+	"sp-io/std",
+	"sp-runtime/std",
+	"sp-std/std",
+]
+
+deserialize  = []
+with-new-dag = []
