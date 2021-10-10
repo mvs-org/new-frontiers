@@ -56,7 +56,7 @@ pallet-evm-precompile-sha3fips = { default-features = false, version = "1.0.0" }
 pallet-evm-precompile-simple = { default-features = false, version = "1.0.0" }
 
 [features]
-default = ["std", "manual-seal"]
+default = ["std", "aura"]
 aura = []
 manual-seal = []
 runtime-benchmarks = [
