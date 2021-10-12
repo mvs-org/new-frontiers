@@ -1,42 +1,48 @@
 version: "3.3"
 services:
-  rpc-01:
+  bootnode:
     image: metaversevm
     user: root
+    volumes:
+            - "./chaindata:/tmp/chaindata"
+            - "./fork_58w_aura.json:/tmp/fork_58w_aura.json"
     networks:
         metaverse:
-          ipv4_address: 172.30.0.10
-    # ports:
-    #   - "9615:9615"
-    #   - "9933:9933"
-    #   - "9944:9944"
-    entrypoint: ["/usr/local/bin/metaversevm", "--dev", "--rpc-cors=all", "--rpc-methods=safe", "--ws-external", "--unsafe-rpc-external", "--prometheus-external", "--telemetry-url", "wss://telemetry.mvs.org/ws/submit 0", "--name", "regular-X"]
-  vm:
+          ipv4_address: 172.30.0.20  
+    ports:
+      - "9933:9933"
+    entrypoint: ["/usr/local/bin/metaversevm", "--alice", "--chain=/tmp/fork_58w_aura.json", "--base-path=/tmp/chaindata/node01", "--name", "node1", "--validator", "--unsafe-ws-external", "--unsafe-rpc-external", "--rpc-methods", "Unsafe", "--rpc-cors", "all"]
+
+  validator-01:
     image: metaversevm
     user: root
-    networks:
-        metaverse:
-          ipv4_address: 172.30.0.20
-    # ports:
-    #   - "9615:9615"
-    #   - "9933:9933"
-    #   - "9944:9944"
-    #   - "30333:30333"
-    entrypoint: ["/usr/local/bin/metaversevm", "--dev", "--base-path=/tmp/chaindata", "--telemetry-url", "wss://telemetry.mvs.org/ws/submit 0", "--name", "validator-X", "--validator"]
-  rpc-archive-01:
-    image: metaversevm
-    user: root
+    volumes:
+            - "./chaindata:/tmp/chaindata"
+            - "./fork_58w_aura.json:/tmp/fork_58w_aura.json"
     networks:
         metaverse:
           ipv4_address: 172.30.0.30
-    # ports:
-    #   - "18835:9933"
-    #   - "18845:9944"
-    entrypoint: ["/usr/local/bin/metaversevm", "--dev", "--rpc-cors=all", "--rpc-methods=safe", "--ws-external", "--unsafe-rpc-external", "--prometheus-external", "--telemetry-url", "wss://telemetry.mvs.org/ws/submit 0", "--name", "rpc-archive-X", "--pruning=archive"]
+    ports:
+       - "9934:9933"
+    entrypoint: ["/usr/local/bin/metaversevm", "--bob", "--chain=/tmp/fork_58w_aura.json", "--base-path=/tmp/chaindata/node02", "--name", "node2", "--validator", "--unsafe-ws-external", "--unsafe-rpc-external", "--rpc-methods", "Unsafe", "--rpc-cors", "all"]
+
+  validator-02:
+    image: metaversevm
+    user: root
+    volumes:
+            - "./chaindata:/tmp/chaindata"
+            - "./fork_58w_aura.json:/tmp/fork_58w_aura.json"
+    networks:
+        metaverse:
+          ipv4_address: 172.30.0.40
+    ports:
+       - "9935:9933"
+    entrypoint: ["/usr/local/bin/metaversevm", "--charlie", "--chain=/tmp/fork_58w_aura.json", "--base-path=/tmp/chaindata/node03", "--name", "node3", "--validator", "--unsafe-ws-external", "--unsafe-rpc-external", "--rpc-methods", "Unsafe", "--rpc-cors", "all"]
+
 networks:
     metaverse:
         driver: bridge
         ipam:
             config:
                 - subnet: 172.30.0.0/16
-  
+    
