@@ -78,6 +78,9 @@ pub type DigestItem = generic::DigestItem<Hash>;
 /// the specifics of the runtime. They can then be made to be agnostic over specific formats
 /// of data like extrinsics, allowing for them to continue syncing the network through upgrades
 /// to even the core data structures.
+
+pub mod migrations;
+
 pub mod opaque {
 	use super::*;
 
