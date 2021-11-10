@@ -40,7 +40,7 @@ pub use pallet_balances::Call as BalancesCall;
 pub use sp_runtime::{Permill, Perbill};
 pub use frame_support::{
 	construct_runtime, parameter_types, StorageValue,
-	traits::{KeyOwnerProofSystem, Randomness, FindAuthor},
+	traits::{KeyOwnerProofSystem, Randomness, FindAuthor, Currency, OnUnbalanced},
 	weights::{
 		Weight, IdentityFee,
 		constants::{BlockExecutionWeight, ExtrinsicBaseWeight, RocksDbWeight, WEIGHT_PER_SECOND},
@@ -98,6 +98,20 @@ pub mod opaque {
 		}
 	}
 }
+
+/// Type alias for negative imbalance during fees
+//type NegativeImbalance = pallet_balances::NegativeImbalance;
+type NegativeImbalance = <Balances as Currency<
+	<Runtime as frame_system::Config>::AccountId,
+>>::NegativeImbalance;
+
+pub struct DealWithFees;
+impl OnUnbalanced<NegativeImbalance> for DealWithFees {
+	fn on_nonzero_unbalanced(amount: NegativeImbalance) {
+		Balances::resolve_creating(&Authorship::author(), amount);
+	}
+}
+
 
 // To learn more about runtime versioning and what each of the following value means:
 //   https://substrate.dev/docs/en/knowledgebase/runtime/upgrades#runtime-versioning
@@ -265,10 +279,36 @@ parameter_types! {
 }
 
 impl pallet_transaction_payment::Config for Runtime {
-	type OnChargeTransaction = CurrencyAdapter<Balances, ()>;
+	type OnChargeTransaction = CurrencyAdapter<Balances, DealWithFees>;
 	type TransactionByteFee = TransactionByteFee;
 	type WeightToFee = IdentityFee<Balance>;
 	type FeeMultiplierUpdate = ();
+}
+
+pub struct AuthorShipFindAuthor<F>(PhantomData<F>);
+impl<F: FindAuthor<u32>> FindAuthor<AccountId> for AuthorShipFindAuthor<F>
+{
+	fn find_author<'a, I>(digests: I) -> Option<AccountId> where
+		I: 'a + IntoIterator<Item=(ConsensusEngineId, &'a [u8])>
+	{
+		if let Some(author_index) = F::find_author(digests) {
+			let mut data = [0u8; 32];
+			let authority_id = Aura::authorities()[author_index as usize].clone();
+			data[0..32].copy_from_slice(&authority_id.to_raw_vec());
+			return Some(AccountId::from(data));
+		}
+		None
+	}
+}
+
+parameter_types! {
+	pub const UncleGenerations: BlockNumber = 5;
+}
+impl pallet_authorship::Config for Runtime {
+	type FindAuthor = AuthorShipFindAuthor<Aura>;
+	type UncleGenerations = UncleGenerations;
+	type FilterUncle = ();
+	type EventHandler = ();
 }
 
 impl pallet_sudo::Config for Runtime {
@@ -372,6 +412,7 @@ construct_runtime!(
 		Aura: pallet_aura::{Module, Config<T>},
 		Grandpa: pallet_grandpa::{Module, Call, Storage, Config, Event},
 		Balances: pallet_balances::{Module, Call, Storage, Config<T>, Event<T>},
+		Authorship: pallet_authorship::{Module, Call, Storage, Inherent},
 		TransactionPayment: pallet_transaction_payment::{Module, Storage},
 		Sudo: pallet_sudo::{Module, Call, Config<T>, Storage, Event<T>},
         EVM: pallet_evm::{Module, Call, Storage, Config, Event<T>},
