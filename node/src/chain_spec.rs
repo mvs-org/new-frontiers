@@ -146,23 +146,7 @@ fn testnet_genesis(
 	_enable_println: bool,
 ) -> GenesisConfig {
 	const GENESIS_EVM_ACCOUNT: &'static str = "0xa6f101A982fdd1eF115A614BDbBF67DA71a6c4E3";
-	// const TOKEN_REDEEM_ADDRESS: &'static str = "0x49262B932E439271d05634c32978294C7Ea15d0C";
-	// const DEPOSIT_REDEEM_ADDRESS: &'static str = "0x6EF538314829EfA8386Fc43386cB13B4e0A67D1e";
-	// const SET_AUTHORITIES_ADDRESS: &'static str = "0xE4A2892599Ad9527D76Ce6E26F93620FA7396D85";
-	// const ETP_TOKEN_ADDRESS: &'static str = "0xb52FBE2B925ab79a821b261C82c5Ba0814AAA5e0";
-	// const DNA_TOKEN_ADDRESS: &'static str = "0x1994100c58753793D52c6f457f189aa3ce9cEe94";
-
-	// let initial_authorities = vec![get_authority_keys_from_seed(GENESIS_VALIDATOR)];
-	// let endowed_accounts = vec![
-	// 	(root.clone(), 1 << 56),
-	// 	(
-	// 		get_account_id_from_seed::<sr25519::Public>(),
-	// 		GENESIS_VALIDATOR_BOND,
-	// 	),
-	// ];
 	let mut evm_accounts = BTreeMap::new();
-
-
 
 	evm_accounts.insert(
 		H160::from_str(GENESIS_EVM_ACCOUNT)
