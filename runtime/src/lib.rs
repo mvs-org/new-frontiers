@@ -29,7 +29,7 @@ use fp_rpc::TransactionStatus;
 
 use pallet_evm::{
 	Account as EVMAccount, FeeCalculator, HashedAddressMapping,
-	EnsureAddressTruncated, Runner, AddressMapping,
+	EnsureAddressTruncated, Runner, AddressMapping, EVMCurrencyAdapter,
 };
 
 // A few exports that help ease life for downstream crates.
@@ -90,12 +90,12 @@ pub mod opaque {
 	pub type Block = generic::Block<Header, UncheckedExtrinsic>;
 	/// Opaque block identifier type.
 	pub type BlockId = generic::BlockId<Block>;
+}
 
-	impl_opaque_keys! {
-		pub struct SessionKeys {
-			pub aura: Aura,
-			pub grandpa: Grandpa,
-		}
+impl_opaque_keys! {
+	pub struct SessionKeys {
+		pub aura: Aura,
+		pub grandpa: Grandpa,
 	}
 }
 
@@ -285,30 +285,43 @@ impl pallet_transaction_payment::Config for Runtime {
 	type FeeMultiplierUpdate = ();
 }
 
-pub struct AuthorShipFindAuthor<F>(PhantomData<F>);
-impl<F: FindAuthor<u32>> FindAuthor<AccountId> for AuthorShipFindAuthor<F>
-{
-	fn find_author<'a, I>(digests: I) -> Option<AccountId> where
-		I: 'a + IntoIterator<Item=(ConsensusEngineId, &'a [u8])>
-	{
-		if let Some(author_index) = F::find_author(digests) {
-			let mut data = [0u8; 32];
-			let authority_id = Aura::authorities()[author_index as usize].clone();
-			data[0..32].copy_from_slice(&authority_id.to_raw_vec());
-			return Some(AccountId::from(data));
-		}
-		None
-	}
-}
-
 parameter_types! {
 	pub const UncleGenerations: BlockNumber = 5;
 }
 impl pallet_authorship::Config for Runtime {
-	type FindAuthor = AuthorShipFindAuthor<Aura>;
+	type FindAuthor = pallet_session::FindAccountFromAuthorIndex<Self, Aura>;
 	type UncleGenerations = UncleGenerations;
 	type FilterUncle = ();
 	type EventHandler = ();
+}
+
+parameter_types! {
+	pub const Period: u32 = 6 * HOURS;
+	pub const Offset: u32 = 0;
+}
+parameter_types! {
+	pub const DisabledValidatorsThreshold: Perbill = Perbill::from_percent(17);
+}
+pub struct ValidatorOf;
+impl<T> sp_runtime::traits::Convert<T, Option<T>> for ValidatorOf {
+	fn convert(t: T) -> Option<T> {
+		Some(t)
+	}
+}
+
+impl pallet_session::Config for Runtime {
+	type Event = Event;
+	type ValidatorId = AccountId;
+	// we don't have stash and controller, thus we don't need the convert as well.
+	type ValidatorIdOf = ValidatorOf;
+	type ShouldEndSession = pallet_session::PeriodicSessions<Period, Offset>;
+	type NextSessionRotation = pallet_session::PeriodicSessions<Period, Offset>;
+	type SessionManager = ();
+	// Essentially just Aura, but lets be pedantic.
+	type SessionHandler = <SessionKeys as sp_runtime::traits::OpaqueKeys>::KeyTypeIdProviders;
+	type Keys = SessionKeys;
+	type DisabledValidatorsThreshold = DisabledValidatorsThreshold;
+	type WeightInfo = pallet_session::weights::SubstrateWeight<Self>;
 }
 
 impl pallet_sudo::Config for Runtime {
@@ -376,7 +389,7 @@ impl pallet_evm::Config for Runtime {
 	);
 	type ChainId = ChainId;
 	type BlockGasLimit = BlockGasLimit;
-	type OnChargeTransaction = ();
+	type OnChargeTransaction = EVMCurrencyAdapter<Balances, DealWithFees>;
 }
 
 pub struct EthereumFindAuthor<F>(PhantomData<F>);
@@ -406,17 +419,27 @@ construct_runtime!(
 		NodeBlock = opaque::Block,
 		UncheckedExtrinsic = UncheckedExtrinsic
 	{
+		// basic system stuff
 		System: frame_system::{Module, Call, Config, Storage, Event<T>},
 		RandomnessCollectiveFlip: pallet_randomness_collective_flip::{Module, Call, Storage},
 		Timestamp: pallet_timestamp::{Module, Call, Storage, Inherent},
-		Aura: pallet_aura::{Module, Config<T>},
-		Grandpa: pallet_grandpa::{Module, Call, Storage, Config, Event},
+
+		// money stuff
 		Balances: pallet_balances::{Module, Call, Storage, Config<T>, Event<T>},
-		Authorship: pallet_authorship::{Module, Call, Storage, Inherent},
 		TransactionPayment: pallet_transaction_payment::{Module, Storage},
+		
+		// authoring stuff
+		Authorship: pallet_authorship::{Module, Call, Storage, Inherent},
+		//AuthorityDiscovery: pallet_authority_discovery::{Module, Call, Config},
+		Session: pallet_session::{Module, Call, Storage, Event, Config<T>},
+		Aura: pallet_aura::{Module, Storage, Config<T>},
+		Grandpa: pallet_grandpa::{Module, Call, Storage, Config, Event},
+		
+		// admin stuff
 		Sudo: pallet_sudo::{Module, Call, Config<T>, Storage, Event<T>},
+        // EVM stuff
         EVM: pallet_evm::{Module, Call, Storage, Config, Event<T>},
-        Ethereum: pallet_ethereum::{Module, Call, Storage, Event, Config, ValidateUnsigned},
+		Ethereum: pallet_ethereum::{Module, Call, Storage, Event, Config, ValidateUnsigned},
 	}
 );
 
@@ -548,13 +571,13 @@ impl_runtime_apis! {
 
 	impl sp_session::SessionKeys<Block> for Runtime {
 		fn generate_session_keys(seed: Option<Vec<u8>>) -> Vec<u8> {
-			opaque::SessionKeys::generate(seed)
+			SessionKeys::generate(seed)
 		}
 
 		fn decode_session_keys(
 			encoded: Vec<u8>,
 		) -> Option<Vec<(Vec<u8>, KeyTypeId)>> {
-			opaque::SessionKeys::decode_into_raw_public_keys(&encoded)
+			SessionKeys::decode_into_raw_public_keys(&encoded)
 		}
 	}
 
