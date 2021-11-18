@@ -30,8 +30,8 @@ RUN cargo +nightly-2021-05-18 build --release
 RUN cp target/release/metaversevm /usr/local/bin
 RUN ls /usr/local/bin
 USER mvs
-COPY ./testnet1.json ./testnet
-COPY ./testnet1.json .
+#COPY ./testnet1.json ./testnet
+#COPY ./testnet1.json .
 EXPOSE 30333 9933 9944 9615
 VOLUME ["/metaversevm"]
 ENTRYPOINT ["/usr/local/bin/metaversevm", "--unsafe-rpc-external", "--unsafe-ws-external"]

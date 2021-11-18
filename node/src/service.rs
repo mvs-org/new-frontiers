@@ -254,6 +254,8 @@ pub fn new_full(mut config: Configuration, cli: &Cli) -> Result<TaskManager, Ser
 		};
 	}
 
+	config.network.extra_sets.push(sc_finality_grandpa::grandpa_peers_set_config());
+	
 	let (network, network_status_sinks, system_rpc_tx, network_starter) =
 		sc_service::build_network(sc_service::BuildNetworkParams {
 			config: &config,
