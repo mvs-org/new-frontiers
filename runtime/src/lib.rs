@@ -251,10 +251,7 @@ impl pallet_timestamp::Config for Runtime {
 	type Moment = u64;
 	type MinimumPeriod = MinimumPeriod;
 	type WeightInfo = ();
-	#[cfg(feature = "aura")]
 	type OnTimestampSet = Aura;
-	#[cfg(feature = "manual-seal")]
-	type OnTimestampSet = ();
 }
 
 parameter_types! {
@@ -530,13 +527,7 @@ impl_runtime_apis! {
 			block: Block,
 			data: sp_inherents::InherentData,
 		) -> sp_inherents::CheckInherentsResult {
-			if cfg!(feature = "manual-seal") {
-				// With mannual-seal we don't check timestamp validity
-				sp_inherents::CheckInherentsResult::new()
-			} else {
-				//sp_inherents::CheckInherentsResult::new()
-				data.check_extrinsics(&block)
-			}
+			data.check_extrinsics(&block)
 		}
 
 		fn random_seed() -> <Block as BlockT>::Hash {

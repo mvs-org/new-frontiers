@@ -19,10 +19,6 @@ use jsonrpc_pubsub::manager::SubscriptionManager;
 use pallet_ethereum::EthereumStorageSchema;
 use fc_rpc::{StorageOverride, SchemaV1Override, };
 use futures::channel::mpsc::Sender;
-use sc_consensus_manual_seal::{
-	rpc::{ManualSeal, ManualSealApi},
-	EngineCommand,
-};
 
 /// Full client dependencies.
 pub struct FullDeps<C, P> {
@@ -46,8 +42,6 @@ pub struct FullDeps<C, P> {
 	pub backend: Arc<fc_db::Backend<Block>>,
     /// Maximum number of logs in a query.
 	pub max_past_logs: u32,
-	/// Manual seal command sink
-	pub command_sink: Sender<EngineCommand<Hash>>,
 }
 
 /// Instantiate all Full RPC extensions.
@@ -88,7 +82,6 @@ pub fn create_full<C, P, BE>(
 		backend,
 		enable_dev_signer,
         max_past_logs,
-		command_sink,
 	} = deps;
 
 	io.extend_with(
@@ -155,12 +148,6 @@ pub fn create_full<C, P, BE>(
 				Arc::new(subscription_task_executor)
 			),
 		))
-	);
-
-	io.extend_with(
-		// We provide the rpc handler with the sending end of the channel to allow the rpc
-		// send EngineCommands to the background block authorship task.
-		ManualSealApi::to_delegate(ManualSeal::new(command_sink)),
 	);
 
 	io

@@ -68,10 +68,7 @@ fc-mapping-sync = '1.0.0'
 
 # local dependencies
 metaverse-vm-runtime = { path = '../runtime', version = '0.2.1' }
-sc-consensus-manual-seal = { path = '../client/custom-manual-seal', version = '0.9' }
 
 [features]
-default = ["aura"]
-aura = ["metaverse-vm-runtime/aura"]
-manual-seal = ["metaverse-vm-runtime/manual-seal"]
+default = []
 runtime-benchmarks = ['metaverse-vm-runtime/runtime-benchmarks']
