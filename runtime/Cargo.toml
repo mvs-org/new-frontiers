@@ -20,13 +20,15 @@ serde = { version = "1.0.119", optional = true, features = ["derive"] }
 
 # Substrate dependencies
 # frame-benchmarking = { default-features = false, optional = true, version = '3.0.0' }
+# frame-system-benchmarking = { default-features = false, optional = true, version = '3.0.0' }
 frame-executive = { default-features = false, version = '3.0.0' }
 frame-support = { default-features = false, version = '3.0.0' }
 frame-system = { default-features = false, version = '3.0.0' }
-# frame-system-benchmarking = { default-features = false, optional = true, version = '3.0.0' }
 frame-system-rpc-runtime-api = { default-features = false, version = '3.0.0' }
 pallet-aura = { default-features = false, version = '3.0.0' }
 pallet-balances = { default-features = false, version = '3.0.0' }
+pallet-authorship = { default-features = false, version = '3.0.0' }
+pallet-session = { default-features = false, version = '3.0.0' }
 pallet-grandpa = { default-features = false, version = '3.0.0' }
 pallet-randomness-collective-flip = { default-features = false, version = '3.0.0' }
 pallet-sudo = { default-features = false, version = '3.0.0' }
@@ -53,9 +55,10 @@ pallet-evm-precompile-ed25519 = { default-features = false, version = "1.0.0" }
 pallet-evm-precompile-bn128 = { default-features = false, version = "1.0.0" }
 pallet-evm-precompile-modexp = { default-features = false, version = "1.0.0" }
 pallet-evm-precompile-sha3fips = { default-features = false, version = "1.0.0" }
+pallet-evm-precompile-simple = { default-features = false, version = "1.0.0" }
 
 [features]
-default = ['std']
+default = ["std"]
 # runtime-benchmarks = [
 #     'frame-benchmarking',
 #     'frame-support/runtime-benchmarks',
@@ -72,8 +75,8 @@ std = [
     "pallet-evm-precompile-bn128/std", 
     "pallet-evm-precompile-modexp/std", 
     "pallet-evm-precompile-sha3fips/std",
-    "pallet-evm-precompile-dispatch/std",
     "pallet-evm-precompile-blake2/std",
+    "pallet-evm-precompile-simple/std",
     'codec/std',
     'frame-executive/std',
     'frame-support/std',
@@ -84,6 +87,8 @@ std = [
     'pallet-ethereum/std',
     'pallet-aura/std',
     'pallet-balances/std',
+    "pallet-authorship/std",
+    "pallet-session/std",
     'pallet-grandpa/std',
     'pallet-randomness-collective-flip/std',
     'pallet-sudo/std',

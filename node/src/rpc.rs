@@ -18,6 +18,7 @@ use sc_network::NetworkService;
 use jsonrpc_pubsub::manager::SubscriptionManager;
 use pallet_ethereum::EthereumStorageSchema;
 use fc_rpc::{StorageOverride, SchemaV1Override, };
+use futures::channel::mpsc::Sender;
 
 /// Full client dependencies.
 pub struct FullDeps<C, P> {

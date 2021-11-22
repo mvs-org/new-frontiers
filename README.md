@@ -1,4 +1,4 @@
-# New Frontiers MetaverseVM Node
+# MetaverseVM Node
 
 Enter the [Metaverse](https://mvs.org). THE NEW REALITY :rocket:
 
@@ -9,12 +9,6 @@ Follow the steps below to take control and compile your own node. :hammer_and_wr
 ### Rust Setup
 
 First, complete the [basic Rust setup instructions](./doc/rust-setup.md).
-```
-rustup toolchain install nightly-2021-05-18-x86_64-unknown-linux-gnu
-rustup +nightly-2021-05-18 target add wasm32-unknown-unknown
-cargo +nightly-2021-05-18 build --release
-```
-
 
 ### Run
 
@@ -39,7 +33,7 @@ Once the project has been built, the following command can be used to explore al
 subcommands:
 
 ```sh
-./target/release/metaversevm -h
+./target/release/metaverse-vm -h
 ```
 
 ## Run
@@ -53,19 +47,19 @@ node.
 This command will start the single-node development chain with persistent state:
 
 ```bash
-./target/release/metaversevm --dev
+./target/release/metaverse-vm --dev
 ```
 
 Purge the development chain's state:
 
 ```bash
-./target/release/metaversevm purge-chain --dev
+./target/release/metaverse-vm purge-chain --dev
 ```
 
 Start the development chain with detailed logging:
 
 ```bash
-RUST_LOG=debug RUST_BACKTRACE=1 ./target/release/metaversevm -lruntime=debug --dev
+RUST_LOG=debug RUST_BACKTRACE=1 ./target/release/metaverse-vm -lruntime=debug --dev
 ```
 
 ## Template Structure
@@ -110,7 +104,32 @@ After the node has been [built](#build), refer to the embedded documentation to 
 capabilities and configuration parameters that it exposes:
 
 ```shell
-./target/release/metaversevm --help
+./target/release/metaverse-vm --help
 ```
 
 
+### Run in Docker
+
+First, install [Docker](https://docs.docker.com/get-docker/) and
+[Docker Compose](https://docs.docker.com/compose/install/).
+
+Then run the following command to start a single node development chain.
+
+```bash
+./scripts/docker_run.sh
+```
+
+This command will firstly compile your code, and then start a local development network. You can
+also replace the default command (`cargo build --release && ./target/release/metaverse-vm --dev --ws-external`)
+by appending your own. A few useful ones are as follow.
+
+```bash
+# Run Substrate node without re-compiling
+./scripts/docker_run.sh ./target/release/metaverse-vm --dev --ws-external
+
+# Purge the local dev chain
+./scripts/docker_run.sh ./target/release/metaverse-vm purge-chain --dev
+
+# Check whether the code is compilable
+./scripts/docker_run.sh cargo check
+```

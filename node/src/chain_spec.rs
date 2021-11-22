@@ -1,7 +1,7 @@
 use std::{str::FromStr, collections::BTreeMap};
 use sp_core::{H160, Pair, Public, sr25519};
 use metaverse_vm_runtime::{
-	AccountId, AuraConfig, BalancesConfig, GenesisConfig, GrandpaConfig,
+	AccountId, AuraConfig, BalancesConfig, GenesisConfig, GrandpaConfig, SessionConfig, SessionKeys,
 	SudoConfig, SystemConfig, EVMConfig, EthereumConfig, WASM_BINARY, Signature
 };
 use sp_consensus_aura::sr25519::AuthorityId as AuraId;
@@ -32,10 +32,11 @@ pub fn get_account_id_from_seed<TPublic: Public>(seed: &str) -> AccountId where
 }
 
 /// Generate an Aura authority key.
-pub fn authority_keys_from_seed(s: &str) -> (AuraId, GrandpaId) {
+pub fn authority_keys_from_seed(s: &str) -> (AuraId, GrandpaId, AccountId) {
 	(
 		get_from_seed::<AuraId>(s),
 		get_from_seed::<GrandpaId>(s),
+		get_account_id_from_seed::<sr25519::Public>(s),
 	)
 }
 
@@ -131,7 +132,7 @@ pub fn local_testnet_config() -> Result<ChainSpec, String> {
 		// Protocol ID
 		None,
 		// Properties
-		None,
+		Some(properties()),
 		// Extensions
 		None,
 	))
@@ -140,7 +141,7 @@ pub fn local_testnet_config() -> Result<ChainSpec, String> {
 /// Configure initial storage state for FRAME modules.
 fn testnet_genesis(
 	wasm_binary: &[u8],
-	initial_authorities: Vec<(AuraId, GrandpaId)>,
+	initial_authorities: Vec<(AuraId, GrandpaId, AccountId)>,
 	root_key: AccountId,
 	endowed_accounts: Vec<AccountId>,
 	_enable_println: bool,
@@ -169,12 +170,21 @@ fn testnet_genesis(
 			// Configure endowed accounts with initial balance of 1 << 60.
 			balances: endowed_accounts.iter().cloned().map(|k|(k, 1 << 60)).collect(),
 		}),
-		pallet_aura: Some(AuraConfig {
-			authorities: initial_authorities.iter().map(|x| (x.0.clone())).collect(),
+		pallet_session: Some(SessionConfig {
+			keys: initial_authorities
+				.iter()
+				.cloned()
+				.map(|(aura, grandpa, aid)| {
+					(
+						aid.clone(),                   // account id
+						aid.clone(),                   // validator id
+						SessionKeys{aura, grandpa},    // session keys
+					)
+				})
+				.collect(),
 		}),
-		pallet_grandpa: Some(GrandpaConfig {
-			authorities: initial_authorities.iter().map(|x| (x.1.clone(), 1)).collect(),
-		}),
+		pallet_aura: Some(Default::default()),
+		pallet_grandpa: Some(Default::default()),
 		pallet_sudo: Some(SudoConfig {
 			// Assign network admin rights.
 			key: root_key,
