@@ -3,7 +3,7 @@
   "id": "dev",
   "chainType": "Development",
   "bootNodes": [
-    "/ip4/172.30.0.10/tcp/30333/p2p/12D3KooWGbWD3ntA8ZJTjh8p4DnaBKGdGbZiZcs8G4W7vd619vC2"
+    "/ip4/127.0.0.1/tcp/30333/p2p/12D3KooWCDVob6ECNSQMHcro3m8RFP2tZ887cD2aZi1kRfsbwa8X"
   ],
   "telemetryEndpoints": null,
   "protocolId": null,

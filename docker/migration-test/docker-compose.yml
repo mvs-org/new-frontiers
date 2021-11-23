@@ -52,6 +52,23 @@ services:
     depends_on: 
         - bootnode
     command: "--chain=/tmp/chainspec.json --rpc-methods Unsafe --rpc-cors=all  --base-path=/tmp/chaindata --no-mdns --name validator-2 --validator"
+    
+    
+  client: 
+    build: ../../../new-frontiers
+    user: root
+    volumes:
+        - "./data/validator-02/keystore:/tmp/chaindata/chains/dev/keystore"
+        - "./data/validator-spec.json:/tmp/chainspec.json"
+    ports:
+        - "9933:9933"
+    networks:
+        metaverse:
+          ipv4_address: 172.30.0.60
+    depends_on: 
+        - bootnode
+    command: "--chain=/tmp/chainspec.json --rpc-methods Unsafe --rpc-cors=all  --base-path=/tmp/chaindata --no-mdns --name client -unsafe-rpc-external --unsafe-ws-external"
+  
   tester:
     image: debian
     user: root

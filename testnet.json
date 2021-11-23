@@ -57,8 +57,44 @@
       },
       "palletEvm": {
         "accounts": {
+          "0xfc1f187Aeae434743D59eE87c8C5bb6A19Cae33c": {
+            "nonce": "0x0",
+            "balance": "0x108b2a2c28029094000000",
+            "storage": {},
+            "code": []
+          },
           "0xa6f101a982fdd1ef115a614bdbbf67da71a6c4e3": {
             "nonce": "0x0",
+            "balance": "0x108b2a2c28029094000000",
+            "storage": {},
+            "code": []
+          },
+          "0xF693807ac9B654C8FbC59587Fa4de2d908EDDa17": {
+            "nonce": "0x1",
+            "balance": "0x108b2a2c28029094000000",
+            "storage": {},
+            "code": []
+          },
+          "0x2Dc028fa731Ade3B0C190c45Ccb504e16924c2D4": {
+            "nonce": "0x2",
+            "balance": "0x108b2a2c28029094000000",
+            "storage": {},
+            "code": []
+          },
+          "0x41FB38d8A49ef53836016455A1Dff8bCBb884fb4": {
+            "nonce": "0x3",
+            "balance": "0x108b2a2c28029094000000",
+            "storage": {},
+            "code": []
+          },
+          "0xFDC1dB43Fdf1c3a33254BBb7A8F644503734F449": {
+            "nonce": "0x4",
+            "balance": "0x108b2a2c28029094000000",
+            "storage": {},
+            "code": []
+          },
+          "0xb22810e69c94F8d78251540468604c399A0c1513": {
+            "nonce": "0x5",
             "balance": "0x108b2a2c28029094000000",
             "storage": {},
             "code": []
