@@ -27,18 +27,6 @@ without launching it:
 cargo build --release
 ```
 
-### Run the testnet
-
-```
-./target/release/metaverse-vm --chain testnet
-```
-
-### Conect your wallet
-
-By default the node will provide a HTTP RPC endpoint on `http://127.0.0.1:9933` as well as a websocket RPC endpoint on `ws://127.0.0.1:9944`.
-
-To connect your browser wallet or any other compatible wallet you can set the URL to the HTTP URL.
-
 ### Embedded Docs
 
 Once the project has been built, the following command can be used to explore all parameters and
@@ -73,6 +61,18 @@ Start the development chain with detailed logging:
 ```bash
 RUST_LOG=debug RUST_BACKTRACE=1 ./target/release/metaverse-vm -lruntime=debug --dev
 ```
+
+### Run the testnet
+
+```
+./target/release/metaverse-vm --chain testnet
+```
+
+### Conect your wallet
+
+By default the node will provide a HTTP RPC endpoint on `http://127.0.0.1:9933` as well as a websocket RPC endpoint on `ws://127.0.0.1:9944`.
+
+To connect your browser wallet or any other compatible wallet you can set the URL to the HTTP URL.
 
 ## Template Structure
 
