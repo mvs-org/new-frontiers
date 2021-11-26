@@ -8,7 +8,7 @@ Follow the steps below to take control and compile your own node. :hammer_and_wr
 
 ### Rust Setup
 
-First, complete the [basic Rust setup instructions](./doc/rust-setup.md).
+First, complete the [basic Rust setup instructions](./docs/rust-setup.md).
 
 ### Run
 
