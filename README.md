@@ -27,6 +27,12 @@ without launching it:
 cargo build --release
 ```
 
+### Run the testnet
+
+```
+./target/release/metaverse-vm --chain testnet
+```
+
 ### Embedded Docs
 
 Once the project has been built, the following command can be used to explore all parameters and
