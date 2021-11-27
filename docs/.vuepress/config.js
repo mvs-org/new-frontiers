@@ -1,7 +1,7 @@
 module.exports = {
   title: 'MetaverseVM',
   description: 'Virtual machine for the Metaverse',
-  base: '/frontier/',
+  base: '/new-frontiers/',
 
   head: [
     ['meta', { name: 'theme-color', content: '#3eaf7c' }],
