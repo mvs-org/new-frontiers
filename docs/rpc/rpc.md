@@ -1,4 +1,4 @@
-# Hyperspace Remote Procedure Calls
+# Remote Procedure Calls
 
 Remote Procedure Calls, or RPCs, are a way for an external program (eg.
 a frontend) to communicate with a node. They are used for checking
@@ -6,12 +6,12 @@ storage values, submitting transactions, and querying the current
 consensus authorities with any client that speaks json RPC. One widely
 available option for using RPC is curl.
 
+
 Example:
-```
-\#!/bin/bash
-"curl -H "Content-Type: application/json" -d '{"id":"1",
+```bash
+curl -H "Content-Type: application/json" -d '{"id":"1",
 "jsonrpc":"2.0", "method":"state\_getRuntimeVersion", "params":\[\]}'
-https://vm.mvs.org/mainnet\_rpc"
+https://vm.mvs.org/mainnet_rpc
 ```
 
 List of calls: * calls marked with an asterix are under development *

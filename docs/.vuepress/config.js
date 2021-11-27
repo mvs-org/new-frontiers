@@ -20,6 +20,7 @@ module.exports = {
     ],
     sidebar: [
       'evm',
+      'rpc/rpc',
       'rust-setup',
     ]
   },
