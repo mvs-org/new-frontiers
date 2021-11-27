@@ -1,45 +1,20 @@
 ---
 home: true
-heroImage: https://v1.vuepress.vuejs.org/hero.png
-tagline: Ethereum compatibility layer for Substrate.
+heroImage: img/mvs.svg
+tagline: Virtual Machine for THE NEW REALITY
 actionText: Overview →
 actionLink: overview.md
 features:
-- title: EVM Contract
-  details: Metaverse allows you to run EVM contracts natively in Substrate, tightly integrated with the rest of the Substrate ecosystem.
-- title: RPC Compatibility
-  details: All existing Ethereum RPC methods work, so none of your dapps will break.
-- title: Substrate Module
-  details: Metaverse can be easily integrated in your existing Substrate application as a runtime module.
-footer: Made by Parity & Wei & PureStake with ❤️
+- title: EVM Compatibility
+  details: Metaverse allows you to run EVM compatible contracts. Ethereum compatible RPC methods improve dapp compatibility. 
+- title: Digital Identity
+  details: Metaverse Avatars are digital identities protected by the Metaverse hybrid consensus.
+- title: Digital Assets
+  details: Fungible as well as non-fungible assets can easily be created, transferred and traded.
+
+footer: Metaverse Foundation️
 ---
 
-Metaverse is the suite that provides an Ethereum compatibility layer
-for Substrate. It has two components that can be activated separately:
-
-* **Pallet EVM**: This is the pallet that enables functionality of
-  running EVM contracts. Existing EVM code can be used from there,
-  using addresses and values mapped directly to Substrate.
-* **Pallet Ethereum** with **Ethereum compatible RPC methods**: The
-  pallet, combined with the RPC module, enables Ethereum block
-  emulation, validates Ethereum-encoded transactions, and allows
-  existing dapps to be deployed on a Substrate blockchain with minimal
-  modifications.
-  
-Metaverse is not a bridge. Metaverse enables you to run Ethereum dapps
-natively on Substrate, but does not deal with the issues of
-communicating with other Ethereum-based networks. If you want a
-standalone blockchain, you are looking for Metaverse. If you want to
-create a parachain that has Ethereum functionality, you need to
-combine Metaverse with Cumulus. If you do not want EVM functionality
-natively but want to communicate with other networks, you need the
-Parity Bridge project.
-
-Metaverse is still under heavy development. We consider Pallet EVM to
-be relatively stable, while some parts of Pallet Ethereum's design
-might still be changed. In the future, using the [wrapper
-block](https://corepaper.org/substrate/wrapper/) strategy, Metaverse
-can also eventually function as an Ethereum client, allowing you to
-migrate any eth1.x-based blockchains seamlessly over to Substrate,
-allowing you to add Substrate-specific features like on-chain
-governance and forkless upgrades!
+The MetaverseVM is not a bridge to another chain and is not a second layer Ethereum chain. The Metaverse VM enables you to run dapps
+natively, but does not deal with the issues of communicating with other Ethereum-based networks. It is the an independent ledger that
+provides an EVM compatible Virtual Machine for the Metaverse Blockchain project.

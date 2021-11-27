@@ -1,12 +1,12 @@
 {
-  "name": "frontier-docs",
+  "name": "new-frontiers-docs",
   "version": "0.0.1",
   "description": "Metaverse documentation.",
   "authors": {
-    "name": "admin@parity.io",
-    "email": "Parity Technologies"
+    "name": "info@mvs.org",
+    "email": "Metaverse Foundation"
   },
-  "repository": "https://github.com/paritytech/frontier",
+  "repository": "https://github.com/mvs-org/new-frontiers",
   "scripts": {
     "dev": "vuepress dev .",
     "build": "vuepress build ."

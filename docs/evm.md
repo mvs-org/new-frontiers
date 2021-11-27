@@ -1,4 +1,4 @@
-# EVM pallet
+# Virtual Machine
 
 The EVM module allows unmodified EVM code to be executed in a
 Substrate-based blockchain.

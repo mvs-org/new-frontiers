@@ -1,6 +1,6 @@
 module.exports = {
-  title: 'Metaverse',
-  description: 'Ethereum compatibility layer for Substrate',
+  title: 'MetaverseVM',
+  description: 'Virtual machine for the Metaverse',
   base: '/frontier/',
 
   head: [
@@ -10,18 +10,17 @@ module.exports = {
   ],
 
   themeConfig: {
-    repo: 'https://github.com/paritytech/frontier',
+    repo: 'https://github.com/mvs-org/new-frontiers',
     editLinks: false,
     docsDir: 'docs',
     editLinkText: '',
     lastUpdated: false,
     nav: [
-      { text: 'API reference', link: 'https://paritytech.github.io/frontier/rustdocs/pallet_evm' }
+      { text: 'Explorer', link: 'https://vm-explorer.mvs.org' }
     ],
     sidebar: [
-      'overview',
-      'frame/evm',
-      'frame/ethereum'
+      'evm',
+      'rust-setup',
     ]
   },
 
