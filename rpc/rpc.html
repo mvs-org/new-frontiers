@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Remote Procedure Calls | MetaverseVM</title>
+    <meta name="generator" content="VuePress 1.7.1">
+    
+    <meta name="description" content="Virtual machine for the Metaverse">
+    <meta name="theme-color" content="#3eaf7c">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    
+    <link rel="preload" href="/new-frontiers/assets/css/0.styles.6e6673f6.css" as="style"><link rel="preload" href="/new-frontiers/assets/js/app.cc1792c3.js" as="script"><link rel="preload" href="/new-frontiers/assets/js/2.2766b79c.js" as="script"><link rel="preload" href="/new-frontiers/assets/js/10.5cbfdcb7.js" as="script"><link rel="prefetch" href="/new-frontiers/assets/js/11.fe41046f.js"><link rel="prefetch" href="/new-frontiers/assets/js/3.9afa9341.js"><link rel="prefetch" href="/new-frontiers/assets/js/4.09fd2c39.js"><link rel="prefetch" href="/new-frontiers/assets/js/5.fc791712.js"><link rel="prefetch" href="/new-frontiers/assets/js/6.ffe6f60a.js"><link rel="prefetch" href="/new-frontiers/assets/js/7.b5506ce8.js"><link rel="prefetch" href="/new-frontiers/assets/js/8.18603b21.js"><link rel="prefetch" href="/new-frontiers/assets/js/9.be3bcb74.js">
+    <link rel="stylesheet" href="/new-frontiers/assets/css/0.styles.6e6673f6.css">
+  </head>
+  <body>
+    <div id="app" data-server-rendered="true"><div class="theme-container"><header class="navbar"><div class="sidebar-button"><svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" role="img" viewBox="0 0 448 512" class="icon"><path fill="currentColor" d="M436 124H12c-6.627 0-12-5.373-12-12V80c0-6.627 5.373-12 12-12h424c6.627 0 12 5.373 12 12v32c0 6.627-5.373 12-12 12zm0 160H12c-6.627 0-12-5.373-12-12v-32c0-6.627 5.373-12 12-12h424c6.627 0 12 5.373 12 12v32c0 6.627-5.373 12-12 12zm0 160H12c-6.627 0-12-5.373-12-12v-32c0-6.627 5.373-12 12-12h424c6.627 0 12 5.373 12 12v32c0 6.627-5.373 12-12 12z"></path></svg></div> <a href="/new-frontiers/" class="home-link router-link-active"><!----> <span class="site-name">MetaverseVM</span></a> <div class="links"><div class="search-box"><input aria-label="Search" autocomplete="off" spellcheck="false" value=""> <!----></div> <nav class="nav-links can-hide"><div class="nav-item"><a href="https://vm-explorer.mvs.org" target="_blank" rel="noopener noreferrer" class="nav-link external">
+  Explorer
+  <span><svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg> <span class="sr-only">(opens new window)</span></span></a></div> <a href="https://github.com/mvs-org/new-frontiers" target="_blank" rel="noopener noreferrer" class="repo-link">
+    GitHub
+    <span><svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg> <span class="sr-only">(opens new window)</span></span></a></nav></div></header> <div class="sidebar-mask"></div> <aside class="sidebar"><nav class="nav-links"><div class="nav-item"><a href="https://vm-explorer.mvs.org" target="_blank" rel="noopener noreferrer" class="nav-link external">
+  Explorer
+  <span><svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg> <span class="sr-only">(opens new window)</span></span></a></div> <a href="https://github.com/mvs-org/new-frontiers" target="_blank" rel="noopener noreferrer" class="repo-link">
+    GitHub
+    <span><svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg> <span class="sr-only">(opens new window)</span></span></a></nav>  <ul class="sidebar-links"><li><a href="/new-frontiers/evm.html" class="sidebar-link">Virtual Machine</a></li><li><a href="/new-frontiers/rpc/rpc.html" aria-current="page" class="active sidebar-link">Remote Procedure Calls</a></li><li><a href="/new-frontiers/rust-setup.html" class="sidebar-link">Development Environment</a></li></ul> </aside> <main class="page"> <div class="theme-default-content content__default"><h1 id="remote-procedure-calls"><a href="#remote-procedure-calls" class="header-anchor">#</a> Remote Procedure Calls</h1> <p>Remote Procedure Calls, or RPCs, are a way for an external program (eg.
+a frontend) to communicate with a node. They are used for checking
+storage values, submitting transactions, and querying the current
+consensus authorities with any client that speaks json RPC. One widely
+available option for using RPC is curl.</p> <p>Example:</p> <div class="language-bash extra-class"><pre class="language-bash"><code><span class="token function">curl</span> -H <span class="token string">&quot;Content-Type: application/json&quot;</span> -d <span class="token string">'{&quot;id&quot;:&quot;1&quot;,
+&quot;jsonrpc&quot;:&quot;2.0&quot;, &quot;method&quot;:&quot;state\_getRuntimeVersion&quot;, &quot;params&quot;:\[\]}'</span>
+https://vm.mvs.org/mainnet_rpc
+</code></pre></div><p>List of calls: * calls marked with an asterix are under development *</p> <p><strong>account_nextIndex</strong> (<em>account: AccountId)</em><br>
+Returns the next valid index (aka nonce) for given account.
+This method takes into consideration all pending transactions currently
+in the pool and if no transactions are found in the pool it fallbacks
+to query the index from the runtime (aka. state nonce).</p> <p><strong>author_hasKey</strong> (<em>public_key: Bytes,<br>
+key_type: String</em>)<br>
+Checks if the keystore has private keys for the given public key and
+key type. Returns `true` if a private key could be found.</p> <p><strong>author_hasSessionKeys</strong> (<em>session_keys: Bytes</em>) <br>
+Checks if the keystore has private keys for the given session public
+keys. `session_keys` is the SCALE encoded session keys object from
+theruntime. Returns `true` iff all private keys could be found.</p> <p><strong>author_insertKey</strong> (<em>key_type: String,suri: String,<br>
+public: Bytes</em>)<br>
+Insert a key into the keystore.</p> <p><strong>author_pendingExtrinsics</strong> ()<br>
+Returns all pending extrinsics, potentially grouped by sender.</p> <p><strong>author_removeExtrinsic</strong> (<em>bytes_or_hash:Vec&lt;hash::ExtrinsicOrHash&lt;Hash&gt;&gt;</em>)<br>
+Remove given extrinsic from the pool and temporarily ban it to prevent
+reimporting.</p> <p><strong>author_rotateKeys</strong> ()<br>
+Generate new session keys and returns the corresponding public keys.</p> <p><strong>author_submitAndWatchExtrinsic</strong> (<em>metadata: Self::Metadata,</em>
+subscriber: Subscriber&lt;TransactionStatus&lt;Hash, BlockHash&gt;&gt;,
+<em>bytes: Bytes</em>) <br>
+Submit an extrinsic to watch. See
+[`TransactionStatus`](sp_transaction_pool::TransactionStatus) for
+details on transaction life cycle.</p> <p><strong>author_submitExtrinsic</strong> (<em>extrinsic: Bytes</em>) <br>
+Submit hex-encoded extrinsic for inclusion in block.</p> <p><strong>author_unwatchExtrinsic</strong> (<em>metadata: Option&lt;Self::Metadata&gt;,</em> <em>id: SubscriptionId</em>) <br>
+Unsubscribe from extrinsic watching.</p> <p><strong>babe_epochAuthorship</strong> () <br>
+Returns data about which slots (primary or secondary) can be claimed in
+the current epoch with the keys in the keystore.</p> <p><strong>balances_usableBalance</strong> (<em>instance: u8,</em> <em>who: AccountId</em>) <br>
+Node-specific RPC methods for interaction with balances.</p> <p><strong>chain_getBlock</strong> (<em>hash: Option&lt;Hash&gt;</em>) <br>
+Get header and body of a relay chain block.</p> <p><strong>chain_getBlockHash</strong> (<em>hash:Option&lt;ListOrValue&lt;NumberOrHex&gt;&gt;</em>) <br>
+Get hash of the n-th block in the canon chain. By default returns
+latest block hash.</p> <p><strong>chain_getFinalisedHead</strong> () <br>
+Get hash of the last finalized block in the canon chain.</p> <p><strong>chain_getHead</strong> (<em>hash:Option&lt;ListOrValue&lt;NumberOrHex&gt;&gt;</em>) <br>
+Get hash of the n-th block in the canon chain. By default returns
+latest block hash.</p> <p><strong>chain_getHeader</strong> (<em>hash: Option&lt;Hash&gt;</em>) <br>
+Get header of a relay chain block.</p> <p><strong>chain_getRuntimeVersion</strong> (<em>hash: Option&lt;Hash&gt;</em>) <br>
+Get the runtime version.</p> <p><strong>chain_subscribeAllHeads</strong> (<em>metadata: Self::Metadata,</em> <em>subscriber: Subscriber&lt;Header&gt;</em>) <br>
+Finalized head subscription operations.</p> <p><strong>All head subscription</strong> (<em>metadata: Self::Metadata,</em> <br> <em>subscriber: Subscriber&lt;Header&gt;</em>) <br>
+Finalized head subscription operations.</p> <p><strong>chain_subscribeNewHead</strong> (<em>metadata: Self::Metadata,</em> <br> <em>subscriber: Subscriber&lt;Header&gt;</em>) <br>
+Finalized head subscription operations.</p> <p><strong>chain_subscribeNewHeads</strong> (<em>metadata: Self::Metadata,</em> <br> <em>subscriber: Subscriber&lt;Header&gt;</em>) <br>
+Finalized head subscription operations.</p> <p><strong>chain_subscribeRuntimeVersion</strong> (<em>metadata: Self::Metadata,</em> <br> <em>subscriber: Subscriber&lt;RuntimeVersion&gt;</em>) <br>
+Unsubscribe runtime version.</p> <p><strong>chain_unsubscribeAllHeads</strong> (<em>metadata: Option&lt;Self::Metadata&gt;,</em> <br> <em>id: SubscriptionId</em>) <br>
+Unsubscribe all heads.</p> <p><strong>chain_unsubscribeFinalisedHeads()</strong> alias <strong>chain_unsubscribeAllHeads</strong></p> <p><strong>chain_unsubscribeNewHead</strong> alias <strong>chain_unsubscribeAllHeads</strong></p> <p><strong>chain_unsubscribeNewHeads</strong> (metadata: Option&lt;Self::Metadata&gt;, <br>
+id: SubscriptionId*)
+Unsubscribe all heads.</p> <p><strong>chain_unsubscribeRuntimeVersion</strong>(<em>metadata:Option&lt;Self::Metadata&gt;,</em> <em>id: SubscriptionId</em>) <br>
+Finalized head and RuntimeVersion unsubscription operations.</p> <p><strong>childstate_getKeys</strong> (<em>child_storage_key: PrefixedStorageKey,</em> <br>
+prefix: StorageKey, <br> <em>hash: Option&lt;Hash&gt;</em>) <br>
+Returns the keys with prefix from a child storage, leave empty to get
+all the keys</p> <p><strong>childstate_getStorage</strong> (<em>child_storage_key: PrefixedStorageKey,</em> <br>
+key: StorageKey, <br> <em>hash: Option&lt;Hash&gt;</em>) <br>
+Returns a child storage entry at a specific block's state</p> <p><strong>childstate_getStorageSize</strong> (<em>child_storage_key:
+PrefixedStorageKey,</em> <br>
+key: StorageKey, <br> <em>hash: Option&lt;Hash&gt;</em>) <br>
+Returns the size of a child storage entry at a block's state.</p> <p><strong>eth_accounts</strong> ()* <br>
+Returns EVM accounts list.</p> <p><strong>eth_blockNumber</strong> () <br>
+Returns highest block number from EVM perspective.</p> <p><strong>eth_call</strong> (<em>_: CallRequest,</em> <br> <em>_: Option&lt;BlockNumber&gt;</em>) <br>
+Call contract, returning the output data.</p> <p><strong>eth_chainId</strong> () <br>
+Returns the chain ID used for transaction signing at the current best
+block. None is returned if not.</p> <p><strong>eth_estimateGas</strong> (<em>_: CallRequest,</em> <br> <em>_: Option&lt;BlockNumber&gt;</em>) <br>
+Estimate gas needed for execution of given contract.</p> <p><strong>eth_gasPrice</strong> () <br>
+Returns current gas_price.</p> <p><strong>eth_getBalance</strong> (<em>_: H160,</em> <br> <em>_: Option&lt;BlockNumber&gt;</em>) <br>
+Returns balance of the given account.</p> <p><strong>eth_getBlockByHash</strong> (<em>_: H256,</em> <br> <em>_: bool</em>) <br>
+Returns block with given hash.</p> <p><strong>eth_getBlockByNumber</strong> (<em>_: BlockNumber,</em> <br> <em>_: bool</em>) <br>
+Returns block with given number.</p> <p><strong>eth_getBlockTransactionCountByHash</strong> (<em>_: H256</em>) <br>
+Returns the number of transactions in a block with given hash.</p> <p><strong>eth_getBlockTransactionCountByNumber</strong> (<em>_: BlockNumber</em>) <br>
+Returns the number of transactions in a block with given block number.</p> <p><strong>eth_getCode</strong> (<em>_: H160,</em> <br> <em>_: Option&lt;BlockNumber&gt;</em>) <br>
+Returns the code at given address at given time (block number).</p> <p><strong>eth_getLogs</strong> (<em>_: Filter</em>) <br>
+Returns logs matching given filter object.</p> <p><strong>eth_getStorageAt</strong> (<em>_: H160,</em> <br>
+_: U256, <br> <em>_: Option &lt;BlockNumber&gt;</em>) <br>
+Returns content of the storage at given address.</p> <p><strong>eth_getTransactionByBlockHashAndIndex</strong> ( <em>_: H256,</em> <br> <em>_: Index</em>) <br>
+Returns transaction at given block hash and index.</p> <p><strong>eth_getTransactionByBlockNumberAndIndex</strong>( <em>v_: BlockNumber,</em> <br> <em>_: Index</em>) <br>
+Returns transaction by given block number and index.</p> <p><strong>eth_getTransactionByHash</strong> (<em>_: H256</em>) <br>
+Get transaction by its hash.</p> <p><strong>eth_getTransactionCount</strong> (<em>_: H160,</em> <br> <em>_: Option&lt;BlockNumber&gt;</em>) <br>
+Returns the number of transactions sent from given address at given
+time (block number).</p> <p><strong>eth_getTransactionReceipt</strong> (<em>_: H256</em>) <br>
+Returns transaction receipt by transaction hash.</p> <p><strong>eth_getUncleByBlockHashAndIndex</strong> (<em>_: H256,</em> <br> <em>_: Index</em>) <br>
+Returns Unlce by block hash and index</p> <p><strong>eth_getUncleByBlockNumberAndIndex</strong> (<em>_: BlockNumber,</em> <br> <em>_: Index</em>) <br>
+Returns an uncle at given block and index.</p> <p><strong>eth_getUncleCountByBlockHash</strong> (<em>_: H256</em>) <br>
+Returns the number of uncles in a block with given hash.</p> <p><strong>eth_getUncleCountByBlockNumber</strong> (<em>_: BlockNumber</em>) <br>
+Returns the number of uncles in a block with given block number.</p> <p><strong>eth_getWork</strong> ()* <br>
+Returns the hash of the current block, the seedHash, and the boundary
+condition to be met.</p> <p><strong>eth_hashrate</strong> () <br>
+Returns the number of hashes per second that the node is mining with.</p> <p><strong>eth_mining</strong> () <br>
+Returns true if client is actively mining new blocks.</p> <p><strong>eth_protocolVersion</strong> () <br>
+Returns protocol version encoded as a string (quotes are necessary
+here).</p> <p><strong>eth_sendRawTransaction</strong> (<em>_: Bytes</em>) <br>
+Sends signed transaction, returning its hash.</p> <p><strong>eth_sendTransaction</strong> (<em>_: TransactionRequest</em>) <br>
+Sends transaction; will block waiting for signer to return the
+transaction hash.</p> <p><strong>eth_submitHashrate</strong> (<em>_: U256,</em> <br> <em>_: H256</em>) <br>
+Used for submitting mining hashrate.</p> <p><strong>eth_submitWork</strong> ( <em>_: H64,</em> <br>
+_: H256, <br> <em>_: H256</em>) <br>
+Used for submitting a proof-of-work solution.</p> <p><strong>eth_subscribe</strong> (<em>_: Self::Metadata,</em> <br>
+_: typed::Subscriber&lt;pubsub::Result&gt;, <br>
+_: pubsub::Kind, <br> <em>_: Option&lt;pubsub::Params&gt;</em>) <br>
+Subscribe to Eth subscription.</p> <p><strong>eth_syncing</strong> () <br>
+Returns an object with data about the sync status or false.</p> <p><strong>eth_unsubscribe</strong> (<em>_: Option&lt;Self::Metadata&gt;,</em> <br> <em>_: SubscriptionId</em>) <br>
+Unsubscribe from existing Eth subscription.</p> <p><strong>grandpa_proveFinality</strong> ( <em>begin: Hash,</em> <br>
+end: Hash, <br> <em>authorities_set_id: u64</em>) <br>
+Prove finality for the given block number by returning the
+justification for the last block in the set and all the intermediary
+headers to link them together.</p> <p><strong>grandpa_roundState</strong> () <br>
+Returns the state of the current best round state as well as the
+ongoing background rounds.</p> <p><strong>grandpa_subscribeJustifications</strong> (<em>metadata: Self::Metadata,</em> <br> <em>subscriber: Subscriber&lt;Notification&gt;</em>) <br>
+Returns the block most recently finalized by Grandpa, alongside side
+its justification.</p> <p><strong>grandpa_unsubscribeJustifications</strong> (<em>metadata: <br>
+Option&lt;Self::Metadata&gt;,</em> <br> <em>id: SubscriptionId</em>) <br>
+Unsubscribe from receiving notifications about recently finalized
+blocks.</p> <p><strong>headerMMR_genProof</strong> (<em>block_number_of_member_leaf: u64,</em> <br> <em>block_number_of_last_leaf: u64</em>) <br>
+Get the MMR proof for a certain height, block number of member leaf,
+block number of the lastest leafnet_listening,
+Returns true if client is actively listening for network connections.
+Otherwise false.</p> <p><strong>net_peerCount</strong> () =
+Returns number of peers connected to node.</p> <p><strong>net_version</strong> () <br>
+Returns protocol version.</p> <p><strong>offchain_localStorageGet</strong> (<em>kind: StorageKind,</em> <br> <em>key: Bytes</em>) <br>
+Get offchain local storage under given key and prefix.</p> <p><strong>offchain_localStorageSet</strong> (<em>kind: StorageKind,</em> <br>
+key: Bytes, <br> <em>value: Bytes</em>) <br>
+Set offchain local storage under given key and prefix.</p> <p><strong>payment_queryFeeDetails</strong> (<em>encoded_xt: Bytes,</em> <br> <em>at: Option&lt;BlockHash&gt;</em>) <br>
+Query the fee of a payment</p> <p><strong>payment_queryInfo</strong> (<em>encoded_xt: Bytes,</em> <br> <em>at: Option&lt;BlockHash&gt;</em>) <br>
+Get details regarding payment fee.</p> <p><strong>staking_powerOf</strong> (<em>who: AccountId</em>) <br>
+Retrunt the power on a certain AccountId in a staking context.</p> <p><strong>state_call</strong> (<em>name: String,</em> <br>
+bytes: Bytes, <br> <em>hash: Option&lt;Hash&gt;</em>) <br>
+Call a contract's block state</p> <p><strong>state_callAt</strong> (<em>name: String,</em> <br>
+bytes: Bytes, <br> <em>hash: Option&lt;Hash&gt;</em>) <br>
+Call a contract at a block's state.</p> <p><strong>state_getKeys</strong> (<em>prefix: StorageKey,</em> <br> <em>hash: Option&lt;Hash&gt;</em>) <br>
+Returns the keys with prefix, leave empty to get all the keys.</p> <p><strong>state_getKeysPaged</strong> (<em>prefix: Option&lt;StorageKey&gt;,</em> <br>
+count: u32, <br>
+start_key: Option&lt;StorageKey&gt;, <br> <em>hash: Option&lt;Hash&gt;</em>) <br>
+Returns the keys with prefix with pagination support.
+Up to `count` keys will be returned.
+If `start_key` is passed, return next keys in storage in
+lexicographic order.</p> <p><strong>state_getKeysPagedAt</strong> (<em>prefix: Option&lt;StorageKey&gt;,</em> <br>
+count: u32, <br>
+start_key: Option&lt;StorageKey&gt;, <br> <em>hash: Option&lt;Hash&gt;</em>) <br>
+Returns the keys with prefix with pagination support.
+Up to `count` keys will be returned.
+If `start_key` is passed, return next keys in storage in
+lexicographic order.</p> <p><strong>state_getMetadata</strong> () <br>
+Returns the runtime metadata as an opaque blob.state_getPairs,
+Returns the keys with prefix, leave empty to get all the keys</p> <p><strong>state_getReadProof</strong> (<em>keys: Vec&lt;StorageKey&gt;,</em> <br> <em>hash: Option&lt;Hash&gt;</em>) <br>
+Returns proof of storage entries at a specific block's state.</p> <p><strong>state_getRuntimeVersion</strong> (<em>hash: Option&lt;Hash&gt;</em>) <br>
+Get the runtime version.</p> <p><strong>state_getStorage</strong> (<em>key: StorageKey,</em> <br> <em>hash: Option&lt;Hash&gt;</em>) <br>
+Returns a storage entry at a specific block's state.</p> <p><strong>state_getStorageAt</strong> (<em>key: StorageKey,</em> <br> <em>hash: Option&lt;Hash</em>&gt;) <br>
+Returns the hash of a storage entry at a block's state.</p> <p><strong>state_getStorageHash</strong> (<em>key: StorageKey,</em> <br> <em>hash: Option&lt;Hash&gt;</em>) <br>
+Returns the hash of a storage entry at a block's state.</p> <p><strong>state_getStorageHashAt</strong> (<em>key: StorageKey,</em> <br> <em>hash: Option&lt;Hash</em>&gt;) <br>
+Returns the hash of a storage entry at a block's state.</p> <p><strong>state_getStorageSize</strong> (<em>key: StorageKey,</em> <br> <em>hash: Option&lt;Hash</em>) <br>
+Returns the size of a storage entry at a block's state.</p> <p><strong>state_queryStorage</strong> (<em>keys: Vec&lt;StorageKey&gt;,</em> <br>
+block: Hash, <br> <em>hash: Option&lt;Hash&gt;</em>) <br>
+Query historical storage entries (by key) starting from a block given as
+the second parameter.
+NOTE: This first returned result contains the initial state of storage
+for all keys.
+Subsequent values in the vector represent changes to the previous state
+(diffs).</p> <p><strong>state_queryStorageAt</strong> (<em>keys: Vec&lt;StorageKey&gt;,</em> <br> <em>at: Option&lt;Hash&gt;</em>) <br>
+Query storage entries (by key) starting at block hash given as the
+second parameter.</p> <p><strong>state_subscribeRuntimeVersion</strong> (<em>metadata: Self::Metadata,</em> <br> <em>subscriber: Subscriber&lt;RuntimeVersion</em>) <br>
+New runtime version subscription.</p> <p><strong>state_subscribeStorage</strong> (<em>metadata: Self::Metadata,</em> <br>
+subscriber: Subscriber&lt;StorageChangeSet&lt;Hash&gt;&gt;, <br> <em>keys: Option&lt;Vec&lt;StorageKey&gt;</em>) <br>
+New storage subscription.</p> <p><strong>state_unsubscribeRuntimeVersion</strong> (<em>metadata: Option&lt;Self::Metadata&gt;,</em> <br> <em>id: SubscriptionId</em>) <br>
+Unsubscribe from runtime subscription</p> <p><strong>state_unsubscribeStorage</strong> (<em>metadata: Option&lt;Self::Metadata&gt;,</em> <br> <em>id: SubscriptionId</em>) <br>
+Unsubscribe from storage subscription</p> <p><strong>subscribe_newHead</strong> (<em>metadata: Option&lt;Self::Metadata&gt;,</em> <br> <em>id: SubscriptionId</em>) <br>
+New head subscription</p> <p><strong>sync_state_genSyncSpec</strong> (<em>raw: bool</em>) <br>
+Returns the json-serialized chainspec running the node, with a sync
+state.</p> <p><strong>system_accountNextIndex</strong> (<em>account: AccountId</em>) <br>
+Returns the next valid index (aka nonce) for given account. This method
+takes into consideration all pending transactions currently in the pool
+and if no transactions are found in the pool it fallbacks to query the
+index from the runtime (aka. state nonce).</p> <p><strong>system_addLogFilter</strong> (<em>directives: String</em>) <br>
+Adds the supplied directives to the current log filter. The syntax is
+identical to the CLI `&lt;target&gt;=&lt;level&gt;`:`sync=debug,state=trace`</p> <p><strong>system_addReservedPeer</strong> (peer: String) <br>
+Adds a reserved peer. Returns the empty string or an error. The string
+parameter should encode a `p2p` multiaddr.</p> <p><strong>system_chain</strong> () <br>
+Get the chain's name. Given as a string identifier.</p> <p><strong>system_chainType</strong> () <br>
+Get the chain's type.</p> <p><strong>system_dryRun</strong> (<em>extrinsic: Bytes</em>, <br>
+at: Option&lt;BlockHash&gt;*) <br>
+Dry run an extrinsic at a given block. Return SCALE encoded
+ApplyExtrinsicResult.</p> <p><strong>system_dryRunAt</strong> (<em>extrinsic: Bytes,</em> <br> <em>at: Option&lt;BlockHash&gt;</em>) <br>
+Dry run an extrinsic at a given block. Return SCALE encoded
+ApplyExtrinsicResult</p> <p><strong>system_health</strong> () <br>
+Return health status of the node. Node is considered healthy if it is:</p> <ul><li>connected to some peers (unless running in dev mode)</li> <li>not performing a major sync</li></ul> <p><strong>system_localListenAddresses</strong> () <br>
+Returns the multiaddresses that the local node is listening on. The
+addresses include a trailing `/p2p/` with the local PeerId, and are
+thus suitable to be passed to `system_addReservedPeer` or as a
+bootnode address for example.</p> <p><strong>system_localPeerId</strong> () <br>
+Returns the base58-encoded PeerId of the node.</p> <p><strong>system_name</strong> () <br>
+Get the node's implementation name. Plain old string.</p> <p><strong>system_networkState</strong> () <br>
+Return the current network state</p> <p><strong>system_nodeRoles</strong> () <br>
+Returns the roles the node is running as.</p> <p><strong>system_peers</strong> () <br>
+Returns currently connected peers</p> <p><strong>system_properties</strong> () <br>
+Get a custom set of properties as a JSON object, defined in the chain
+spec.</p> <p><strong>system_removeReservedPeer</strong> (<em>peer_id: String</em>) <br>
+Remove a reserved peer. Returns the empty string or an error. The
+string should encode only the PeerId.</p> <p><strong>system_resetLogFilter</strong> () <br>
+Resets the log filter to defaults.</p> <p><strong>system_syncState</strong>() <br>
+Returns the state of the syncing of the node: starting block, current
+best block, highest known block.</p> <p><strong>system_version</strong>() <br>
+Get the node implementation's version. Should be a semver string.</p> <p><strong>unsubscribe_newHead</strong> (<em>metadata: Option&lt;Self::Metadata&gt;,</em> <br> <em>id: SubscriptionId</em>)</p> <p><strong>web3_clientVersion</strong> () <br>
+Returns current client version.</p> <p><strong>web3_sha3</strong> (<em>_: Bytes</em>) <br>
+Returns sha3 of the given data.</p></div> <footer class="page-edit"><!----> <!----></footer> <div class="page-nav"><p class="inner"><span class="prev">
+      ←
+      <a href="/new-frontiers/evm.html" class="prev">
+        Virtual Machine
+      </a></span> <span class="next"><a href="/new-frontiers/rust-setup.html">
+        Development Environment
+      </a>
+      →
+    </span></p></div> </main></div><div class="global-ui"></div></div>
+    <script src="/new-frontiers/assets/js/app.cc1792c3.js" defer></script><script src="/new-frontiers/assets/js/2.2766b79c.js" defer></script><script src="/new-frontiers/assets/js/10.5cbfdcb7.js" defer></script>
+  </body>
+</html>
