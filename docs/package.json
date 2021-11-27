@@ -9,7 +9,7 @@
   "repository": "https://github.com/mvs-org/new-frontiers",
   "scripts": {
     "dev": "vuepress dev .",
-    "build": "vuepress build ."
+    "docs:build": "vuepress build ."
   },
   "license": "Apache-2.0",
   "dependencies": {
