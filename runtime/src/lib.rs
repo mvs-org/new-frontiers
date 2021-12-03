@@ -124,6 +124,12 @@ impl_opaque_keys! {
 	}
 }
 
+/// Amounts
+pub const DOLLARS: Balance = 1_000_000_000_000;
+pub const CENTS: Balance = DOLLARS / 100;
+pub const MILLICENTS: u128 = CENTS / 1_000;
+pub const MICROCENTS: u128 = MILLICENTS / 1_000;
+
 /// Type alias for negative imbalance during fees
 //type NegativeImbalance = pallet_balances::NegativeImbalance;
 type NegativeImbalance = <Balances as Currency<
@@ -417,6 +423,29 @@ impl pallet_im_online::Config for Runtime {
 	type WeightInfo = pallet_im_online::weights::SubstrateWeight<Runtime>;
 }
 
+parameter_types! {
+	pub const BasicDeposit: Balance =      100 * DOLLARS;
+	pub const FieldDeposit: Balance =        1 * DOLLARS;
+	pub const SubAccountDeposit: Balance =  20 * DOLLARS;
+	pub const MaxSubAccounts: u32 = 100;
+	pub const MaxAdditionalFields: u32 = 100;
+	pub const MaxRegistrars: u32 = 20;
+}
+impl pallet_identity::Config for Runtime {
+	type Event = Event;
+	type Currency = Balances;
+	type BasicDeposit = BasicDeposit;
+	type FieldDeposit = FieldDeposit;
+	type SubAccountDeposit = SubAccountDeposit;
+	type MaxSubAccounts = MaxSubAccounts;
+	type MaxAdditionalFields = MaxAdditionalFields;
+	type MaxRegistrars = MaxRegistrars;
+	type Slashed = ();
+	type ForceOrigin = EnsureRootOrTwoThridsTechCouncil;
+	type RegistrarOrigin = EnsureRootOrTwoThridsTechCouncil;
+	type WeightInfo = ();
+}
+
 impl pallet_authority_discovery::Config for Runtime {}
 
 parameter_types! {
@@ -603,6 +632,8 @@ construct_runtime!(
 		Historical: pallet_session_historical::{Module},
 		Offences: pallet_offences::{Module, Call, Storage, Event},
 		ImOnline: pallet_im_online::{Module, Call, Storage, Event<T>, ValidateUnsigned, Config<T>},
+		// Identity
+		Identity: pallet_identity::{Module, Call, Storage, Event<T>},
 
 		// admin stuff
 		Sudo: pallet_sudo::{Module, Call, Config<T>, Storage, Event<T>},
