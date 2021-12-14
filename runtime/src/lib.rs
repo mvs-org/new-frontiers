@@ -624,11 +624,11 @@ construct_runtime!(
 		// authoring stuff
 		Authorship: pallet_authorship::{Module, Call, Storage, Inherent},
 		AuthorityDiscovery: pallet_authority_discovery::{Module, Call, Config},
-		Session: pallet_session::{Module, Call, Storage, Event, Config<T>},
 		Aura: pallet_aura::{Module, Storage, Config<T>},
 		Grandpa: pallet_grandpa::{Module, Call, Storage, Config, Event},
 		Council: pallet_collective::<Instance1>::{Module, Call, Storage, Origin<T>, Event<T>, Config<T>},
 		Staking: pallet_staking::{Module, Call, Config<T>, Storage, Event<T>},
+		Session: pallet_session::{Module, Call, Storage, Event, Config<T>},
 		Historical: pallet_session_historical::{Module},
 		Offences: pallet_offences::{Module, Call, Storage, Event},
 		ImOnline: pallet_im_online::{Module, Call, Storage, Event<T>, ValidateUnsigned, Config<T>},

@@ -194,19 +194,6 @@ fn testnet_genesis(
 		pallet_balances: Some(BalancesConfig {
 			balances: endowed_accounts.iter().cloned().map(|k|(k, STASH)).collect(),
 		}),
-		pallet_session: Some(SessionConfig {
-			keys: initial_authorities
-				.iter()
-				.cloned()
-				.map(|(aura, grandpa, aidStash, aid, imoId, audId)| {
-					(
-						aidStash.clone(),                   // account id
-						aidStash.clone(),                   // validator id
-						SessionKeys{aura, grandpa, im_online: imoId, authority_discovery: audId},    // session keys
-					)
-				})
-				.collect(),
-		}),
 		pallet_staking: Some(StakingConfig {
 			validator_count: 60,
 			minimum_validator_count: initial_authorities.len() as u32,
@@ -219,6 +206,19 @@ fn testnet_genesis(
 			invulnerables: [].to_vec(),
 			slash_reward_fraction: Perbill::from_percent(10),
 			..Default::default()
+		}),
+		pallet_session: Some(SessionConfig {
+			keys: initial_authorities
+				.iter()
+				.cloned()
+				.map(|(aura, grandpa, aidStash, aid, imoId, audId)| {
+					(
+						aidStash.clone(),                   // account id
+						aidStash.clone(),                   // validator id
+						SessionKeys{aura, grandpa, im_online: imoId, authority_discovery: audId},    // session keys
+					)
+				})
+				.collect(),
 		}),
 		pallet_collective_Instance1: Some(Default::default()),
 		pallet_im_online: Some(Default::default()),
