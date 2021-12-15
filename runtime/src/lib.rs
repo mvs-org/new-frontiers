@@ -616,14 +616,18 @@ construct_runtime!(
 		System: frame_system::{Module, Call, Config, Storage, Event<T>},
 		RandomnessCollectiveFlip: pallet_randomness_collective_flip::{Module, Call, Storage},
 		Timestamp: pallet_timestamp::{Module, Call, Storage, Inherent},
-
+		Sudo: pallet_sudo::{Module, Call, Config<T>, Storage, Event<T>},
+		
 		// money stuff
 		Balances: pallet_balances::{Module, Call, Storage, Config<T>, Event<T>},
 		TransactionPayment: pallet_transaction_payment::{Module, Storage},
 		
-		// authoring stuff
+		// EVM stuff
+        EVM: pallet_evm::{Module, Call, Storage, Config, Event<T>},
+		Ethereum: pallet_ethereum::{Module, Call, Storage, Event, Config, ValidateUnsigned},
+
+		// Consensus
 		Authorship: pallet_authorship::{Module, Call, Storage, Inherent},
-		AuthorityDiscovery: pallet_authority_discovery::{Module, Call, Config},
 		Aura: pallet_aura::{Module, Storage, Config<T>},
 		Grandpa: pallet_grandpa::{Module, Call, Storage, Config, Event},
 		Council: pallet_collective::<Instance1>::{Module, Call, Storage, Origin<T>, Event<T>, Config<T>},
@@ -632,14 +636,9 @@ construct_runtime!(
 		Historical: pallet_session_historical::{Module},
 		Offences: pallet_offences::{Module, Call, Storage, Event},
 		ImOnline: pallet_im_online::{Module, Call, Storage, Event<T>, ValidateUnsigned, Config<T>},
+		AuthorityDiscovery: pallet_authority_discovery::{Module, Call, Config},
 		// Identity
 		Identity: pallet_identity::{Module, Call, Storage, Event<T>},
-
-		// admin stuff
-		Sudo: pallet_sudo::{Module, Call, Config<T>, Storage, Event<T>},
-        // EVM stuff
-        EVM: pallet_evm::{Module, Call, Storage, Config, Event<T>},
-		Ethereum: pallet_ethereum::{Module, Call, Storage, Event, Config, ValidateUnsigned},
 	}
 );
 
