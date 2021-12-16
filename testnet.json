@@ -2,7 +2,10 @@
   "name": "NF Testnet",
   "id": "nfs_testnet",
   "chainType": "Live",
-  "bootNodes": [],
+  "bootNodes": [
+    "/dns/metaverse-vm-testnet-seed-de.mvs.org/tcp/30333/p2p/12D3KooWCy19rYk9LoHUeoyaMvbc1GUygoRw5psKRkb9yBm8PZzJ",
+    "/dns/metaverse-vm-testnet-seed-us.mvs.org/tcp/30333/p2p/12D3KooWMLR9WgSJ4FaBjPYH6xYH2zvkNPxArmrpgZ96jotbgpXN"
+  ],
   "telemetryEndpoints": null,
   "protocolId": null,
   "properties": {
