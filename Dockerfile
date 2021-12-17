@@ -24,7 +24,8 @@ ENV PATH=/root/.cargo/bin:$PATH
 
 RUN rustup toolchain install nightly-2021-05-18-x86_64-unknown-linux-gnu
 RUN rustup +nightly-2021-05-18 target add wasm32-unknown-unknown
-RUN git clone -b tx_injection https://github.com/mvs-org/new-frontiers.git
+ADD https://api.github.com/repos/mvs-org/new-frontiers/git/refs/heads/master version.json
+RUN git clone -b master https://github.com/mvs-org/new-frontiers.git
 WORKDIR "new-frontiers"
 RUN cargo +nightly-2021-05-18 build --release 
 RUN cp target/release/metaversevm /usr/local/bin
