@@ -1,38 +1,45 @@
+### build stage
+FROM rust:1.51-slim as builder
+ENV USER root
+ENV CI_PROJECT_NAME docker
+RUN apt-get update && apt-get install -y git cmake pkg-config libssl-dev git clang libclang-dev
+RUN rustup default nightly && rustup target add wasm32-unknown-unknown
+COPY . new-frontiers
+WORKDIR "new-frontiers"
+RUN cargo build --release
+
 ### package stage
-FROM debian as target
+FROM debian:bullseye-slim
 # metadata
 ARG VCS_REF
 ARG BUILD_DATE
 # show backtraces
 ENV RUST_BACKTRACE 1
 # install tools and dependencies
-SHELL ["/bin/bash", "-c"]
-RUN apt-get update 
-RUN	apt-get upgrade -y 
-RUN	apt-get install -y ca-certificates  curl git clang curl libssl-dev llvm libudev-dev
-RUN apt-get install build-essential -y
+RUN apt-get update && \
+    DEBIAN_FRONTEND=noninteractive apt-get upgrade -y && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y \
+        libssl1.1 \
+        ca-certificates \
+        curl && \
 # apt cleanup
-RUN apt-get autoremove -y
-RUN apt-get clean 
-RUN find /var/lib/apt/lists/ -type f -not -name lock -delete;
+    apt-get autoremove -y && \
+    apt-get clean && \
+    find /var/lib/apt/lists/ -type f -not -name lock -delete; \
+# add user
+    useradd -m -u 1000 -U -s /bin/sh -d /new-frontiers mvs
+# add binary to docker image
+COPY --from=builder /new-frontiers/target/release/metaversevm /usr/local/bin/
 
-RUN useradd -m -u 1000 -U -s /bin/sh -d /metaverse mvs
-RUN curl https://getsubstrate.io -sSf | bash -s -- --fast
-RUN source $HOME/.cargo/env
-RUN source ~/.profile
-ENV PATH=/root/.cargo/bin:$PATH
+RUN apt-get update && apt-get install -y libc6
 
-RUN rustup toolchain install nightly-2021-05-18-x86_64-unknown-linux-gnu
-RUN rustup +nightly-2021-05-18 target add wasm32-unknown-unknown
-ADD https://api.github.com/repos/mvs-org/new-frontiers/git/refs/heads/master version.json
-RUN git clone -b master https://github.com/mvs-org/new-frontiers.git
-WORKDIR "new-frontiers"
-RUN cargo +nightly-2021-05-18 build --release 
-RUN cp target/release/metaversevm /usr/local/bin
-RUN ls /usr/local/bin
+# check if executable works in this container
 USER mvs
-#COPY ./testnet1.json ./testnet
-#COPY ./testnet1.json .
+RUN /usr/local/bin/metaversevm --version
+# 30333 p2p
+# 9933 http rpc
+# 9944 ws rpc
+# 9615 prometheus
 EXPOSE 30333 9933 9944 9615
-VOLUME ["/metaversevm"]
-ENTRYPOINT ["/usr/local/bin/metaversevm", "--unsafe-rpc-external", "--unsafe-ws-external"]
+VOLUME ["/metaverse"]
+CMD metaversevm
