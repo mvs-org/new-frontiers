@@ -37,7 +37,7 @@ pub use crate::worker::{MiningWorker, MiningMetadata, MiningBuild};
 
 use std::{
 	sync::Arc, any::Any, borrow::Cow, collections::HashMap, marker::PhantomData,
-	cmp::Ordering, time::{Duration, SystemTime, UNIX_EPOCH},
+	cmp::Ordering, time::Duration,
 };
 use futures::{prelude::*, future::Either};
 use parking_lot::Mutex;
@@ -65,9 +65,6 @@ use log::*;
 use sp_timestamp::{InherentError as TIError, TimestampInherentData};
 
 use crate::worker::UntilImportedOrTimeout;
-// use sp_std::{
-// 	convert::TryFrom,
-// };
 
 #[derive(derive_more::Display, Debug)]
 pub enum Error<B: BlockT> {
@@ -171,7 +168,7 @@ pub trait PowAlgorithm<B: BlockT> {
 	fn difficulty(&self, parent: B::Hash) -> Result<Self::Difficulty, Error<B>>;
 
 	/// Get the next block's difficulty.
-	fn calc_difficulty(&self, parent: B::Hash, cur: B::Hash) -> Result<Self::Difficulty, Error<B>>;
+	fn adjust_difficulty(&self, parent: B::Hash, cur: B::Hash) -> Result<Self::Difficulty, Error<B>>;
 
 	/// Verify that the seal is valid against given pre hash when parent block is not yet imported.
 	///
@@ -209,7 +206,7 @@ pub trait PowAlgorithm<B: BlockT> {
 
 /// A block importer for PoW.
 pub struct PowBlockImport<B: BlockT, I, C, S, Algorithm, CAW> {
-	pub algorithm: Algorithm,
+	algorithm: Algorithm,
 	inner: I,
 	select_chain: S,
 	client: Arc<C>,
@@ -352,19 +349,16 @@ impl<B, I, C, S, Algorithm, CAW> BlockImport<B> for PowBlockImport<B, I, C, S, A
 		if let Some(inner_body) = block.body.take() {
 			let inherent_data = self.inherent_data_providers
 				.create_inherent_data().map_err(|e| e.into_string())?;
-			// :TODO: fix timestamp
-			//let timestamp_now = inherent_data.timestamp_inherent_data().map_err(|e| e.into_string())?;
-			//let timestamp_now = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs();
+			let timestamp_now = inherent_data.timestamp_inherent_data().map_err(|e| e.into_string())?;
 
 			let check_block = B::new(block.header.clone(), inner_body);
 
-			// :TODO: may check later, now we don't check the timestamp inherent data 
-			// self.check_inherents(
-			// 	check_block.clone(),
-			// 	BlockId::Hash(parent_hash),
-			// 	inherent_data,
-			// 	timestamp_now
-			// )?;
+			self.check_inherents(
+				check_block.clone(),
+				BlockId::Hash(parent_hash),
+				inherent_data,
+				timestamp_now
+			)?;
 
 			block.body = Some(check_block.deconstruct().1);
 		}
@@ -622,13 +616,13 @@ pub fn start_mining_worker<Block, C, S, Algorithm, E, SO, CAW>(
 
 		// The worker is locked for the duration of the whole proposing period. Within this period,
 		// the mining target is outdated and useless anyway.
-		let difficulty = match algorithm.calc_difficulty(*best_header.parent_hash(), best_hash) {
+		let difficulty = match algorithm.adjust_difficulty(*best_header.parent_hash(), best_hash) {
 			Ok(x) => x,
 			Err(err) => {
 				warn!(
 					target: "pow",
 					"Unable to propose new block for authoring. \
-					 Calculate difficulty failed: {:?}",
+					 Adjust difficulty failed: {:?}",
 					err,
 				);
 				return Either::Left(future::ready(()))
@@ -670,7 +664,7 @@ pub fn start_mining_worker<Block, C, S, Algorithm, E, SO, CAW>(
 			};
 
 			let proposal = match proposer.propose(
-				inherent_data.clone(),
+				inherent_data,
 				inherent_digest,
 				build_time.clone(),
 				RecordProof::No,

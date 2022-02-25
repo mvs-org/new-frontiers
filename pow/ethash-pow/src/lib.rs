@@ -90,7 +90,7 @@ impl<B: BlockT<Hash = H256>> PowAlgorithm<B> for MinimalEthashAlgorithm {
 		Ok(U256::from(1_000_000))
 	}
 
-	fn calc_difficulty(&self, _parent: B::Hash, _cur: B::Hash) -> Result<Self::Difficulty, Error<B>> {
+	fn adjust_difficulty(&self, _parent: B::Hash, _cur: B::Hash) -> Result<Self::Difficulty, Error<B>> {
 		// Fixed difficulty hardcoded here
 		Ok(U256::from(1_000_000))
 	}
@@ -225,7 +225,7 @@ where
 		Ok(seal.difficulty)
 	}
 
-	fn calc_difficulty(&self, parent: B::Hash, cur: B::Hash) -> Result<Self::Difficulty, Error<B>> {
+	fn adjust_difficulty(&self, parent: B::Hash, cur: B::Hash) -> Result<Self::Difficulty, Error<B>> {
 		let parent_header = match self.client.header(BlockId::<B>::hash(parent)).map_err(|err| {
 				sc_consensus_pow::Error::Other(format!("{:?}", err))
 			})? {
