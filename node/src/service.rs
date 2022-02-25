@@ -1,6 +1,6 @@
 //! Service and ServiceFactory implementation. Specialized wrapper over substrate service.
 
-use std::{sync::{Arc, Mutex}, cell::RefCell, time::Duration, collections::{HashMap, BTreeMap}};
+use std::{sync::{Arc, Mutex}, cell::RefCell, time::{Duration, SystemTime, UNIX_EPOCH}, collections::{HashMap, BTreeMap}};
 use fc_rpc::EthTask;
 use fc_rpc_core::types::{FilterPool, PendingTransactions};
 use fc_mapping_sync::MappingSyncWorker;
@@ -12,13 +12,23 @@ use sp_consensus::import_queue::BasicQueue;
 use sp_inherents::{InherentDataProviders, ProvideInherentData, InherentIdentifier, InherentData};
 use sc_executor::native_executor_instance;
 pub use sc_executor::NativeExecutor;
-use sp_consensus_aura::sr25519::AuthorityPair as AuraPair;
-use sc_finality_grandpa::SharedVoterState;
+use sc_finality_grandpa::{SharedVoterState, GrandpaBlockImport};
 use sc_keystore::LocalKeystore;
-use futures::StreamExt;
 use crate::cli::Cli;
 use fc_consensus::FrontierBlockImport;
 use sp_timestamp::InherentError;
+
+use futures::prelude::*;
+use sp_runtime::traits::{Block as BlockT, Header as HeaderT, UniqueSaturatedInto};
+use parking_lot::{Mutex as PMutex};
+use ethash::{self, SeedHashCompute};
+use ethash_pow::{MinimalEthashAlgorithm, EthashAlgorithm, WorkSeal};
+use ethash_rpc::{self, EtheminerCmd, Work, RpcError};
+use sc_consensus_pow::{PowAlgorithm, MiningWorker, MiningMetadata, MiningBuild};
+use sp_core::{U256, H256};
+use ethereum_types::{self, U256 as EU256, H256 as EH256};
+use parity_scale_codec::{Decode, Encode};
+use log::{error, info, debug, trace, warn};
 
 // Our native executor instance.
 native_executor_instance!(
@@ -61,20 +71,6 @@ impl ProvideInherentData for MockTimestampInherentDataProvider {
 	}
 }
 
-pub type ConsensusResult = (
-	sc_consensus_aura::AuraBlockImport<
-		Block,
-		FullClient,
-		FrontierBlockImport<
-			Block,
-			sc_finality_grandpa::GrandpaBlockImport<FullBackend, Block, FullClient, FullSelectChain>,
-			FullClient
-		>,
-		AuraPair
-	>,
-	sc_finality_grandpa::LinkHalf<Block, FullClient, FullSelectChain>
-);
-
 pub fn open_frontier_backend(config: &Configuration) -> Result<Arc<fc_db::Backend<Block>>, String> {
 	let config_dir = config.base_path.as_ref()
 		.map(|base_path| base_path.config_dir(config.chain_spec.id()))
@@ -97,7 +93,16 @@ pub fn new_partial(config: &Configuration, _cli: &Cli) -> Result<sc_service::Par
 	BasicQueue<Block, TransactionFor<FullClient, Block>>,
 	sc_transaction_pool::FullPool<Block, FullClient>,
 	(
-		ConsensusResult,
+		sc_consensus_pow::PowBlockImport<
+			Block,
+			GrandpaBlockImport<FullBackend, Block, FullClient, FullSelectChain>,
+			FullClient,
+			FullSelectChain,
+			EthashAlgorithm<FullClient>,
+			impl sp_consensus::CanAuthorWith<Block>,
+		>,
+		EthashAlgorithm<FullClient>,
+		sc_finality_grandpa::LinkHalf<Block, FullClient, FullSelectChain>,
         PendingTransactions, Option<FilterPool>, Arc<fc_db::Backend<Block>>,
 	)
 >, ServiceError> {
@@ -126,8 +131,6 @@ pub fn new_partial(config: &Configuration, _cli: &Cli) -> Result<sc_service::Par
 	let filter_pool: Option<FilterPool>
 		= Some(Arc::new(Mutex::new(BTreeMap::new())));
 
-	let frontier_backend = open_frontier_backend(config)?;
-
 	let transaction_pool = sc_transaction_pool::BasicPool::new_full(
 		config.transaction_pool.clone(),
 		config.role.is_authority().into(),
@@ -136,6 +139,12 @@ pub fn new_partial(config: &Configuration, _cli: &Cli) -> Result<sc_service::Par
 		client.clone(),
 	);
 
+	let frontier_backend = open_frontier_backend(config)?;
+	// let frontier_block_import = FrontierBlockImport::new(
+	// 	grandpa_block_import.clone(),
+	// 	client.clone(),
+	// 	frontier_backend.clone(),
+	// );
 
 	let (grandpa_block_import, grandpa_link) = sc_finality_grandpa::block_import(
 		client.clone(),
@@ -143,25 +152,26 @@ pub fn new_partial(config: &Configuration, _cli: &Cli) -> Result<sc_service::Par
 		select_chain.clone(),
 	)?;
 
-	let frontier_block_import = FrontierBlockImport::new(
-		grandpa_block_import.clone(),
+	let can_author_with = sp_consensus::CanAuthorWithNativeVersion::new(client.executor().clone());
+	let ethash_alg = EthashAlgorithm::new(client.clone());
+
+	let pow_block_import = sc_consensus_pow::PowBlockImport::new(
+		grandpa_block_import,
 		client.clone(),
-		frontier_backend.clone(),
+		ethash_alg.clone(),
+		0, // check inherents starting at block 0
+		select_chain.clone(),
+		inherent_data_providers.clone(),
+		can_author_with,
 	);
 
-	let aura_block_import = sc_consensus_aura::AuraBlockImport::<_, _, _, AuraPair>::new(
-		frontier_block_import.clone(), client.clone(),
-	);
-
-	let import_queue = sc_consensus_aura::import_queue::<_, _, _, AuraPair, _, _>(
-		sc_consensus_aura::slot_duration(&*client)?,
-		aura_block_import.clone(),
-		Some(Box::new(grandpa_block_import.clone())),
-		client.clone(),
+	let import_queue = sc_consensus_pow::import_queue(
+		Box::new(pow_block_import.clone()),
+		None,
+		ethash_alg.clone(),
 		inherent_data_providers.clone(),
 		&task_manager.spawn_handle(),
 		config.prometheus_registry(),
-		sp_consensus::CanAuthorWithNativeVersion::new(client.executor().clone()),
 	)?;
 
 	Ok(sc_service::PartialComponents {
@@ -173,7 +183,7 @@ pub fn new_partial(config: &Configuration, _cli: &Cli) -> Result<sc_service::Par
 		select_chain,
 		transaction_pool,
 		inherent_data_providers,
-		other: ((aura_block_import, grandpa_link), 
+		other: (pow_block_import, ethash_alg, grandpa_link, 
 				pending_transactions,
 				filter_pool,
 				frontier_backend,
@@ -203,7 +213,7 @@ pub fn new_full(mut config: Configuration, cli: &Cli) -> Result<TaskManager, Ser
 		select_chain,
 		transaction_pool,
 		inherent_data_providers,
-		other: (consensus_result, pending_transactions, filter_pool, frontier_backend),
+		other: (pow_block_import, ethash_alg, grandpa_link, pending_transactions, filter_pool, frontier_backend),
 	} = new_partial(&config, cli)?;
 
 	if let Some(url) = &config.keystore_remote {
@@ -244,6 +254,9 @@ pub fn new_full(mut config: Configuration, cli: &Cli) -> Result<TaskManager, Ser
     let is_authority = role.is_authority();
 	let subscription_task_executor = sc_rpc::SubscriptionTaskExecutor::new(task_manager.spawn_handle());
 
+	// Channel for the rpc handler to communicate with the authorship task.
+	let (command_sink, commands_stream) = futures::channel::mpsc::channel(1000);
+
 	let rpc_extensions_builder = {
 		let client = client.clone();
 		let pool = transaction_pool.clone();
@@ -265,6 +278,7 @@ pub fn new_full(mut config: Configuration, cli: &Cli) -> Result<TaskManager, Ser
 				filter_pool: filter_pool.clone(),
 				backend: frontier_backend.clone(),
 				max_past_logs,
+				command_sink: command_sink.clone(),
 			};
 
 			crate::rpc::create_full(deps, subscription_task_executor.clone())
@@ -326,8 +340,6 @@ pub fn new_full(mut config: Configuration, cli: &Cli) -> Result<TaskManager, Ser
 		);
 	}
 
-	let (block_import, grandpa_link) = consensus_result;
-
 	if role.is_authority() {
 		let proposer_factory = sc_basic_authorship::ProposerFactory::new(
 			task_manager.spawn_handle(),
@@ -339,23 +351,30 @@ pub fn new_full(mut config: Configuration, cli: &Cli) -> Result<TaskManager, Ser
 		let can_author_with =
 			sp_consensus::CanAuthorWithNativeVersion::new(client.executor().clone());
 
-		let aura = sc_consensus_aura::start_aura::<_, _, _, _, _, AuraPair, _, _, _,_>(
-			sc_consensus_aura::slot_duration(&*client)?,
+		let (worker, worker_task) = sc_consensus_pow::start_mining_worker(
+			Box::new(pow_block_import),
 			client.clone(),
 			select_chain,
-			block_import,
+			ethash_alg,
 			proposer_factory,
 			network.clone(),
-			inherent_data_providers.clone(),
-			force_authoring,
-			backoff_authoring_blocks,
-			keystore_container.sync_keystore(),
+			None,
+			inherent_data_providers,
+			// time to wait for a new block before starting to mine a new one
+			Duration::from_secs(10),
+			// how long to take to actually build the block (i.e. executing extrinsics)
+			Duration::from_secs(10),
 			can_author_with,
-		)?;
+		);
 
-		// the AURA authoring task is considered essential, i.e. if it
-		// fails we take down the service with it.
-		task_manager.spawn_essential_handle().spawn_blocking("aura", aura);
+		task_manager
+			.spawn_essential_handle()
+			.spawn_blocking("pow", worker_task);
+		
+		// Start Mining
+		task_manager
+			.spawn_essential_handle()
+			.spawn_blocking("mining", run_mining_svc(worker.clone(), commands_stream));
 
 		// if the node isn't actively participating in consensus then it doesn't
 		// need a keystore, regardless of which protocol we use below.
@@ -401,7 +420,6 @@ pub fn new_full(mut config: Configuration, cli: &Cli) -> Result<TaskManager, Ser
 		}
 	}
 
-
 	network_starter.start_network();
 	Ok(task_manager)
 }
@@ -429,20 +447,27 @@ pub fn new_light(mut config: Configuration) -> Result<TaskManager, ServiceError>
 		select_chain.clone(),
 	)?;
 
-	let aura_block_import = sc_consensus_aura::AuraBlockImport::<_, _, _, AuraPair>::new(
-		grandpa_block_import.clone(),
+	let inherent_data_providers = InherentDataProviders::new();
+	let ethash_alg = EthashAlgorithm::new(client.clone());
+
+	let pow_block_import = sc_consensus_pow::PowBlockImport::new(
+		grandpa_block_import,
 		client.clone(),
+		ethash_alg.clone(),
+		0, // check inherents starting at block 0
+		select_chain,
+		inherent_data_providers.clone(),
+		// FixMe #375
+		sp_consensus::AlwaysCanAuthor,
 	);
 
-	let import_queue = sc_consensus_aura::import_queue::<_, _, _, AuraPair, _, _>(
-		sc_consensus_aura::slot_duration(&*client)?,
-		aura_block_import,
-		Some(Box::new(grandpa_block_import)),
-		client.clone(),
-		InherentDataProviders::new(),
+	let import_queue = sc_consensus_pow::import_queue(
+		Box::new(pow_block_import),
+		None,
+		ethash_alg.clone(),
+		inherent_data_providers,
 		&task_manager.spawn_handle(),
 		config.prometheus_registry(),
-		sp_consensus::NeverCanAuthor,
 	)?;
 
 	let (network, network_status_sinks, system_rpc_tx, network_starter) =
@@ -480,4 +505,65 @@ pub fn new_light(mut config: Configuration) -> Result<TaskManager, ServiceError>
 	network_starter.start_network();
 
 	Ok(task_manager)
+}
+
+pub async fn run_mining_svc<B, Algorithm, C, CS>(
+	worker : Arc<PMutex<MiningWorker<B, Algorithm, C>>>,
+	mut commands_stream: CS,
+)
+	where 
+	B: BlockT<Hash = H256>,
+	Algorithm: PowAlgorithm<B, Difficulty = U256>,
+	C: sp_api::ProvideRuntimeApi<B>,
+	CS: Stream<Item=EtheminerCmd<<B as BlockT>::Hash>> + Unpin + 'static,
+{
+	let seed_compute = SeedHashCompute::default();
+
+	while let Some(command) = commands_stream.next().await {
+		match command {
+			EtheminerCmd::GetWork { mut sender } => {
+				let metadata = worker.lock().metadata();
+				if let Some(metadata) = metadata {
+					let nr :u64 = UniqueSaturatedInto::<u64>::unique_saturated_into(metadata.number);
+					let pow_hash:H256 = metadata.pre_hash;
+					let seed_hash:H256 = seed_compute.hash_block_number(nr).into();
+					let tmp:[u8; 32] = metadata.difficulty.into();
+					let tmp:[u8; 32] = ethash::difficulty_to_boundary(&EU256::from(tmp)).into();
+					let target:H256 = H256::from(tmp);
+
+					let ret = Ok(Work { 
+						pow_hash, 
+						seed_hash,
+						target, 
+						number: Some(nr),
+					 });
+
+					ethash_rpc::send_result(&mut sender, ret)
+					// ethash_rpc::send_result(&mut sender, future.await)
+				} else {
+					ethash_rpc::send_result(&mut sender, Err(RpcError::NoWork))
+				}
+			}
+			EtheminerCmd::SubmitWork {  nonce, pow_hash, mix_digest, mut sender } => {
+				let mut worker = worker.lock();
+				let metadata = worker.metadata();
+				if let Some(metadata) = metadata {
+					let non_nr :u64 = UniqueSaturatedInto::<u64>::unique_saturated_into(nonce);
+					let header_nr :u64 = UniqueSaturatedInto::<u64>::unique_saturated_into(metadata.number);
+					let timestamp :u64 = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs();
+					let seal = WorkSeal{nonce:non_nr, pow_hash, mix_digest, difficulty:metadata.difficulty, header_nr, timestamp};
+					debug!(target:"pow", "worker.submit pow_hash: {}", pow_hash);
+					worker.submit(seal.encode());
+					ethash_rpc::send_result(&mut sender, Ok(true))
+				} else {
+					ethash_rpc::send_result(&mut sender, Err(RpcError::NoMetaData))
+				}
+
+						
+			}
+			EtheminerCmd::SubmitHashrate { hash, mut sender } => {
+				
+			}
+		}
+	}
 }

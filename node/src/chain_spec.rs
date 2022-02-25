@@ -1,11 +1,9 @@
 use std::{str::FromStr, collections::BTreeMap};
 use sp_core::{H160, Pair, Public, sr25519};
 use metaverse_vm_runtime::{
-	AccountId, AuraConfig, BalancesConfig, GenesisConfig, GrandpaConfig, SessionConfig, SessionKeys,
+	AccountId, BalancesConfig, GenesisConfig, GrandpaConfig, SessionConfig, SessionKeys,
 	SudoConfig, SystemConfig, EVMConfig, EthereumConfig, WASM_BINARY, Signature,
-	StakerStatus, StakingConfig, ImOnlineConfig, AuthorityDiscoveryConfig,
 };
-use sp_consensus_aura::sr25519::AuthorityId as AuraId;
 use sp_finality_grandpa::AuthorityId as GrandpaId;
 use pallet_im_online::ed25519::AuthorityId as ImOnlineId;
 use sp_authority_discovery::AuthorityId as AuthorityDiscoveryId;
@@ -41,22 +39,11 @@ pub fn get_account_id_from_seed<TPublic: Public>(seed: &str) -> AccountId where
 	AccountPublic::from(get_from_seed::<TPublic>(seed)).into_account()
 }
 
-/// Generate an Aura authority key.
-pub fn authority_keys_from_seed(s: &str) -> (
-	AuraId, 
-	GrandpaId, 
-	AccountId,
-	AccountId,
-	ImOnlineId,
-	AuthorityDiscoveryId,
-) {
+/// Generate an Grandpa authority key.
+pub fn authority_keys_from_seed(s: &str) -> (GrandpaId, AccountId) {
 	(
-		get_from_seed::<AuraId>(s),
 		get_from_seed::<GrandpaId>(s),
-		get_account_id_from_seed::<sr25519::Public>(&format!("{}//stash", s)),
 		get_account_id_from_seed::<sr25519::Public>(s),
-		get_from_seed::<ImOnlineId>(s),
-		get_from_seed::<AuthorityDiscoveryId>(s),
 	)
 }
 
@@ -162,8 +149,7 @@ pub fn local_testnet_config() -> Result<ChainSpec, String> {
 fn testnet_genesis(
 	wasm_binary: &[u8],
 	initial_authorities: Vec<(
-		AuraId, GrandpaId, AccountId, 
-		AccountId, ImOnlineId, AuthorityDiscoveryId,
+		GrandpaId, AccountId
 	)>,
 	root_key: AccountId,
 	endowed_accounts: Vec<AccountId>,
@@ -194,36 +180,19 @@ fn testnet_genesis(
 		pallet_balances: Some(BalancesConfig {
 			balances: endowed_accounts.iter().cloned().map(|k|(k, STASH)).collect(),
 		}),
-		pallet_staking: Some(StakingConfig {
-			validator_count: 60,
-			minimum_validator_count: initial_authorities.len() as u32,
-			stakers: initial_authorities
-				.iter()
-				.map(|x| 
-					(x.2.clone(), x.3.clone(), STASH, StakerStatus::Validator)
-				)
-				.collect(),
-			invulnerables: [].to_vec(),
-			slash_reward_fraction: Perbill::from_percent(10),
-			..Default::default()
-		}),
 		pallet_session: Some(SessionConfig {
 			keys: initial_authorities
 				.iter()
 				.cloned()
-				.map(|(aura, grandpa, aidStash, aid, imoId, audId)| {
+				.map(|(grandpa, aid)| {
 					(
-						aidStash.clone(),                   // account id
-						aidStash.clone(),                   // validator id
-						SessionKeys{aura, grandpa, im_online: imoId, authority_discovery: audId},    // session keys
+						aid.clone(),                   // account id
+						aid.clone(),                   // validator id
+						SessionKeys{grandpa},    // session keys
 					)
 				})
 				.collect(),
 		}),
-		pallet_collective_Instance1: Some(Default::default()),
-		pallet_im_online: Some(Default::default()),
-		pallet_authority_discovery: Some(Default::default()),
-		pallet_aura: Some(Default::default()),
 		pallet_grandpa: Some(Default::default()),
 		pallet_sudo: Some(SudoConfig {
 			// Assign network admin rights.
