@@ -5,14 +5,15 @@ use metaverse_vm_runtime::{
 	SudoConfig, SystemConfig, EVMConfig, EthereumConfig, WASM_BINARY, Signature,
 };
 use sp_finality_grandpa::AuthorityId as GrandpaId;
-use pallet_im_online::ed25519::AuthorityId as ImOnlineId;
-use sp_authority_discovery::AuthorityId as AuthorityDiscoveryId;
 use sp_runtime::{
 	traits::{Verify, IdentifyAccount},
 	Perbill,
 };
 use sc_service::{ChainType, Properties};
 use pallet_evm::GenesisAccount;
+// use pallet_im_online::ed25519::AuthorityId as ImOnlineId;
+// use sp_authority_discovery::AuthorityId as AuthorityDiscoveryId;
+
 // The URL for the telemetry server.
 // const STAGING_TELEMETRY_URL: &str = "wss://telemetry.polkadot.io/submit/";
 
