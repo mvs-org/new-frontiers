@@ -58,10 +58,13 @@ pallet-im-online = { version = "3.0", default-features = false }
 sp-authority-discovery = { version = "3.0" }
 pallet-authority-discovery = { version = "3.0" }
 
-pallet-evm = '3.0.0'
-pallet-ethereum = '1.0.0'
+pallet-evm = '5.0.0'
+pallet-ethereum = '3.0.0'
+# pallet-evm = { version = '5.0.0', git = "https://github.com/paritytech/substrate.git", branch = "frontier" }
+# pallet-ethereum = { version = '3.0.0', git = "https://github.com/paritytech/substrate.git", branch = "frontier" }
 
-fp-rpc = '1.0.0'
+fp-rpc = '2.0.0'
+
 fc-rpc = '1.0.0'
 fc-db = '1.0.0'
 fc-rpc-core = '1.0.0'
