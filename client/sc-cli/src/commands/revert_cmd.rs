@@ -19,13 +19,42 @@
 use crate::error;
 use crate::params::{GenericNumber, PruningParams, SharedParams};
 use crate::CliConfiguration;
-use sc_service::chain_ops::revert_chain;
-use sp_runtime::traits::{Block as BlockT, Header as HeaderT};
+use sp_runtime::traits::{Block as BlockT, Header as HeaderT, NumberFor, Zero};
+use sp_runtime::generic::{BlockId};
 use std::fmt::Debug;
 use std::str::FromStr;
 use std::sync::Arc;
 use structopt::StructOpt;
-use sc_client_api::{Backend, UsageProvider};
+use sc_client_api::{backend::{Finalizer}, Backend, UsageProvider};
+use log::info;
+
+
+/// Performs a revert of `blocks` blocks.
+fn revert_chain<B, BA, C>(
+	client: Arc<C>,
+	backend: Arc<BA>,
+	blocks: NumberFor<B>,
+	rfinal: bool
+) -> Result<(), sc_service::Error>
+where
+	B: BlockT,
+	C: UsageProvider<B> + Finalizer<B, BA>,
+	BA: Backend<B>,
+{
+	let reverted = backend.revert(blocks, rfinal)?;
+	let info = client.usage_info().chain;
+
+	if reverted.0.is_zero() {
+		info!("There aren't any non-finalized blocks to revert.");
+	} else {
+		if rfinal {
+			client.finalize_block(BlockId::Number(info.finalized_number), None, false).unwrap();
+		}
+		info!("Reverted {} blocks. Best: #{} ({}), Finalized: #{} ({})", reverted.0, 
+			info.best_number, info.best_hash, info.finalized_number, info.finalized_hash);
+	}
+	Ok(())
+}
 
 /// The `revert` command used revert the chain to a previous state.
 #[derive(Debug, StructOpt)]
@@ -33,6 +62,10 @@ pub struct RevertCmd {
 	/// Number of blocks to revert.
 	#[structopt(default_value = "256")]
 	pub num: GenericNumber,
+
+	/// If revert finalized block.
+	#[structopt(long = "rfinal")]
+	pub rfinal: bool,
 
 	#[allow(missing_docs)]
 	#[structopt(flatten)]
@@ -53,11 +86,11 @@ impl RevertCmd {
 	where
 		B: BlockT,
 		BA: Backend<B>,
-		C: UsageProvider<B>,
+		C: UsageProvider<B> + Finalizer<B, BA>,
 		<<<B as BlockT>::Header as HeaderT>::Number as FromStr>::Err: Debug,
 	{
 		let blocks = self.num.parse()?;
-		revert_chain(client, backend, blocks)?;
+		revert_chain(client, backend, blocks, self.rfinal)?;
 
 		Ok(())
 	}
