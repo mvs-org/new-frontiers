@@ -42,7 +42,7 @@ use frame_system::{
 };
 use fp_rpc::TransactionStatus;
 use pallet_evm::{
-	Account as EVMAccount, FeeCalculator, HashedAddressMapping,
+	Account as EVMAccount, FeeCalculator,
 	EnsureAddressTruncated, Runner, AddressMapping, EVMCurrencyAdapter,
 };
 
@@ -167,7 +167,7 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
 /// up by `pallet_aura` to implement `fn slot_duration()`.
 ///
 /// Change this to adjust the block time.
-pub const SECS_PER_BLOCK: Moment = 2; // second block times
+pub const SECS_PER_BLOCK: Moment = 4; // second block times
 pub const MILLISECS_PER_BLOCK: Moment = SECS_PER_BLOCK * 1000;
 
 // These time units are defined in number of blocks.  
@@ -523,7 +523,7 @@ impl pallet_sudo::Config for Runtime {
 }
 
 parameter_types! {
-	pub const ChainId: u64 = 23;
+	pub const ChainId: u64 = 43;
 	pub BlockGasLimit: U256 = U256::from(u32::max_value());
 }
 
@@ -531,8 +531,7 @@ pub struct FixedGasPrice;
 
 impl FeeCalculator for FixedGasPrice {
 	fn min_gas_price() -> U256 {
-		// Gas price is 10 gwei
-		10_000_000_000u64.into()
+		1u64.into()
 	}
 }
 
