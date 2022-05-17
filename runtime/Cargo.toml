@@ -39,6 +39,7 @@ sp-api = { default-features = false, version = '3.0.0' }
 sp-block-builder = { default-features = false, version = '3.0.0' }
 sp-consensus-aura = { default-features = false, version = '0.9.0' }
 sp-core = { default-features = false, version = '3.0.0' }
+sp-io = { default-features = false, version = "3.0.0" }
 sp-inherents = { default-features = false, version = '3.0.0' }
 sp-offchain = { default-features = false, version = '3.0.0' }
 sp-runtime = { default-features = false, version = '3.0.0' }
@@ -46,16 +47,14 @@ sp-session = { default-features = false, version = '3.0.0' }
 sp-std = { default-features = false, version = '3.0.0' }
 sp-transaction-pool = { default-features = false, version = '3.0.0' }
 sp-version = { default-features = false, version = '3.0.0' }
-pallet-evm = { default-features = false, version = '3.0.0' }
-pallet-ethereum = { default-features = false, version = '1.0.0' }
-fp-rpc = { default-features = false, version = '1.0.0' }
-pallet-evm-precompile-blake2 = { default-features = false, version = "1.0.0" }
-pallet-evm-precompile-dispatch = { default-features = false, version = "1.0.0" }
-pallet-evm-precompile-ed25519 = { default-features = false, version = "1.0.0" }
-pallet-evm-precompile-bn128 = { default-features = false, version = "1.0.0" }
-pallet-evm-precompile-modexp = { default-features = false, version = "1.0.0" }
-pallet-evm-precompile-sha3fips = { default-features = false, version = "1.0.0" }
-pallet-evm-precompile-simple = { default-features = false, version = "1.0.0" }
+
+pallet-evm = { default-features = false, version = "5.0.0", git = "https://github.com/mvs-org/substrate.git", branch = "EVMv5" }
+pallet-ethereum = { default-features = false, version = "3.0.0", git = "https://github.com/mvs-org/substrate.git", branch = "EVMv5" }
+fp-rpc = { default-features = false, version = "2.1.0", git = "https://github.com/mvs-org/substrate.git", branch = "EVMv5" }
+pallet-evm-precompile-bn128 = { default-features = false, version = "2.0.0", git = "https://github.com/mvs-org/substrate.git", branch = "EVMv5"}
+pallet-evm-precompile-modexp = { default-features = false, version = "2.0.0", git = "https://github.com/mvs-org/substrate.git", branch = "EVMv5" }
+pallet-evm-precompile-sha3fips = { default-features = false, version = "2.0.0", git = "https://github.com/mvs-org/substrate.git", branch = "EVMv5" }
+pallet-evm-precompile-simple = { default-features = false, version = "2.0.0", git = "https://github.com/mvs-org/substrate.git", branch = "EVMv5" }
 
 sp-staking = { version = "3.0", default-features = false }
 pallet-staking = { version = "3.0", default-features = false }
@@ -82,12 +81,9 @@ default = ["std"]
 #     'sp-runtime/runtime-benchmarks',
 # ]
 std = [
-    "pallet-evm-precompile-dispatch/std", 
-    "pallet-evm-precompile-ed25519/std", 
     "pallet-evm-precompile-bn128/std", 
     "pallet-evm-precompile-modexp/std", 
     "pallet-evm-precompile-sha3fips/std",
-    "pallet-evm-precompile-blake2/std",
     "pallet-evm-precompile-simple/std",
     'codec/std',
     'frame-executive/std',
@@ -112,6 +108,7 @@ std = [
     'sp-block-builder/std',
     'sp-consensus-aura/std',
     'sp-core/std',
+    "sp-io/std",
     'sp-inherents/std',
     'sp-offchain/std',
     'sp-runtime/std',

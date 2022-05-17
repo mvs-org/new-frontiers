@@ -3,7 +3,7 @@
 use std::{sync::{Arc, Mutex}, cell::RefCell, time::Duration, collections::{HashMap, BTreeMap}};
 use fc_rpc::EthTask;
 use fc_rpc_core::types::{FilterPool, PendingTransactions};
-use fc_mapping_sync::MappingSyncWorker;
+use fc_mapping_sync::{MappingSyncWorker, SyncStrategy};
 use sc_client_api::{ExecutorProvider, RemoteBackend, BlockchainEvents};
 use metaverse_vm_runtime::{self, opaque::Block, RuntimeApi, SLOT_DURATION};
 use sc_service::{error::Error as ServiceError, Configuration, TaskManager, BasePath};
@@ -279,6 +279,7 @@ pub fn new_full(mut config: Configuration, cli: &Cli) -> Result<TaskManager, Ser
 			client.clone(),
 			backend.clone(),
 			frontier_backend.clone(),
+			SyncStrategy::Normal,
 		).for_each(|()| futures::future::ready(()))
 	);
 
@@ -325,6 +326,11 @@ pub fn new_full(mut config: Configuration, cli: &Cli) -> Result<TaskManager, Ser
 				)
 		);
 	}
+
+	task_manager.spawn_essential_handle().spawn(
+		"metaverse-schema-cache-task",
+		EthTask::ethereum_schema_cache_task(Arc::clone(&client), Arc::clone(&frontier_backend)),
+	);
 
 	let (block_import, grandpa_link) = consensus_result;
 

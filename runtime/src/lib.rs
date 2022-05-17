@@ -41,6 +41,7 @@ use frame_system::{
 	EnsureOneOf, EnsureRoot,
 };
 use fp_rpc::TransactionStatus;
+use pallet_ethereum::{Call::transact, Transaction as EthereumTransaction};
 use pallet_evm::{
 	Account as EVMAccount, FeeCalculator,
 	EnsureAddressTruncated, Runner, AddressMapping, EVMCurrencyAdapter,
@@ -555,6 +556,7 @@ impl AddressMapping<AccountId32> for ConcatAddressMapping {
 impl pallet_evm::Config for Runtime {
 	type FeeCalculator = FixedGasPrice;
 	type GasWeightMapping = ();
+	type BlockHashMapping = pallet_ethereum::EthereumBlockHashMapping;
 	type CallOrigin = EnsureAddressTruncated;
 	type WithdrawOrigin = EnsureAddressTruncated;
 	type AddressMapping = ConcatAddressMapping;
@@ -563,25 +565,23 @@ impl pallet_evm::Config for Runtime {
 	type Runner = pallet_evm::runner::stack::Runner<Self>;
 
 	type Precompiles = (
-		pallet_evm_precompile_modexp::Modexp,
 		pallet_evm_precompile_simple::ECRecover,
 		pallet_evm_precompile_simple::Sha256,
 		pallet_evm_precompile_simple::Ripemd160,
 		pallet_evm_precompile_simple::Identity,
+		pallet_evm_precompile_modexp::Modexp,
+		pallet_evm_precompile_simple::ECRecoverPublicKey,
+		pallet_evm_precompile_sha3fips::Sha3FIPS256,
+		pallet_evm_precompile_sha3fips::Sha3FIPS512,
+
 		pallet_evm_precompile_bn128::Bn128Add,
 		pallet_evm_precompile_bn128::Bn128Mul,
 		pallet_evm_precompile_bn128::Bn128Pairing,
-
-		pallet_evm_precompile_blake2::Blake2F,
-		pallet_evm_precompile_dispatch::Dispatch<Self>,
-		pallet_evm_precompile_ed25519::Ed25519Verify,
-
-		pallet_evm_precompile_sha3fips::Sha3FIPS256,
-		pallet_evm_precompile_sha3fips::Sha3FIPS512,
 	);
 	type ChainId = ChainId;
 	type BlockGasLimit = BlockGasLimit;
 	type OnChargeTransaction = EVMCurrencyAdapter<Balances, DealWithFees>;
+	type FindAuthor = EthereumFindAuthor<Aura>;
 }
 
 pub struct EthereumFindAuthor<F>(PhantomData<F>);
@@ -600,7 +600,6 @@ impl<F: FindAuthor<u32>> FindAuthor<H160> for EthereumFindAuthor<F>
 
 impl pallet_ethereum::Config for Runtime {
 	type Event = Event;
-	type FindAuthor = EthereumFindAuthor<Aura>;
 	type StateRoot = pallet_ethereum::IntermediateStateRoot;
 }
 
@@ -823,7 +822,7 @@ impl_runtime_apis! {
 		}
 
 		fn author() -> H160 {
-			<pallet_ethereum::Module<Runtime>>::find_author()
+			<pallet_evm::Module<Runtime>>::find_author()
 		}
 
 		fn storage_at(address: H160, index: U256) -> H256 {
@@ -912,6 +911,15 @@ impl_runtime_apis! {
 				Ethereum::current_receipts(),
 				Ethereum::current_transaction_statuses()
 			)
+		}
+
+		fn extrinsic_filter(
+			xts: Vec<<Block as BlockT>::Extrinsic>,
+		) -> Vec<EthereumTransaction> {
+			xts.into_iter().filter_map(|xt| match xt.function {
+				Call::Ethereum(transact(t)) => Some(t),
+				_ => None
+			}).collect::<Vec<EthereumTransaction>>()
 		}
 	}
 

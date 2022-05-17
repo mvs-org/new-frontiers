@@ -1,7 +1,6 @@
 use std::sync::Arc;
 
 use std::collections::BTreeMap;
-use fc_rpc_core::types::{PendingTransactions, FilterPool};
 use metaverse_vm_runtime::{Hash, AccountId, Index, opaque::Block, Balance};
 use sp_api::ProvideRuntimeApi;
 use sp_transaction_pool::TransactionPool;
@@ -17,7 +16,8 @@ use sp_block_builder::BlockBuilder;
 use sc_network::NetworkService;
 use jsonrpc_pubsub::manager::SubscriptionManager;
 use pallet_ethereum::EthereumStorageSchema;
-use fc_rpc::{StorageOverride, SchemaV1Override, };
+use fc_rpc::{OverrideHandle, RuntimeApiStorageOverride, SchemaV1Override, StorageOverride};
+use fc_rpc_core::types::{PendingTransactions, FilterPool};
 use futures::channel::mpsc::Sender;
 
 /// Full client dependencies.
@@ -101,6 +101,11 @@ pub fn create_full<C, P, BE>(
 		Box::new(SchemaV1Override::new(client.clone())) as Box<dyn StorageOverride<_> + Send + Sync>
 	);
 
+	let overrides = Arc::new(OverrideHandle {
+		schemas: overrides_map,
+		fallback: Box::new(RuntimeApiStorageOverride::new(client.clone())),
+	});
+
 	io.extend_with(
 		EthApiServer::to_delegate(EthApi::new(
 			client.clone(),
@@ -109,9 +114,10 @@ pub fn create_full<C, P, BE>(
 			network.clone(),
 			pending_transactions.clone(),
 			signers,
-            overrides_map,
-			backend,
+            overrides.clone(),
+			backend.clone(),
 			is_authority,
+			max_past_logs,
 		))
 	);
 
@@ -119,8 +125,11 @@ pub fn create_full<C, P, BE>(
 		io.extend_with(
 			EthFilterApiServer::to_delegate(EthFilterApi::new(
 				client.clone(),
+				backend,
 				filter_pool.clone(),
 				500 as usize, // max stored filters
+				overrides.clone(),
+				max_past_logs,
 			))
 		);
 	}
@@ -129,6 +138,8 @@ pub fn create_full<C, P, BE>(
 		NetApiServer::to_delegate(NetApi::new(
 			client.clone(),
 			network.clone(),
+			// Whether to format the `peer_count` response as Hex (default) or not.
+			true,
 		))
 	);
 
@@ -147,6 +158,7 @@ pub fn create_full<C, P, BE>(
 				HexEncodedIdProvider::default(),
 				Arc::new(subscription_task_executor)
 			),
+			overrides,
 		))
 	);
 
