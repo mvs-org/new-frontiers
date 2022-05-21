@@ -4,7 +4,7 @@ edition = '2018'
 homepage = 'https://mvs.org'
 license = 'Unlicense'
 name = 'metaverse-vm-runtime'
-repository = 'https://github.com/mvs-org/metaverse-vm'
+repository = 'https://github.com/mvs-org/new-frontiers'
 version = '0.2.1'
 
 [package.metadata.docs.rs]
@@ -65,7 +65,9 @@ sp-authority-discovery = { version = "3.0", default-features = false }
 pallet-authority-discovery = { version = "3.0", default-features = false }
 pallet-offences = { version = "3.0.0", default-features = false }
 pallet-im-online = { version = "3.0", default-features = false }
-#sp-npos-elections = { version = "3.0", default-features = false }
+# pallet-election-provider-multi-phase = { version = "3.0", default-features = false}
+# pallet-elections-phragmen = { version = "4.0", default-features = false}
+# sp-npos-elections = { version = "3.0", default-features = false }
 pallet-collective = { version = "3.0", default-features = false, features = ["runtime-benchmarks"] }
 pallet-identity = { version = "3.0.0", default-features = false }
 
@@ -126,7 +128,9 @@ std = [
     "pallet-im-online/std",
     "sp-authority-discovery/std",
 	"pallet-authority-discovery/std",
-    #"sp-npos-elections/std",
+    # "pallet-elections-phragmen/std",
+    # "pallet-election-provider-multi-phase/std",
+    # "sp-npos-elections/std",
     "pallet-collective/std",
     "pallet-identity/std",
 ]
