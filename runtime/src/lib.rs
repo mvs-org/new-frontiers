@@ -554,7 +554,7 @@ impl AddressMapping<AccountId32> for ConcatAddressMapping {
 }
 
 impl pallet_evm::Config for Runtime {
-	type FeeCalculator = FixedGasPrice;
+	type FeeCalculator = pallet_dynamic_fee::Module<Self>;
 	type GasWeightMapping = ();
 	type BlockHashMapping = pallet_ethereum::EthereumBlockHashMapping;
 	type CallOrigin = EnsureAddressTruncated;
@@ -603,6 +603,14 @@ impl pallet_ethereum::Config for Runtime {
 	type StateRoot = pallet_ethereum::IntermediateStateRoot;
 }
 
+parameter_types! {
+	pub BoundDivision: U256 = U256::from(1024);
+}
+
+impl pallet_dynamic_fee::Config for Runtime {
+	type MinGasPriceBoundDivisor = BoundDivision;
+}
+
 // Create the runtime by composing the FRAME pallets that were previously configured.
 construct_runtime!(
 	pub enum Runtime where
@@ -623,6 +631,7 @@ construct_runtime!(
 		// EVM stuff
         EVM: pallet_evm::{Module, Call, Storage, Config, Event<T>},
 		Ethereum: pallet_ethereum::{Module, Call, Storage, Event, Config, ValidateUnsigned},
+		DynamicFee: pallet_dynamic_fee::{Module, Call, Storage, Inherent},
 
 		// Consensus
 		Authorship: pallet_authorship::{Module, Call, Storage, Inherent},

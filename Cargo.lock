@@ -1527,7 +1527,7 @@ dependencies = [
 [[package]]
 name = "fc-consensus"
 version = "2.0.0"
-source = "git+https://github.com/mvs-org/substrate.git?branch=EVMv5#c51e32a7c7825dce8b74c9950962bf5516f4ef60"
+source = "git+https://github.com/mvs-org/substrate.git?branch=EVMv5#63d191f7ccd4fd358931f1de39caf3073479defc"
 dependencies = [
  "derive_more",
  "fc-db",
@@ -1551,7 +1551,7 @@ dependencies = [
 [[package]]
 name = "fc-db"
 version = "2.0.0"
-source = "git+https://github.com/mvs-org/substrate.git?branch=EVMv5#c51e32a7c7825dce8b74c9950962bf5516f4ef60"
+source = "git+https://github.com/mvs-org/substrate.git?branch=EVMv5#63d191f7ccd4fd358931f1de39caf3073479defc"
 dependencies = [
  "fp-storage",
  "kvdb",
@@ -1567,7 +1567,7 @@ dependencies = [
 [[package]]
 name = "fc-mapping-sync"
 version = "2.0.0"
-source = "git+https://github.com/mvs-org/substrate.git?branch=EVMv5#c51e32a7c7825dce8b74c9950962bf5516f4ef60"
+source = "git+https://github.com/mvs-org/substrate.git?branch=EVMv5#63d191f7ccd4fd358931f1de39caf3073479defc"
 dependencies = [
  "fc-consensus",
  "fc-db",
@@ -1585,7 +1585,7 @@ dependencies = [
 [[package]]
 name = "fc-rpc"
 version = "2.0.0"
-source = "git+https://github.com/mvs-org/substrate.git?branch=EVMv5#c51e32a7c7825dce8b74c9950962bf5516f4ef60"
+source = "git+https://github.com/mvs-org/substrate.git?branch=EVMv5#63d191f7ccd4fd358931f1de39caf3073479defc"
 dependencies = [
  "ethereum",
  "ethereum-types",
@@ -1626,7 +1626,7 @@ dependencies = [
 [[package]]
 name = "fc-rpc-core"
 version = "1.1.0"
-source = "git+https://github.com/mvs-org/substrate.git?branch=EVMv5#c51e32a7c7825dce8b74c9950962bf5516f4ef60"
+source = "git+https://github.com/mvs-org/substrate.git?branch=EVMv5#63d191f7ccd4fd358931f1de39caf3073479defc"
 dependencies = [
  "ethereum-types",
  "jsonrpc-core 15.1.0",
@@ -1731,7 +1731,7 @@ dependencies = [
 [[package]]
 name = "fp-consensus"
 version = "1.0.0"
-source = "git+https://github.com/mvs-org/substrate.git?branch=EVMv5#c51e32a7c7825dce8b74c9950962bf5516f4ef60"
+source = "git+https://github.com/mvs-org/substrate.git?branch=EVMv5#63d191f7ccd4fd358931f1de39caf3073479defc"
 dependencies = [
  "ethereum",
  "parity-scale-codec",
@@ -1745,7 +1745,7 @@ dependencies = [
 [[package]]
 name = "fp-evm"
 version = "2.0.0"
-source = "git+https://github.com/mvs-org/substrate.git?branch=EVMv5#c51e32a7c7825dce8b74c9950962bf5516f4ef60"
+source = "git+https://github.com/mvs-org/substrate.git?branch=EVMv5#63d191f7ccd4fd358931f1de39caf3073479defc"
 dependencies = [
  "evm",
  "impl-trait-for-tuples 0.1.3",
@@ -1758,7 +1758,7 @@ dependencies = [
 [[package]]
 name = "fp-rpc"
 version = "2.1.0"
-source = "git+https://github.com/mvs-org/substrate.git?branch=EVMv5#c51e32a7c7825dce8b74c9950962bf5516f4ef60"
+source = "git+https://github.com/mvs-org/substrate.git?branch=EVMv5#63d191f7ccd4fd358931f1de39caf3073479defc"
 dependencies = [
  "ethereum",
  "ethereum-types",
@@ -1774,7 +1774,7 @@ dependencies = [
 [[package]]
 name = "fp-storage"
 version = "2.0.0"
-source = "git+https://github.com/mvs-org/substrate.git?branch=EVMv5#c51e32a7c7825dce8b74c9950962bf5516f4ef60"
+source = "git+https://github.com/mvs-org/substrate.git?branch=EVMv5#63d191f7ccd4fd358931f1de39caf3073479defc"
 
 [[package]]
 name = "frame-benchmarking"
@@ -3680,6 +3680,7 @@ dependencies = [
  "pallet-authorship",
  "pallet-balances",
  "pallet-collective",
+ "pallet-dynamic-fee",
  "pallet-ethereum",
  "pallet-evm",
  "pallet-evm-precompile-bn128",
@@ -4268,9 +4269,24 @@ dependencies = [
 ]
 
 [[package]]
+name = "pallet-dynamic-fee"
+version = "3.0.0"
+source = "git+https://github.com/mvs-org/substrate.git?branch=EVMv5#63d191f7ccd4fd358931f1de39caf3073479defc"
+dependencies = [
+ "frame-support",
+ "frame-system",
+ "pallet-evm",
+ "parity-scale-codec",
+ "sp-core",
+ "sp-inherents",
+ "sp-runtime",
+ "sp-std",
+]
+
+[[package]]
 name = "pallet-ethereum"
 version = "3.0.0"
-source = "git+https://github.com/mvs-org/substrate.git?branch=EVMv5#c51e32a7c7825dce8b74c9950962bf5516f4ef60"
+source = "git+https://github.com/mvs-org/substrate.git?branch=EVMv5#63d191f7ccd4fd358931f1de39caf3073479defc"
 dependencies = [
  "ethereum",
  "ethereum-types",
@@ -4298,7 +4314,7 @@ dependencies = [
 [[package]]
 name = "pallet-evm"
 version = "5.0.0"
-source = "git+https://github.com/mvs-org/substrate.git?branch=EVMv5#c51e32a7c7825dce8b74c9950962bf5516f4ef60"
+source = "git+https://github.com/mvs-org/substrate.git?branch=EVMv5#63d191f7ccd4fd358931f1de39caf3073479defc"
 dependencies = [
  "evm",
  "evm-gasometer",
@@ -4325,7 +4341,7 @@ dependencies = [
 [[package]]
 name = "pallet-evm-precompile-bn128"
 version = "2.0.0"
-source = "git+https://github.com/mvs-org/substrate.git?branch=EVMv5#c51e32a7c7825dce8b74c9950962bf5516f4ef60"
+source = "git+https://github.com/mvs-org/substrate.git?branch=EVMv5#63d191f7ccd4fd358931f1de39caf3073479defc"
 dependencies = [
  "evm",
  "fp-evm",
@@ -4337,7 +4353,7 @@ dependencies = [
 [[package]]
 name = "pallet-evm-precompile-modexp"
 version = "2.0.0"
-source = "git+https://github.com/mvs-org/substrate.git?branch=EVMv5#c51e32a7c7825dce8b74c9950962bf5516f4ef60"
+source = "git+https://github.com/mvs-org/substrate.git?branch=EVMv5#63d191f7ccd4fd358931f1de39caf3073479defc"
 dependencies = [
  "evm",
  "fp-evm",
@@ -4349,7 +4365,7 @@ dependencies = [
 [[package]]
 name = "pallet-evm-precompile-sha3fips"
 version = "2.0.0"
-source = "git+https://github.com/mvs-org/substrate.git?branch=EVMv5#c51e32a7c7825dce8b74c9950962bf5516f4ef60"
+source = "git+https://github.com/mvs-org/substrate.git?branch=EVMv5#63d191f7ccd4fd358931f1de39caf3073479defc"
 dependencies = [
  "evm",
  "fp-evm",
@@ -4361,7 +4377,7 @@ dependencies = [
 [[package]]
 name = "pallet-evm-precompile-simple"
 version = "2.0.0"
-source = "git+https://github.com/mvs-org/substrate.git?branch=EVMv5#c51e32a7c7825dce8b74c9950962bf5516f4ef60"
+source = "git+https://github.com/mvs-org/substrate.git?branch=EVMv5#63d191f7ccd4fd358931f1de39caf3073479defc"
 dependencies = [
  "evm",
  "fp-evm",
@@ -5776,6 +5792,8 @@ dependencies = [
 [[package]]
 name = "sc-cli"
 version = "0.9.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7ec1647b5c1483fa05f7f32e436d0e378e2f3d5696a5a30bddf66f5faf28acb4"
 dependencies = [
  "chrono",
  "fdlimit",
@@ -8442,7 +8460,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "04f8ab788026715fa63b31960869617cba39117e520eb415b0139543e325ab59"
 dependencies = [
  "cfg-if 0.1.10",
- "rand 0.7.3",
+ "rand 0.3.23",
  "static_assertions",
 ]
 
