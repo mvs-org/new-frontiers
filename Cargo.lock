@@ -3680,6 +3680,7 @@ dependencies = [
  "pallet-authorship",
  "pallet-balances",
  "pallet-collective",
+ "pallet-democracy",
  "pallet-dynamic-fee",
  "pallet-ethereum",
  "pallet-evm",
@@ -4263,6 +4264,22 @@ dependencies = [
  "parity-scale-codec",
  "serde",
  "sp-core",
+ "sp-io",
+ "sp-runtime",
+ "sp-std",
+]
+
+[[package]]
+name = "pallet-democracy"
+version = "3.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9f2be1b6b34f7208d4e85bb2129de6ed319e43e2cf7ae6fc8f3e32797f55724b"
+dependencies = [
+ "frame-benchmarking",
+ "frame-support",
+ "frame-system",
+ "parity-scale-codec",
+ "serde",
  "sp-io",
  "sp-runtime",
  "sp-std",
@@ -8460,7 +8477,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "04f8ab788026715fa63b31960869617cba39117e520eb415b0139543e325ab59"
 dependencies = [
  "cfg-if 0.1.10",
- "rand 0.3.23",
+ "rand 0.7.3",
  "static_assertions",
 ]
 

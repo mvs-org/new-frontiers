@@ -71,6 +71,8 @@ pallet-im-online = { version = "3.0", default-features = false }
 # sp-npos-elections = { version = "3.0", default-features = false }
 pallet-collective = { version = "3.0", default-features = false, features = ["runtime-benchmarks"] }
 pallet-identity = { version = "3.0.0", default-features = false }
+pallet-democracy = { version = "3.0", default-features = false }
+
 
 [features]
 default = ["std"]
@@ -132,5 +134,6 @@ std = [
     # "sp-npos-elections/std",
     "pallet-collective/std",
     "pallet-identity/std",
+    "pallet-democracy/std",
 ]
 
