@@ -3,7 +3,7 @@ use sp_core::{H160, Pair, Public, sr25519};
 use metaverse_vm_runtime::{
 	AccountId, AuraConfig, BalancesConfig, GenesisConfig, GrandpaConfig, SessionConfig, SessionKeys,
 	SudoConfig, SystemConfig, EVMConfig, EthereumConfig, WASM_BINARY, Signature,
-	StakerStatus, StakingConfig, ImOnlineConfig, AuthorityDiscoveryConfig,
+	StakerStatus, StakingConfig, ImOnlineConfig, AuthorityDiscoveryConfig, DemocracyConfig,
 };
 use sp_consensus_aura::sr25519::AuthorityId as AuraId;
 use sp_finality_grandpa::AuthorityId as GrandpaId;
@@ -222,6 +222,7 @@ fn testnet_genesis(
 		}),
 		pallet_collective_Instance1: Some(Default::default()),
 		pallet_im_online: Some(Default::default()),
+		pallet_democracy: Some(DemocracyConfig::default()),
 		pallet_authority_discovery: Some(Default::default()),
 		pallet_aura: Some(Default::default()),
 		pallet_grandpa: Some(Default::default()),

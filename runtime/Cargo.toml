@@ -33,6 +33,7 @@ pallet-grandpa = { default-features = false, version = '3.0.0' }
 pallet-randomness-collective-flip = { default-features = false, version = '3.0.0' }
 pallet-sudo = { default-features = false, version = '3.0.0' }
 pallet-timestamp = { default-features = false, version = '3.0.0' }
+pallet-scheduler = { default-features = false, version = "3.0" }
 pallet-transaction-payment = { default-features = false, version = '3.0.0' }
 pallet-transaction-payment-rpc-runtime-api = { default-features = false, version = '3.0.0' }
 sp-api = { default-features = false, version = '3.0.0' }
@@ -107,6 +108,7 @@ std = [
     'pallet-randomness-collective-flip/std',
     'pallet-sudo/std',
     'pallet-timestamp/std',
+    "pallet-scheduler/std",
     'pallet-transaction-payment-rpc-runtime-api/std',
     'pallet-transaction-payment/std',
     'serde',
@@ -135,5 +137,6 @@ std = [
     "pallet-collective/std",
     "pallet-identity/std",
     "pallet-democracy/std",
+    
 ]
 
