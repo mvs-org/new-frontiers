@@ -554,7 +554,7 @@ impl AddressMapping<AccountId32> for ConcatAddressMapping {
 }
 
 impl pallet_evm::Config for Runtime {
-	type FeeCalculator = pallet_dynamic_fee::Module<Self>;
+	type FeeCalculator = pallet_dynamic_fee::Pallet<Self>;
 	type GasWeightMapping = ();
 	type BlockHashMapping = pallet_ethereum::EthereumBlockHashMapping;
 	type CallOrigin = EnsureAddressTruncated;
@@ -619,33 +619,33 @@ construct_runtime!(
 		UncheckedExtrinsic = UncheckedExtrinsic
 	{
 		// basic system stuff
-		System: frame_system::{Module, Call, Config, Storage, Event<T>},
-		RandomnessCollectiveFlip: pallet_randomness_collective_flip::{Module, Call, Storage},
-		Timestamp: pallet_timestamp::{Module, Call, Storage, Inherent},
-		Sudo: pallet_sudo::{Module, Call, Config<T>, Storage, Event<T>},
+		System: frame_system::{Pallet, Call, Config, Storage, Event<T>} = 0,
+		RandomnessCollectiveFlip: pallet_randomness_collective_flip::{Pallet, Call, Storage} = 1,
+		Timestamp: pallet_timestamp::{Pallet, Call, Storage, Inherent} = 2,
+		Sudo: pallet_sudo::{Pallet, Call, Config<T>, Storage, Event<T>} = 3,
 		
 		// money stuff
-		Balances: pallet_balances::{Module, Call, Storage, Config<T>, Event<T>},
-		TransactionPayment: pallet_transaction_payment::{Module, Storage},
+		Balances: pallet_balances::{Pallet, Call, Storage, Config<T>, Event<T>} = 4,
+		TransactionPayment: pallet_transaction_payment::{Pallet, Storage} = 5,
 		
 		// EVM stuff
-        EVM: pallet_evm::{Module, Call, Storage, Config, Event<T>},
-		Ethereum: pallet_ethereum::{Module, Call, Storage, Event, Config, ValidateUnsigned},
-		DynamicFee: pallet_dynamic_fee::{Module, Call, Storage, Inherent},
+        EVM: pallet_evm::{Pallet, Call, Storage, Config, Event<T>}, = 6,
+		Ethereum: pallet_ethereum::{Pallet, Call, Storage, Event, Config, ValidateUnsigned} = 7,
+		DynamicFee: pallet_dynamic_fee::{Pallet, Call, Storage, Inherent} = 8,
 
 		// Consensus
-		Authorship: pallet_authorship::{Module, Call, Storage, Inherent},
-		Aura: pallet_aura::{Module, Storage, Config<T>},
-		Grandpa: pallet_grandpa::{Module, Call, Storage, Config, Event},
-		Council: pallet_collective::<Instance1>::{Module, Call, Storage, Origin<T>, Event<T>, Config<T>},
-		Staking: pallet_staking::{Module, Call, Config<T>, Storage, Event<T>},
-		Session: pallet_session::{Module, Call, Storage, Event, Config<T>},
-		Historical: pallet_session_historical::{Module},
-		Offences: pallet_offences::{Module, Call, Storage, Event},
-		ImOnline: pallet_im_online::{Module, Call, Storage, Event<T>, ValidateUnsigned, Config<T>},
-		AuthorityDiscovery: pallet_authority_discovery::{Module, Call, Config},
+		Authorship: pallet_authorship::{Pallet, Call, Storage, Inherent} = 10,
+		Aura: pallet_aura::{Pallet, Storage, Config<T>} = 11,
+		Grandpa: pallet_grandpa::{Pallet, Call, Storage, Config, Event} = 12,
+		Council: pallet_collective::<Instance1>::{Pallet, Call, Storage, Origin<T>, Event<T>, Config<T>} = 13,
+		Staking: pallet_staking::{Pallet, Call, Config<T>, Storage, Event<T>}, = 14,
+		Session: pallet_session::{Pallet, Call, Storage, Event, Config<T>} = 15,
+		Historical: pallet_session_historical::{Pallet} = 16,
+		Offences: pallet_offences::{Pallet, Call, Storage, Event} = 7,
+		ImOnline: pallet_im_online::{Pallet, Call, Storage, Event<T>, ValidateUnsigned, Config<T>} = 18,
+		AuthorityDiscovery: pallet_authority_discovery::{Pallet, Call, Config} = 19,
 		// Identity
-		Identity: pallet_identity::{Module, Call, Storage, Event<T>},
+		Identity: pallet_identity::{Pallet, Call, Storage, Event<T>} = 20,
 	}
 );
 
@@ -831,7 +831,7 @@ impl_runtime_apis! {
 		}
 
 		fn author() -> H160 {
-			<pallet_evm::Module<Runtime>>::find_author()
+			<pallet_evm::Pallet<Runtime>>::find_author()
 		}
 
 		fn storage_at(address: H160, index: U256) -> H256 {
@@ -954,7 +954,7 @@ impl_runtime_apis! {
 	// 	) -> Result<Vec<frame_benchmarking::BenchmarkBatch>, sp_runtime::RuntimeString> {
 	// 		use frame_benchmarking::{Benchmarking, BenchmarkBatch, add_benchmark, TrackedStorageKey};
 
-	// 		use frame_system_benchmarking::Module as SystemBench;
+	// 		use frame_system_benchmarking::Pallet as SystemBench;
 	// 		impl frame_system_benchmarking::Config for Runtime {}
 
 	// 		let whitelist: Vec<TrackedStorageKey> = vec![
