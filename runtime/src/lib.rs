@@ -10,7 +10,6 @@ use sp_std::{prelude::*, marker::PhantomData};
 use codec::{Encode, Decode};
 use sp_core::{
 	crypto::KeyTypeId, crypto::Public, 
-	u32_trait::{_1, _2, _3, _4, _5},
 	OpaqueMetadata, U256, H160, H256
 };
 use sp_runtime::{
@@ -38,7 +37,7 @@ pub use sp_authority_discovery::AuthorityId as AuthorityDiscoveryId;
 use frame_support::traits::InstanceFilter;
 use frame_system::{
 	limits,
-	EnsureOneOf, EnsureRoot,
+	EnsureRoot,
 };
 use fp_rpc::TransactionStatus;
 use pallet_ethereum::{Call::transact, Transaction as EthereumTransaction};
@@ -46,6 +45,9 @@ use pallet_evm::{
 	Account as EVMAccount, FeeCalculator,
 	EnsureAddressTruncated, Runner, AddressMapping, EVMCurrencyAdapter,
 };
+
+mod precompiles;
+use precompiles::FrontierPrecompiles;
 
 pub use pallet_staking::StakerStatus;
 // A few exports that help ease life for downstream crates.
@@ -57,15 +59,15 @@ pub use frame_support::{
 	construct_runtime, parameter_types, StorageValue,
 	traits::{
 		KeyOwnerProofSystem, Randomness, FindAuthor, Currency, OnUnbalanced,
-		U128CurrencyToVote,
+		U128CurrencyToVote, EitherOfDiverse,
 	},
 	weights::{
-		DispatchClass, IdentityFee, Weight,
+		ConstantMultiplier, DispatchClass, IdentityFee, Weight,
 		constants::{BlockExecutionWeight, ExtrinsicBaseWeight, RocksDbWeight, WEIGHT_PER_SECOND},
 	},
     ConsensusEngineId, 
 };
-use pallet_transaction_payment::CurrencyAdapter;
+use pallet_transaction_payment::{CurrencyAdapter, Multiplier, TargetedFeeAdjustment};
 
 /// An index to a block.
 pub type BlockNumber = u32;
@@ -195,6 +197,9 @@ pub fn native_version() -> NativeVersion {
 }
 
 const NORMAL_DISPATCH_RATIO: Perbill = Perbill::from_percent(75);
+/// We allow for 2 seconds of compute with a 6 second average block time.
+pub const MAXIMUM_BLOCK_WEIGHT: Weight = 2 * WEIGHT_PER_SECOND;
+const WEIGHT_PER_GAS: u64 = 20_000;
 
 parameter_types! {
 	pub const Version: RuntimeVersion = VERSION;
@@ -313,13 +318,21 @@ impl pallet_balances::Config for Runtime {
 }
 
 parameter_types! {
+	
+}
+parameter_types! {
 	pub const TransactionByteFee: Balance = 1;
+	pub const OperationalFeeMultiplier: u8 = 1;
+	pub const TargetBlockFullness: Perquintill = Perquintill::from_percent(25);
+	pub AdjustmentVariable: Multiplier = Multiplier::saturating_from_rational(1, 100_000);
+	pub MinimumMultiplier: Multiplier = Multiplier::saturating_from_rational(1, 1_000_000_000u128);
 }
 
 impl pallet_transaction_payment::Config for Runtime {
 	type OnChargeTransaction = CurrencyAdapter<Balances, DealWithFees>;
-	type TransactionByteFee = TransactionByteFee;
+	type OperationalFeeMultiplier = OperationalFeeMultiplier;
 	type WeightToFee = IdentityFee<Balance>;
+	type LengthToFee = ConstantMultiplier<Balance, TransactionByteFee>;
 	type FeeMultiplierUpdate = ();
 }
 
@@ -337,9 +350,6 @@ parameter_types! {
 	pub const Period: u32 = 6 * HOURS;
 	pub const Offset: u32 = 0;
 }
-parameter_types! {
-	pub const DisabledValidatorsThreshold: Perbill = Perbill::from_percent(17);
-}
 pub struct ValidatorOf;
 impl<T> sp_runtime::traits::Convert<T, Option<T>> for ValidatorOf {
 	fn convert(t: T) -> Option<T> {
@@ -348,7 +358,6 @@ impl<T> sp_runtime::traits::Convert<T, Option<T>> for ValidatorOf {
 }
 
 impl pallet_session::Config for Runtime {
-	type DisabledValidatorsThreshold = DisabledValidatorsThreshold;
 	type Event = Event;
 	type Keys = SessionKeys;
 	type NextSessionRotation = pallet_session::PeriodicSessions<Period, Offset>;
@@ -372,15 +381,13 @@ parameter_types! {
 }
 
 type CouncilCollective = pallet_collective::Instance1;
-type EnsureRootOrTwoThridsTechCouncil = EnsureOneOf<
-	AccountId,
+type EnsureRootOrTwoThridsTechCouncil = EitherOfDiverse<
 	EnsureRoot<AccountId>,
-	pallet_collective::EnsureProportionAtLeast<_2, _3, AccountId, CouncilCollective>,
+	pallet_collective::EnsureProportionAtLeast<AccountId, CouncilCollective, 2, 3>,
 >;
-type EnsureRootOrThreeFourthsTechCouncil = EnsureOneOf<
-	AccountId,
+type EnsureRootOrThreeFourthsTechCouncil = EitherOfDiverse<
 	EnsureRoot<AccountId>,
-	pallet_collective::EnsureProportionAtLeast<_3, _4, AccountId, CouncilCollective>,
+	pallet_collective::EnsureProportionAtLeast<AccountId, CouncilCollective, 3, 4>,
 >;
 impl pallet_collective::Config<CouncilCollective> for Runtime {
 	type DefaultVote = pallet_collective::PrimeDefaultVote;
@@ -408,20 +415,24 @@ where
 
 parameter_types! {
 	pub const ImOnlineUnsignedPriority: TransactionPriority = TransactionPriority::max_value();
-	/// We prioritize im-online heartbeats over phragmen solution submission.
+	/// We prioritize im-online heartbeats over election solution submission.
 	pub const StakingUnsignedPriority: TransactionPriority = TransactionPriority::max_value() / 2;
+	pub const MaxAuthorities: u32 = 100;
+	pub const MaxKeys: u32 = 10_000;
+	pub const MaxPeerInHeartbeats: u32 = 10_000;
+	pub const MaxPeerDataEncodingSize: u32 = 1_000;
 }
-parameter_types! {
-	pub SessionDuration: BlockNumber = 1 * HOURS;
-}
+
 impl pallet_im_online::Config for Runtime {
 	type AuthorityId = ImOnlineId;
 	type Event = Event;
 	type ValidatorSet = Historical;
-	type SessionDuration = SessionDuration;
 	type ReportUnresponsiveness = Offences;
 	type UnsignedPriority = ImOnlineUnsignedPriority;
 	type WeightInfo = pallet_im_online::weights::SubstrateWeight<Runtime>;
+	type MaxKeys = MaxKeys;
+	type MaxPeerInHeartbeats = MaxPeerInHeartbeats;
+	type MaxPeerDataEncodingSize = MaxPeerDataEncodingSize;
 }
 
 parameter_types! {
@@ -449,15 +460,10 @@ impl pallet_identity::Config for Runtime {
 
 impl pallet_authority_discovery::Config for Runtime {}
 
-parameter_types! {
-	pub OffencesWeightSoftLimit: Weight = Perbill::from_percent(20) * BlockWeights::get().max_block;
-}
-
 impl pallet_offences::Config for Runtime {
 	type Event = Event;
 	type IdentificationTuple = pallet_session::historical::IdentificationTuple<Self>;
 	type OnOffenceHandler = Staking;
-	type WeightSoftLimit = OffencesWeightSoftLimit;
 }
 
 pallet_staking_reward_curve::build! {
@@ -480,15 +486,9 @@ parameter_types! {
 	// 28 eras * 6 hours/era = 7 day slash duration
 	pub const SlashDeferDuration: pallet_staking::EraIndex = 28;
 	pub const RewardCurve: &'static PiecewiseLinear<'static> = &REWARD_CURVE;
-	pub const ElectionLookahead: BlockNumber = EPOCH_DURATION_IN_BLOCKS / 4;
 	pub const MaxNominatorRewardedPerValidator: u32 = 128;
-	pub const MaxIterations: u32 = 5;
-	// 0.05%. The higher the value, the more strict solution acceptance becomes.
-	pub MinSolutionScoreBump: Perbill = Perbill::from_rational_approximation(5u32, 10_000);
-	pub OffchainSolutionWeightLimit: Weight = BlockWeights::get()
-		.get(DispatchClass::Normal)
-		.max_extrinsic.expect("Normal extrinsics have a weight limit configured; qed")
-		.saturating_sub(BlockExecutionWeight::get());
+	pub const OffendingValidatorsThreshold: Perbill = Perbill::from_percent(17);
+	pub OffchainRepeat: BlockNumber = 5;
 }
 
 impl pallet_staking::Config for Runtime {
@@ -505,16 +505,11 @@ impl pallet_staking::Config for Runtime {
 	type SlashCancelOrigin = EnsureRootOrThreeFourthsTechCouncil;
 	type SlashDeferDuration = SlashDeferDuration;
 	type SessionInterface = Self;
-	type RewardCurve = RewardCurve;
+	type EraPayout = pallet_staking::ConvertCurve<RewardCurve>;
 	type NextNewSession = Session;
-	type ElectionLookahead = ElectionLookahead;
-	type Call = Call;
-	type MaxIterations = MaxIterations;
-	type MinSolutionScoreBump = MinSolutionScoreBump;
 	type MaxNominatorRewardedPerValidator = MaxNominatorRewardedPerValidator;
-	type UnsignedPriority = StakingUnsignedPriority;
+	type OffendingValidatorsThreshold = OffendingValidatorsThreshold;
 	type WeightInfo = pallet_staking::weights::SubstrateWeight<Runtime>;
-	type OffchainSolutionWeightLimit = OffchainSolutionWeightLimit;
 }
 
 
@@ -526,6 +521,8 @@ impl pallet_sudo::Config for Runtime {
 parameter_types! {
 	pub const ChainId: u64 = 43;
 	pub BlockGasLimit: U256 = U256::from(u32::max_value());
+	//pub BlockGasLimit: U256 = U256::from(NORMAL_DISPATCH_RATIO * MAXIMUM_BLOCK_WEIGHT / WEIGHT_PER_GAS);
+	pub PrecompilesValue: FrontierPrecompiles<Runtime> = FrontierPrecompiles::<_>::new();
 }
 
 pub struct FixedGasPrice;
@@ -563,21 +560,8 @@ impl pallet_evm::Config for Runtime {
 	type Currency = Balances;
 	type Event = Event;
 	type Runner = pallet_evm::runner::stack::Runner<Self>;
-
-	type Precompiles = (
-		pallet_evm_precompile_simple::ECRecover,
-		pallet_evm_precompile_simple::Sha256,
-		pallet_evm_precompile_simple::Ripemd160,
-		pallet_evm_precompile_simple::Identity,
-		pallet_evm_precompile_modexp::Modexp,
-		pallet_evm_precompile_simple::ECRecoverPublicKey,
-		pallet_evm_precompile_sha3fips::Sha3FIPS256,
-		pallet_evm_precompile_sha3fips::Sha3FIPS512,
-
-		pallet_evm_precompile_bn128::Bn128Add,
-		pallet_evm_precompile_bn128::Bn128Mul,
-		pallet_evm_precompile_bn128::Bn128Pairing,
-	);
+	type PrecompilesType = FrontierPrecompiles<Self>;
+	type PrecompilesValue = PrecompilesValue;
 	type ChainId = ChainId;
 	type BlockGasLimit = BlockGasLimit;
 	type OnChargeTransaction = EVMCurrencyAdapter<Balances, DealWithFees>;
@@ -620,7 +604,7 @@ construct_runtime!(
 	{
 		// basic system stuff
 		System: frame_system::{Pallet, Call, Config, Storage, Event<T>},
-		RandomnessCollectiveFlip: pallet_randomness_collective_flip::{Pallet, Call, Storage},
+		RandomnessCollectiveFlip: pallet_randomness_collective_flip::{Pallet, Storage},
 		Timestamp: pallet_timestamp::{Pallet, Call, Storage, Inherent},
 		Sudo: pallet_sudo::{Pallet, Call, Config<T>, Storage, Event<T>},
 		
@@ -630,7 +614,7 @@ construct_runtime!(
 		
 		// EVM stuff
         EVM: pallet_evm::{Pallet, Call, Storage, Config, Event<T>},
-		Ethereum: pallet_ethereum::{Pallet, Call, Storage, Event, Config, ValidateUnsigned},
+		Ethereum: pallet_ethereum::{Pallet, Call, Storage, Event, Config},
 		DynamicFee: pallet_dynamic_fee::{Pallet, Call, Storage, Inherent},
 
 		// Consensus
@@ -641,9 +625,9 @@ construct_runtime!(
 		Staking: pallet_staking::{Pallet, Call, Config<T>, Storage, Event<T>},
 		Session: pallet_session::{Pallet, Call, Storage, Event, Config<T>},
 		Historical: pallet_session_historical::{Pallet},
-		Offences: pallet_offences::{Pallet, Call, Storage, Event},
+		Offences: pallet_offences::{Pallet, Storage, Event},
 		ImOnline: pallet_im_online::{Pallet, Call, Storage, Event<T>, ValidateUnsigned, Config<T>},
-		AuthorityDiscovery: pallet_authority_discovery::{Pallet, Call, Config},
+		AuthorityDiscovery: pallet_authority_discovery::{Pallet, Config},
 		// Identity
 		Identity: pallet_identity::{Pallet, Call, Storage, Event<T>},
 	}
@@ -737,10 +721,6 @@ impl_runtime_apis! {
 			data: sp_inherents::InherentData,
 		) -> sp_inherents::CheckInherentsResult {
 			data.check_extrinsics(&block)
-		}
-
-		fn random_seed() -> <Block as BlockT>::Hash {
-			RandomnessCollectiveFlip::random_seed()
 		}
 	}
 
