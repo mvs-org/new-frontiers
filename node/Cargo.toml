@@ -2,7 +2,7 @@
 authors = ['Metaverse Foundation <https://github.com/mvs-org>']
 build = 'build.rs'
 description = 'MetaverseVM node'
-edition = '2018'
+edition = '2021'
 homepage = 'https://mvs.org'
 license = 'Unlicense'
 name = 'metaversevm'

@@ -1,6 +1,6 @@
 [package]
 authors = ['Metaverse Foundation <https://github.com/mvs-org>']
-edition = '2018'
+edition = '2021'
 homepage = 'https://mvs.org'
 license = 'Unlicense'
 name = 'metaverse-vm-runtime'
@@ -11,13 +11,13 @@ version = '0.2.1'
 targets = ['x86_64-unknown-linux-gnu']
 
 [build-dependencies]
-substrate-wasm-builder = '4.0.0'
+substrate-wasm-builder = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.25" }
 
 [dependencies]
-codec = { default-features = false, features = ['derive'], package = 'parity-scale-codec', version = '2.0.0' }
+codec = { version = '3.0.0', package = 'parity-scale-codec', default-features = false, features = ['derive', "max-encoded-len"] }
 hex-literal = { optional = true, version = '0.3.1' }
 serde = { version = "1.0.119", optional = true, features = ["derive"] }
-scale-info = { version = "1.0.0", default-features = false }
+scale-info = { version = "2.1.1", default-features = false, features = ["derive"] }
 
 ## Substrate FRAME Dependencies
 # frame-benchmarking = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.25", default-features = false, optional = true }
@@ -57,6 +57,7 @@ pallet-dynamic-fee = { default-features = false, git = "https://github.com/parit
 pallet-evm = { default-features = false, git = "https://github.com/paritytech/frontier.git", branch = "polkadot-v0.9.25" }
 pallet-ethereum = { default-features = false, git = "https://github.com/paritytech/frontier.git", branch = "polkadot-v0.9.25" }
 fp-rpc = { default-features = false, git = "https://github.com/paritytech/frontier.git", branch = "polkadot-v0.9.25" }
+fp-self-contained = { default-features = false, git = "https://github.com/paritytech/frontier.git", branch = "polkadot-v0.9.25" }
 pallet-evm-precompile-bn128 = { default-features = false, git = "https://github.com/paritytech/frontier.git", branch = "polkadot-v0.9.25"}
 pallet-evm-precompile-modexp = { default-features = false, git = "https://github.com/paritytech/frontier.git", branch = "polkadot-v0.9.25" }
 pallet-evm-precompile-sha3fips = { default-features = false, git = "https://github.com/paritytech/frontier.git", branch = "polkadot-v0.9.25" }
@@ -64,7 +65,8 @@ pallet-evm-precompile-simple = { default-features = false, git = "https://github
 
 sp-staking = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.25", default-features = false }
 pallet-staking = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.25", default-features = false }
-pallet-staking-reward-curve = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.25"  }
+pallet-staking-reward-curve = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.25", default-features = false }
+frame-election-provider-support = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.25", default-features = false }
 
 sp-authority-discovery = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.25", default-features = false }
 pallet-authority-discovery = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.25", default-features = false }
