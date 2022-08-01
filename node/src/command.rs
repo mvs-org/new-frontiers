@@ -65,8 +65,8 @@ impl MetaverseCli for Cli {
 }
 
 fn set_default_ss58_version() {
-	use sp_core::crypto::Ss58AddressFormat;
-	sp_core::crypto::set_default_ss58_version(Ss58AddressFormat::Custom(150));
+	// use sp_core::crypto::Ss58AddressFormat;
+	// sp_core::crypto::set_default_ss58_version(Ss58AddressFormat::Custom(150));
 }
 
 /// Parse and run command line arguments
@@ -83,7 +83,6 @@ pub fn run() -> sc_cli::Result<()> {
 		},
 		Some(Subcommand::CheckBlock(cmd)) => {
 			let runner = cli.create_runner(cmd)?;
-			let chain_spec = &runner.config().chain_spec;
 			set_default_ss58_version();
 			runner.async_run(|config| {
 				let PartialComponents { client, task_manager, import_queue, ..}
@@ -93,7 +92,6 @@ pub fn run() -> sc_cli::Result<()> {
 		},
 		Some(Subcommand::ExportBlocks(cmd)) => {
 			let runner = cli.create_runner(cmd)?;
-			let chain_spec = &runner.config().chain_spec;
 			set_default_ss58_version();
 			runner.async_run(|config| {
 				let PartialComponents { client, task_manager, ..}
@@ -113,7 +111,6 @@ pub fn run() -> sc_cli::Result<()> {
 		},
 		Some(Subcommand::ImportBlocks(cmd)) => {
 			let runner = cli.create_runner(cmd)?;
-			let chain_spec = &runner.config().chain_spec;
 			set_default_ss58_version();
 			runner.async_run(|config| {
 				let PartialComponents { client, task_manager, import_queue, ..}
@@ -123,18 +120,24 @@ pub fn run() -> sc_cli::Result<()> {
 		},
 		Some(Subcommand::PurgeChain(cmd)) => {
 			let runner = cli.create_runner(cmd)?;
-			let chain_spec = &runner.config().chain_spec;
 			set_default_ss58_version();
 			runner.sync_run(|config| cmd.run(config.database))
 		},
 		Some(Subcommand::Revert(cmd)) => {
 			let runner = cli.create_runner(cmd)?;
-			let chain_spec = &runner.config().chain_spec;
 			set_default_ss58_version();
 			runner.async_run(|config| {
-				let PartialComponents { client, task_manager, backend, ..}
-					= service::new_partial(&config, &cli)?;
-				Ok((cmd.run(client, backend), task_manager))
+				let PartialComponents {
+					client,
+					task_manager,
+					backend,
+					..
+				} = service::new_partial(&config, &cli)?;
+				let aux_revert = Box::new(move |client, _, blocks| {
+					sc_finality_grandpa::revert(client, blocks)?;
+					Ok(())
+				});
+				Ok((cmd.run(client, backend, Some(aux_revert)), task_manager))
 			})
 		},
 		// Some(Subcommand::Benchmark(cmd)) => {
@@ -150,13 +153,9 @@ pub fn run() -> sc_cli::Result<()> {
 		// },
 		None => {
 			let runner = cli.create_runner(&cli.run.base)?;
-			let chain_spec = &runner.config().chain_spec;
 			set_default_ss58_version();
 			runner.run_node_until_exit(|config| async move {
-				match config.role {
-					Role::Light => service::new_light(config),
-					_ => service::new_full(config, &cli),
-				}.map_err(sc_cli::Error::Service)
+				service::new_full(config, &cli).map_err(sc_cli::Error::Service)
 			})
 		}
 	}

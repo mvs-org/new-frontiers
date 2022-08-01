@@ -2,9 +2,10 @@ use std::{str::FromStr, collections::BTreeMap};
 use sp_core::{H160, Pair, Public, sr25519};
 use metaverse_vm_runtime::{
 	AccountId, AuraConfig, BalancesConfig, GenesisConfig, GrandpaConfig, SessionConfig, SessionKeys,
-	SudoConfig, SystemConfig, EVMConfig, EthereumConfig, WASM_BINARY, Signature,
+	CouncilConfig, SudoConfig, SystemConfig, EVMConfig, EthereumConfig, WASM_BINARY, Signature,
 	StakerStatus, StakingConfig, ImOnlineConfig, AuthorityDiscoveryConfig,
 };
+
 use sp_consensus_aura::sr25519::AuthorityId as AuraId;
 use sp_finality_grandpa::AuthorityId as GrandpaId;
 use pallet_im_online::ed25519::AuthorityId as ImOnlineId;
@@ -14,7 +15,7 @@ use sp_runtime::{
 	Perbill,
 };
 use sc_service::{ChainType, Properties};
-use pallet_evm::GenesisAccount;
+
 // The URL for the telemetry server.
 // const STAGING_TELEMETRY_URL: &str = "wss://telemetry.polkadot.io/submit/";
 
@@ -103,6 +104,8 @@ pub fn development_config() -> Result<ChainSpec, String> {
 		None,
 		// Protocol ID
 		None,
+		// Fork ID
+		None,
 		// Properties
 		Some(properties()),
 		// Extensions
@@ -151,6 +154,8 @@ pub fn local_testnet_config() -> Result<ChainSpec, String> {
 		None,
 		// Protocol ID
 		None,
+		// Fork ID
+		None,
 		// Properties
 		Some(properties()),
 		// Extensions
@@ -175,7 +180,7 @@ fn testnet_genesis(
 	evm_accounts.insert(
 		H160::from_str(GENESIS_EVM_ACCOUNT)
 						.expect("internal H160 is valid; qed"),
-		GenesisAccount {
+		fp_evm::GenesisAccount {
 			nonce: 0.into(),
 			balance: 20_000_000_000_000_000_000_000_000u128.into(),
 			storage: BTreeMap::new(),
@@ -186,15 +191,15 @@ fn testnet_genesis(
 	const STASH: u128 = 1 << 60;
 
 	GenesisConfig {
-		frame_system: Some(SystemConfig {
+		system: SystemConfig {
 			// Add Wasm runtime to storage.
 			code: wasm_binary.to_vec(),
-			changes_trie_config: Default::default(),
-		}),
-		pallet_balances: Some(BalancesConfig {
+		},
+		balances: BalancesConfig {
 			balances: endowed_accounts.iter().cloned().map(|k|(k, STASH)).collect(),
-		}),
-		pallet_staking: Some(StakingConfig {
+		},
+		transaction_payment: Default::default(),
+		staking: StakingConfig {
 			validator_count: 60,
 			minimum_validator_count: initial_authorities.len() as u32,
 			stakers: initial_authorities
@@ -206,8 +211,8 @@ fn testnet_genesis(
 			invulnerables: [].to_vec(),
 			slash_reward_fraction: Perbill::from_percent(10),
 			..Default::default()
-		}),
-		pallet_session: Some(SessionConfig {
+		},
+		session: SessionConfig {
 			keys: initial_authorities
 				.iter()
 				.cloned()
@@ -219,21 +224,22 @@ fn testnet_genesis(
 					)
 				})
 				.collect(),
-		}),
-		pallet_collective_Instance1: Some(Default::default()),
-		pallet_im_online: Some(Default::default()),
-		pallet_authority_discovery: Some(Default::default()),
-		pallet_aura: Some(Default::default()),
-		pallet_grandpa: Some(Default::default()),
-		pallet_sudo: Some(SudoConfig {
+		},
+		council: CouncilConfig::default(),
+		im_online: Default::default(),
+		authority_discovery: Default::default(),
+		aura: Default::default(),
+		grandpa: Default::default(),
+		
+		sudo: SudoConfig {
 			// Assign network admin rights.
-			key: root_key,
-		}),
-		pallet_evm: Some(EVMConfig {
+			key: Some(root_key),
+		},
+		evm: EVMConfig {
 			accounts: evm_accounts,
 			
-		}),
-		pallet_ethereum: Some(EthereumConfig {})
-		
+		},
+		ethereum: EthereumConfig {},
+		dynamic_fee: Default::default(),
 	}
 }
