@@ -65,8 +65,8 @@ impl MetaverseCli for Cli {
 }
 
 fn set_default_ss58_version() {
-	// use sp_core::crypto::Ss58AddressFormat;
-	// sp_core::crypto::set_default_ss58_version(Ss58AddressFormat::Custom(150));
+	use sp_core::crypto::Ss58AddressFormat;
+	sp_core::crypto::set_default_ss58_version(Ss58AddressFormat::custom(150));
 }
 
 /// Parse and run command line arguments
