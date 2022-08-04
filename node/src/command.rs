@@ -16,12 +16,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use crate::{chain_spec, service};
-use crate::cli::{Cli, Subcommand};
+use fc_db::frontier_database_dir;
 use sc_cli::{SubstrateCli as MetaverseCli, RuntimeVersion, Role, ChainSpec};
-use sc_service::PartialComponents;
+use sc_service::{DatabaseSource, PartialComponents};
 use metaverse_vm_runtime::Block;
-
+use crate::{
+	chain_spec,
+	cli::{Cli, Subcommand},
+	service::{self, db_config_dir},
+};
 
 impl MetaverseCli for Cli {
 	fn impl_name() -> String {
@@ -121,7 +124,25 @@ pub fn run() -> sc_cli::Result<()> {
 		Some(Subcommand::PurgeChain(cmd)) => {
 			let runner = cli.create_runner(cmd)?;
 			set_default_ss58_version();
-			runner.sync_run(|config| cmd.run(config.database))
+			runner.sync_run(|config| {
+				// Remove Frontier offchain db
+				let db_config_dir = db_config_dir(&config);
+				let frontier_database_config = match config.database {
+					DatabaseSource::RocksDb { .. } => DatabaseSource::RocksDb {
+						path: frontier_database_dir(&db_config_dir, "db"),
+						cache_size: 0,
+					},
+					DatabaseSource::ParityDb { .. } => DatabaseSource::ParityDb {
+						path: frontier_database_dir(&db_config_dir, "paritydb"),
+					},
+					_ => {
+						return Err(format!("Cannot purge `{:?}` database", config.database).into())
+					}
+				};
+				cmd.run(frontier_database_config)?;
+				cmd.run(config.database)
+			})
+			
 		},
 		Some(Subcommand::Revert(cmd)) => {
 			let runner = cli.create_runner(cmd)?;
@@ -141,15 +162,49 @@ pub fn run() -> sc_cli::Result<()> {
 			})
 		},
 		// Some(Subcommand::Benchmark(cmd)) => {
-		// 	if cfg!(feature = "runtime-benchmarks") {
-		// 		let runner = cli.create_runner(cmd)?;
-		// 		let chain_spec = &runner.config().chain_spec;
-		// 		set_default_ss58_version();	
-		// 		runner.sync_run(|config| cmd.run::<Block, service::Executor>(config))
-		// 	} else {
-		// 		Err("Benchmarking wasn't enabled when building the node. \
-		// 		You can enable it with `--features runtime-benchmarks`.".into())
-		// 	}
+		// 	let runner = cli.create_runner(cmd)?;
+		// 	runner.sync_run(|config| {
+		// 		let PartialComponents {
+		// 			client, backend, ..
+		// 		} = service::new_partial(&config, &cli)?;
+
+		// 		// This switch needs to be in the client, since the client decides
+		// 		// which sub-commands it wants to support.
+		// 		match cmd {
+		// 			BenchmarkCmd::Pallet(cmd) => {
+		// 				if !cfg!(feature = "runtime-benchmarks") {
+		// 					return Err(
+		// 						"Runtime benchmarking wasn't enabled when building the node. \
+		// 					You can enable it with `--features runtime-benchmarks`."
+		// 							.into(),
+		// 					);
+		// 				}
+
+		// 				cmd.run::<Block, service::ExecutorDispatch>(config)
+		// 			}
+		// 			BenchmarkCmd::Block(cmd) => cmd.run(client),
+		// 			BenchmarkCmd::Storage(cmd) => {
+		// 				let db = backend.expose_db();
+		// 				let storage = backend.expose_storage();
+
+		// 				cmd.run(config, client, db, storage)
+		// 			}
+		// 			BenchmarkCmd::Overhead(cmd) => {
+		// 				let ext_builder = BenchmarkExtrinsicBuilder::new(client.clone());
+
+		// 				cmd.run(
+		// 					config,
+		// 					client,
+		// 					inherent_benchmark_data()?,
+		// 					Arc::new(ext_builder),
+		// 				)
+		// 			}
+		// 			BenchmarkCmd::Machine(cmd) => cmd.run(
+		// 				&config,
+		// 				frame_benchmarking_cli::SUBSTRATE_REFERENCE_HARDWARE.clone(),
+		// 			),
+		// 		}
+		// 	})
 		// },
 		None => {
 			let runner = cli.create_runner(&cli.run.base)?;
@@ -157,6 +212,6 @@ pub fn run() -> sc_cli::Result<()> {
 			runner.run_node_until_exit(|config| async move {
 				service::new_full(config, &cli).map_err(sc_cli::Error::Service)
 			})
-		}
+		},
 	}
 }
